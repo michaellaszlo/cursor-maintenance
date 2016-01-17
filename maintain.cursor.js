@@ -1,6 +1,6 @@
 var MaintainCursor = (function () {
 
-  // restoreCursor repositions a cursor in a string after the string has
+  // findNewPosition repositions a cursor in a string after the string has
   //   been transformed by some formatting process which is unknown to us.
   //   Our approach is to incorporate the cursor into the string as a
   //   special character and to look for a new cursor position that
@@ -8,33 +8,30 @@ var MaintainCursor = (function () {
   // original: the string before formatting. Must not contain a
   //   representation of the cursor. We insert our own cursor character
   //   for the purpose of the computation.
-  // position: the cursor position in the original string, specified with the
-  //   zero-based index of the character immediately to the right of the
-  //   cursor, or by the string length if the cursor is at the end.
+  // position: the cursor position in the original string, specified by
+  //   the zero-based index of the character immediately to the right of
+  //   the cursor, or by the string length if the cursor is at the end.
   // formatted: the outcome of formatting the original string.
   // return value: a cursor position in the formatted string.
-  //
-  function restoreCursor(original, cursorPosition, formatted) {
-    var cursorCharCode,
-        cursorChar,
+  function findNewPosition(original, cursorPosition, formatted) {
+    var cursorChar,
         substitute,
         low, high,
         found,
         bestCost,
-        bestPositions,
+        bestPosition,
         cost,
         position,
         sum,
         i, s, t,
         n = original.length,
         m = formatted.length,
-        editDistanceFunction = sillyEditDistance;
+        editDistance = levenshtein;
 
     // If the cursor character is present in the string, replace it with
     // a printable ASCII character (codes 32 through 126). If all of these
     // are present in the string, give up and return null.
-    cursorCharCode = 126;  // 126 = '~' (tilde character)
-    cursorChar = String.fromCharCode(cursorCharCode);
+    cursorChar = '_';
     low = 32;
     high = 126;
     if (original.indexOf(cursorChar) !== -1) {
@@ -63,58 +60,90 @@ var MaintainCursor = (function () {
     for (position = 0; position <= m; ++position) {
       t = formatted.substring(0, position) + cursorChar +
           formatted.substring(position);
-      cost = editDistanceFunction(s, t);
+      cost = editDistance(s, t);
       if (cost < bestCost) {
         bestCost = cost;
-        bestPositions = [ position ];
-      } else if (cost == bestCost) {
-        bestPositions.push(position);
+        bestPosition = position;
       }
     }
 
-    // Take the mean of the lowest-cost cursor positions, rounded to
-    // the nearest integer.
-    sum = 0;
-    for (i = 0; i < bestPositions.length; ++i) {
-      sum += bestPositions[i];
-    }
-    return Math.round(sum / bestPositions.length);
+    return bestPosition;
   }
 
-  function sillyEditDistance(s, t) {
-    if (t.indexOf('~') == t.length - 1) {
-      return 0;
-    }
-    return 1;
-  }
-
-  function computeLevenshteinDistance(s, t) {
+  // Compute the Levenshtein distance between strings s and t.
+  function levenshtein(s, t) {
     var distance = 0,
-        n = original.length,
-        m = formatted.length,
+        n = s.length,
+        m = t.length,
+        previous,
+        current,
+        temp,
         i, j;
+    if (Math.min(n, m) == 0) {
+      return Math.max(n, m);
+    }
+    current = new Array(m + 1);
+    for (j = 0; j <= m; ++j) {
+      current[j] = j;
+    }
+    previous = new Array(m + 1);
+    for (i = 1; i <= n; ++i) {
+      temp = previous;
+      previous = current;
+      current = temp;
+      current[0] = previous[0] + 1;
+      for (j = 1; j <= m; ++j) {
+        if (t[j - 1] == s[i - 1]) {
+          current[j] = previous[j - 1];
+        } else {
+          current[j] = Math.min(previous[j - 1] + 1,
+              previous[j] + 1,
+              current[j - 1] + 1);
+        }
+      }
+    }
+    return current[m];
   }
 
   var message = (this.console ? this.console.log : this.print);
 
   function test() {
-    [ [ '1234', 2, '1,234' ]
+    [ // Test Levenshtein distance computation.
+      [ 'sitting', 'kitten' ],
+      [ 'Sunday', 'Saturday' ],
+      [ 'flaw', 'lawn' ]
+    ].forEach(function (tuple) {
+      var s = tuple[0],
+          t = tuple[1],
+          d = levenshtein(s, t);
+      message('Levenshtein: "' + s + '" -> "' + t + '" ' + d);
+    });
+
+    [ // Test cursor restoration.
+      [ '1234', 2, '1,234' ],
+      [ '1,23', 4, '123' ],
+      [ '1,24', 3, '124' ],
+      [ '1,34', 2, '134' ],
+      [ ',234', 0, '234' ],
+      [ '$50.', 4, '$50.00' ],
+      [ '$50.00', 6, '$50' ],
+      [ '$50.00', 3, '$50' ]
     ].forEach(function (tuple) {
       var original = tuple[0],
           cursorPosition = tuple[1],
           formatted = tuple[2],
-          newPosition = restoreCursor(original, cursorPosition, formatted),
-          cursorChar = '~',
+          newPosition = findNewPosition(original, cursorPosition, formatted),
+          cursorChar = '_',
           s = original.substring(0, cursorPosition) + cursorChar + 
               original.substring(cursorPosition),
           t = formatted.substring(0, newPosition) + cursorChar + 
               formatted.substring(newPosition);
-      message('"' + s + '" -> "' + t + '"');
+      message('restore cursor: "' + s + '" -> "' + t + '"');
     });
   }
 
   return {
-    restoreCursor: restoreCursor,
+    findNewPosition: findNewPosition,
     test: test
   };
 })();

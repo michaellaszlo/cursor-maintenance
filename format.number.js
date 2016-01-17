@@ -27,10 +27,10 @@ var FormatNumber = (function () {
   var message = (this.console ? this.console.log : this.print);
 
   function test() {
-    [  // Test groupDigits.
-        'abc', 'x02', '-12', '2.4',  // Invalid input.
-        '', '0', '42', '123', '5005', '16384', '650444',
-        '1000555', '45212800', '600333001', '8045000555'
+    [ // Test groupDigits.
+      'abc', 'x02', '-12', '2.4',  // Invalid input.
+      '', '0', '42', '123', '5005', '16384', '650444',
+      '1000555', '45212800', '600333001', '8045000555'
     ].forEach(function (s) {
       var t = groupDigits(s);
       message('"' + s + '" -> "' + t + '"');
