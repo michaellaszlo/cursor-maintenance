@@ -16,6 +16,7 @@ var MaintainCursor = (function () {
   function findNewPosition(original, cursorPosition, formatted) {
     var cursorChar,
         substitute,
+        regex,
         low, high,
         found,
         bestCost,
@@ -31,7 +32,7 @@ var MaintainCursor = (function () {
     // If the cursor character is present in the string, replace it with
     // a printable ASCII character (codes 32 through 126). If all of these
     // are present in the string, give up and return null.
-    cursorChar = '_';
+    cursorChar = '^';
     low = 32;
     high = 126;
     if (original.indexOf(cursorChar) !== -1) {
@@ -42,7 +43,9 @@ var MaintainCursor = (function () {
       for (i = low; i <= high; ++i) {
         if (found[i - low] === undefined) {
           substitute = String.fromCharCode(i);
-          original = original.replace(cursorChar, substitute);
+          regex = new RegExp('\\' + cursorChar, 'g');
+          original = original.replace(regex, substitute);
+          formatted = formatted.replace(regex, substitute);
           break;
         }
       }
@@ -110,7 +113,7 @@ var MaintainCursor = (function () {
   function test() {
     [ // Test Levenshtein distance computation.
       [ 'sitting', 'kitten' ],
-      [ 'Sunday', 'Saturday' ],
+      [ 'Saturday', 'Sunday' ],
       [ 'flaw', 'lawn' ]
     ].forEach(function (tuple) {
       var s = tuple[0],
@@ -125,8 +128,16 @@ var MaintainCursor = (function () {
       [ '1,24', 3, '124' ],
       [ '1,34', 2, '134' ],
       [ ',234', 0, '234' ],
+      [ '[,234]', 2, '[234]' ],
+      [ '[,234]', 3, '[234]' ],
+      [ '^,234^', 2, '^234^' ],
+      [ '^^1,34^^', 4, '^^134^^' ],
+      [ '123,4506', 7, '1,234,056' ],
+      [ '1,234,56', 7, '123,456' ],
+      [ '12,345,68', 8, '1,234,568' ],
       [ '$50.', 4, '$50.00' ],
       [ '$50.00', 6, '$50' ],
+      [ '$51.00', 3, '$51' ],
       [ '$50.00', 3, '$50' ]
     ].forEach(function (tuple) {
       var original = tuple[0],
