@@ -1,3 +1,8 @@
+// an article about this code and the problem that it attempts to solve:
+//   ?
+// code repository:
+//   ?
+
 var MaintainCursor = (function () {
 
   // findNewPosition repositions a cursor in a string after the string has
@@ -158,5 +163,3 @@ var MaintainCursor = (function () {
     test: test
   };
 })();
-
-MaintainCursor.test();

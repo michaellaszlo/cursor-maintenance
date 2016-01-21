@@ -42,5 +42,3 @@ var FormatNumber = (function () {
     test: test
   };
 })();
-
-FormatNumber.test();

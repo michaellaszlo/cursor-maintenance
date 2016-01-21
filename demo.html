@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<style>
+</style>
+<script src="maintain.cursor.js"></script>
+<script src="format.number.js"></script>
+<script>
+window.onload = function () {
+  var numberInput = document.getElementById('numberInput');
+  numberInput.onchange = numberInput.onkeydown =
+      function () {
+        console.log(this.value);
+      };
+  numberInput.focus();
+};
+</script>
+</head>
+<body>
+
+<input id="numberInput">
+
+</body>
+</html>
