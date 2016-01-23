@@ -30,15 +30,15 @@ body {
 <script>
 
 function updateInput() {
-  var before = this.value,
-      stripped = before.replace(/\D/g, ''),
-      after = FormatNumber.groupDigits(stripped);
-  console.log(before, stripped, after);
-  if (after === null) {
-    after = before;
+  var s = this.value;
+  s = s.replace(/\D/g, '');
+  s = s.replace(/^0+/, '0');
+  if (s.charAt(0) == '0' && s.length > 1) {
+    s = s.substring(1);
   }
-  if (after !== before) {
-    this.value = after;
+  s = FormatNumber.groupDigits(s);
+  if (s !== this.value) {
+    this.value = s;
   }
 }
 
