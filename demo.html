@@ -30,7 +30,16 @@ body {
 <script>
 
 function updateInput() {
-  console.log(this.value);
+  var before = this.value,
+      stripped = before.replace(/\D/g, ''),
+      after = FormatNumber.groupDigits(stripped);
+  console.log(before, stripped, after);
+  if (after === null) {
+    after = before;
+  }
+  if (after !== before) {
+    this.value = after;
+  }
 }
 
 window.onload = function () {
