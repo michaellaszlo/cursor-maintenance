@@ -29,17 +29,33 @@ body {
 <script src="format.number.js"></script>
 <script>
 
-function updateInput() {
-  var s = this.value;
+// Format a non-negative integer with no zero padding.
+function format(s) {
+  // Delete non-digits.
   s = s.replace(/\D/g, '');
+  // Delete zero padding.
   s = s.replace(/^0+/, '0');
   if (s.charAt(0) == '0' && s.length > 1) {
     s = s.substring(1);
   }
+  // Insert commas to separate groups of three digits.
   s = FormatNumber.groupDigits(s);
-  if (s !== this.value) {
-    this.value = s;
+  return s;
+}
+
+function updateInput() {
+  var oldPosition,
+      newPosition;
+      original = this.value,
+      formatted = format(this.value);
+  if (formatted === original) {
+    return;
   }
+  oldPosition = this.selectionStart;
+  newPosition = MaintainCursor.findNewPosition(
+      original, oldPosition, formatted);
+  this.value = formatted;
+  this.setSelectionRange(newPosition, newPosition);
 }
 
 window.onload = function () {
@@ -47,6 +63,7 @@ window.onload = function () {
       handler = updateInput.bind(numberInput);
   [ 'change', 'keydown', 'click' ].forEach(function (eventName) {
     numberInput['on' + eventName] = function () {
+      // Set zero timeout to add our handler to the end of the event queue.
       setTimeout(handler, 0);
     };
   });
