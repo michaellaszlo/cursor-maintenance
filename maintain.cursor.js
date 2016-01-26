@@ -143,7 +143,8 @@ var MaintainCursor = (function () {
       [ '$50.', 4, '$50.00' ],
       [ '$50.00', 6, '$50' ],
       [ '$51.00', 3, '$51' ],
-      [ '$50.00', 3, '$50' ]
+      [ '$50.00', 3, '$50' ],
+      [ '11,11', 4, '1,111' ]
     ].forEach(function (tuple) {
       var original = tuple[0],
           cursorPosition = tuple[1],

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css"
+ href="https://fonts.googleapis.com/css?family=Roboto">
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+}
+#wrapper {
+}
+#experiment {
+  height: 100%;
+  width: 800px;
+  margin: 20px auto;
+}
+.container {
+  width: 400px;
+  display: inline-block;
+  border: 1px solid #eee;
+  font-family: Roboto, sans-serif;
+}
+input {
+  width: 250px;
+  text-align: center;
+  font-family: Roboto, sans-serif;
+  font-size: 24px;
+  padding: 5px 10px;
+  border: 2px solid #888;
+  border-radius: 5px;
+  outline: none;
+}
+</style>
+<script>
+
+// Format a non-negative integer with no zero padding.
+function format(s) {
+  // Delete non-digits.
+  s = s.replace(/\D/g, '');
+  // Delete zero padding.
+  s = s.replace(/^0+/, '0');
+  if (s.charAt(0) == '0' && s.length > 1) {
+    s = s.substring(1);
+  }
+  // Insert commas to separate groups of three digits.
+  s = FormatNumber.groupDigits(s);
+  return s;
+}
+
+function getCursorPosition(element) {
+  return element.selectionStart;
+}
+
+function setCursorPosition(element, position) {
+  element.setSelectionRange(position, position);
+}
+
+var original,
+    formatted;
+
+function displayGet(display) {
+  return display.innerHTML;
+}
+function displaySet(display, s) {
+  display.innerHTML = s;
+}
+function displayClear(display) {
+  displaySet(display, '');
+}
+function displayAdd(display, s) {
+  displaySet(display, displayGet(display) + s);
+}
+function displayAddLine(display, s) {
+  displayAdd(display, s + '<br>');
+}
+function displaySetLine(display, s) {
+  displayClear(display);
+  displayAddLine(display, s);
+}
+
+function refresh() {
+  var originalString = original.input.value,
+      formattedString = formatted.input.value;
+  displaySetLine(original.display, originalString);
+  displaySetLine(formatted.display, formattedString);
+}
+
+window.onload = function () {
+  original = document.getElementById('original');
+  formatted = document.getElementById('formatted');
+  original.input = original.getElementsByTagName('input')[0];
+  original.display = original.getElementsByClassName('display')[0];
+  formatted.input = formatted.getElementsByTagName('input')[0];
+  formatted.display = formatted.getElementsByClassName('display')[0];
+  [ 'change', 'keydown', 'click' ].forEach(function (eventName) {
+    original.input['on' + eventName] = formatted.input['on' + eventName] = 
+        function () {
+          setTimeout(refresh, 0);
+        };
+  });
+  original.input.focus();
+};
+
+</script>
+</head>
+<body>
+<div id="wrapper"> 
+
+<div id="experiment">
+
+  <div class="container" id="original">
+    <input>
+    <div class="display"></div>
+  </div><div class="container" id="formatted">
+    <input>
+    <div class="display"></div>
+  </div>
+
+</div>
+
+</div>
+</body>
+</html>
