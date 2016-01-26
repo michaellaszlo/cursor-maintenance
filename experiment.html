@@ -29,10 +29,19 @@ input {
   text-align: center;
   font-family: Roboto, sans-serif;
   font-size: 24px;
+  color: #222;
   padding: 5px 10px;
   border: 2px solid #888;
   border-radius: 5px;
   outline: none;
+}
+.display {
+  font-size: 24px;
+  color: #666;
+}
+.cursor {
+  color: #701211;
+  font-weight: bold;
 }
 </style>
 <script>
@@ -84,8 +93,12 @@ function displaySetLine(display, s) {
 
 function refresh() {
   var originalString = original.input.value,
-      formattedString = formatted.input.value;
-  displaySetLine(original.display, originalString);
+      formattedString = formatted.input.value,
+      positionBefore = getCursorPosition(original.input);
+  displaySetLine(original.display,
+      originalString.substring(0, positionBefore) +
+      '<span class="cursor">|</span>' +
+      originalString.substring(positionBefore));
   displaySetLine(formatted.display, formattedString);
 }
 
