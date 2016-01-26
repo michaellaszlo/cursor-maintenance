@@ -92,9 +92,37 @@ function displaySetLine(display, s) {
   displayAddLine(display, s);
 }
 
+function getCounts(s) {
+  var counts = {},
+      i, ch;
+  for (i = 0; i < s.length; ++i) {
+    ch = s.charAt(i);
+    if (ch in counts) {
+      counts[ch] += 1;
+    } else {
+      counts[ch] = 1;
+    }
+  }
+  return counts;
+}
+
+function getCommonCounts(a, b) {
+  var aCounts = getCounts(a),
+      bCounts = getCounts(b),
+      counts = { a: {}, b: {} };
+  Object.keys(aCounts).forEach(function (ch) {
+    if (ch in bCounts) {
+      counts.a[ch] = aCounts[ch];
+      counts.b[ch] = bCounts[ch];
+    }
+  });
+  return counts;
+}
+
 function refresh() {
   var originalString = original.input.value,
       formattedString = formatted.input.value,
+      counts = getCommonCounts(originalString, formattedString),
       posBefore = getCursorPosition(original.input),
       pos;
   displaySetLine(original.display,
@@ -108,6 +136,7 @@ function refresh() {
         '<span class="cursor">|</span>' +
         formattedString.substring(pos));
   }
+  console.log(JSON.stringify(counts));
 }
 
 window.onload = function () {
