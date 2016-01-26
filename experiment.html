@@ -120,23 +120,61 @@ function getCommonCounts(a, b) {
 }
 
 function refresh() {
-  var originalString = original.input.value,
-      formattedString = formatted.input.value,
-      counts = getCommonCounts(originalString, formattedString),
-      posBefore = getCursorPosition(original.input),
-      pos;
-  displaySetLine(original.display,
-      originalString.substring(0, posBefore) +
-      '<span class="cursor">|</span>' +
-      originalString.substring(posBefore));
-  displayClear(formatted.display);
-  for (pos = 0; pos <= formattedString.length; ++pos) {
-    displayAddLine(formatted.display,
-        formattedString.substring(0, pos) +
-        '<span class="cursor">|</span>' +
-        formattedString.substring(pos));
+  var a = original.input.value,
+      b = formatted.input.value,
+      counts = getCommonCounts(a, b),
+      posA = getCursorPosition(original.input),
+      pos, posB,
+      tallies = {},
+      tally,
+      ch;
+
+  // Tally original.
+  tally = tallies.original = {
+    common: {
+      total: {},
+      current: {},
+      sum: { total: 0, current: 0 }
+    },
+    distinct: { total: null, current: 0 },
+    all: { total: a.length, current: null }
+  };
+  Object.keys(counts.a).forEach(function (ch) {
+    var count = counts.a[ch];
+    tally.common.total[ch] = count;
+    tally.common.current[ch] = 0;
+    tally.common.sum.total += count;
+  });
+  tally.distinct.total = tally.all.total - tally.common.sum.total;
+  for (pos = 0; pos < posA; ++pos) {
+    ch = a.charAt(pos);
+    if (ch in tally.common.total) {
+      ++tally.common.current[ch];
+      ++tally.common.sum.current;
+    } else {
+      ++tally.distinct.current;
+    }
   }
-  console.log(JSON.stringify(counts));
+  tally.all.current = posA;
+  console.log(JSON.stringify(tally));
+
+  // Tally formatted.
+
+  // Display original.
+  displaySetLine(original.display,
+      a.substring(0, posA) +
+      '<span class="cursor">|</span>' +
+      a.substring(posA));
+
+  // Display formatted.
+  displayClear(formatted.display);
+  for (pos = 0; pos <= b.length; ++pos) {
+    displayAddLine(formatted.display,
+        b.substring(0, pos) +
+        '<span class="cursor">|</span>' +
+        b.substring(pos));
+  }
+
 }
 
 window.onload = function () {
