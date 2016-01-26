@@ -2,7 +2,7 @@
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css"
- href="https://fonts.googleapis.com/css?family=Roboto">
+ href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono">
 <style>
 * {
   box-sizing: border-box;
@@ -43,6 +43,26 @@ input {
 .cursor {
   color: #b5471c;
   font-weight: bold;
+}
+.report {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 20px;
+  color: #444;
+}
+.report .cursor {
+  margin: 0 2px;
+}
+.character, .category {
+  margin-right: 10px;
+  background: #d8cbac;
+  color: #000;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+.category {
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 14px;
 }
 </style>
 <script>
@@ -119,6 +139,37 @@ function getCommonCounts(a, b) {
   return counts;
 }
 
+function makeReport(tally) {
+  var stats, text, score,
+      lines = [];
+  stats = { chars: {}, common: {}, distinct: {}, all: {} };
+  Object.keys(tally.common.current).forEach(function (ch) {
+    var count = tally.common.current[ch];
+    stats.chars[ch] = { left: count };
+    stats.chars[ch].right = tally.common.total[ch] - count;
+  });
+  stats.common.left = tally.common.sum.current;
+  stats.common.right = tally.common.sum.total - stats.common.left;
+  stats.distinct.left = tally.distinct.current;
+  stats.distinct.right = tally.distinct.total - stats.distinct.left;
+  stats.all.left = tally.all.current;
+  stats.all.right = tally.all.total - stats.all.left;
+  tally.common.characters.forEach(function (ch) {
+    lines.push('<span class="character">' + ch + '</span>' +
+        stats.chars[ch].left +
+        '<span class="cursor">|</span>' +
+        stats.chars[ch].right);
+  });
+  [ 'common', 'distinct', 'all' ].forEach(function (name) {
+    lines.push('<span class="category">' + name + '</span>' +
+        stats[name].left + 
+        '<span class="cursor">|</span>' +
+        stats[name].right);
+  });
+  text = '<span class="report">' + lines.join('<br>') + '</span>';
+  return { stats: stats, text: text, score: score };
+}
+
 function refresh() {
   var a = original.input.value,
       b = formatted.input.value,
@@ -134,7 +185,8 @@ function refresh() {
     common: {
       total: {},
       current: {},
-      sum: { total: 0, current: 0 }
+      sum: { total: 0, current: 0 },
+      characters: []
     },
     distinct: { total: null, current: 0 },
     all: { total: a.length, current: null }
@@ -144,6 +196,10 @@ function refresh() {
     tally.common.total[ch] = count;
     tally.common.current[ch] = 0;
     tally.common.sum.total += count;
+    tally.common.characters.push(ch);
+  });
+  tally.common.characters.sort(function (c, d) {
+    return c.charCodeAt(0) - d.charCodeAt(0);
   });
   tally.distinct.total = tally.all.total - tally.common.sum.total;
   for (pos = 0; pos < posA; ++pos) {
@@ -156,17 +212,18 @@ function refresh() {
     }
   }
   tally.all.current = posA;
-  console.log(JSON.stringify(tally));
+  report = makeReport(tally);
 
   // Tally formatted.
 
-  // Display original.
+  // Display original report.
   displaySetLine(original.display,
       a.substring(0, posA) +
       '<span class="cursor">|</span>' +
       a.substring(posA));
+  displayAdd(original.display, report.text);
 
-  // Display formatted.
+  // Display formatted cursor variants.
   displayClear(formatted.display);
   for (pos = 0; pos <= b.length; ++pos) {
     displayAddLine(formatted.display,
