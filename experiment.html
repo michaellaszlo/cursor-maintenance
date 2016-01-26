@@ -21,6 +21,7 @@ body {
 .container {
   width: 400px;
   display: inline-block;
+  vertical-align: top;
   border: 1px solid #eee;
   font-family: Roboto, sans-serif;
 }
@@ -37,10 +38,10 @@ input {
 }
 .display {
   font-size: 24px;
-  color: #666;
+  color: #888;
 }
 .cursor {
-  color: #701211;
+  color: #b5471c;
   font-weight: bold;
 }
 </style>
@@ -94,12 +95,19 @@ function displaySetLine(display, s) {
 function refresh() {
   var originalString = original.input.value,
       formattedString = formatted.input.value,
-      positionBefore = getCursorPosition(original.input);
+      posBefore = getCursorPosition(original.input),
+      pos;
   displaySetLine(original.display,
-      originalString.substring(0, positionBefore) +
+      originalString.substring(0, posBefore) +
       '<span class="cursor">|</span>' +
-      originalString.substring(positionBefore));
-  displaySetLine(formatted.display, formattedString);
+      originalString.substring(posBefore));
+  displayClear(formatted.display);
+  for (pos = 0; pos <= formattedString.length; ++pos) {
+    displayAddLine(formatted.display,
+        formattedString.substring(0, pos) +
+        '<span class="cursor">|</span>' +
+        formattedString.substring(pos));
+  }
 }
 
 window.onload = function () {
@@ -115,7 +123,11 @@ window.onload = function () {
           setTimeout(refresh, 0);
         };
   });
+  original.input.value = '11,11';
+  setCursorPosition(original.input, 4);
   original.input.focus();
+  formatted.input.value = '1,111';
+  refresh();
 };
 
 </script>
