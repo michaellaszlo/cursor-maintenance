@@ -68,6 +68,11 @@ input {
 .report.active {
   display: block
 }
+.score {
+}
+.score.active {
+  background: #eee;
+}
 .label.active {
   background: #eee;
 }
@@ -301,15 +306,21 @@ function classRemove(element, name) {
   }
 }
 
-function makeLabelHandler(labels, tables, pos) {
-  var label = labels.children[pos],
+function makeLabelHandler(container, pos) {
+  var labels = container.labels,
+      scores = container.scores,
+      tables = container.tables,
+      label = labels.children[pos],
+      score = scores.children[pos],
       table = tables.children[pos];
   return function () {
     if (labels.active) {
       classRemove(labels.active, 'active');
+      classRemove(scores.active, 'active');
       classRemove(tables.active, 'active');
     }
     classAdd(labels.active = label, 'active');
+    classAdd(scores.active = score, 'active');
     classAdd(tables.active = table, 'active');
   };
 }
@@ -320,7 +331,8 @@ function refresh() {
       counts = getCommonCounts(a, b),
       posA = getCursorPosition(original.input),
       reports,
-      originalReport;
+      originalReport,
+      score, bestScore = null, bestPos;
 
   // Original.
   originalReport = makeReports(a, counts.a, posA)[0];
@@ -335,13 +347,18 @@ function refresh() {
   formatted.labels.innerHTML = formatted.scores.innerHTML =
       formatted.tables.innerHTML = '';
   reports.forEach(function (report, pos) {
+    score = report.score;
+    if (bestScore === null || score < bestScore) {
+      bestScore = score;
+      bestPos = pos;
+    }
     formatted.labels.appendChild(report.label);
-    formatted.scores.appendChild(newElement('div', report.score));
+    formatted.scores.appendChild(newElement('div', score, 'score'));
     formatted.tables.appendChild(report.table);
     report.label.onmouseover =
-        makeLabelHandler(formatted.labels, formatted.tables, pos);
+        makeLabelHandler(formatted, pos);
   });
-  reports[0].label.onmouseover();
+  reports[bestPos].label.onmouseover();
 }
 
 window.onload = function () {
