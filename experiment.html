@@ -15,14 +15,14 @@ body {
 }
 #experiment {
   height: 100%;
-  width: 800px;
+  width: 850px;
   margin: 20px auto;
 }
 .container {
-  width: 400px;
+  width: 425px;
+  padding-right: 20px;
   display: inline-block;
   vertical-align: top;
-  border: 1px solid #eee;
   font-family: Roboto, sans-serif;
 }
 input {
@@ -35,19 +35,41 @@ input {
   border: 2px solid #888;
   border-radius: 5px;
   outline: none;
+  margin-bottom: 10px;
 }
 .cursor {
   color: #b5471c;
   font-weight: bold;
 }
-.labels, .reports {
+.labels, .tables {
   font-size: 24px;
+  vertical-align: top;
+  display: inline-block;
 }
 .labels {
+  width: 250px;
   color: #666;
 }
-.reports {
+.tables {
+  width: calc(100% - 250px);
+}
+.report {
   color: #222;
+  padding-right: 5px;
+  display: none;
+}
+.report.active {
+  display: block
+}
+.label.active {
+  background: #eee;
+}
+.label {
+  cursor: default;
+  display: inline-block;
+  width: 250px;
+  text-align: center;
+  padding: 0 5px;
 }
 .report td {
   padding: 0 1px;
@@ -64,7 +86,7 @@ td.character span {
   display: inline-block;
   width: 24px;
   text-align: center;
-  background: #d8cbac;
+  background: #ccc;
   border-radius: 2px;
   padding: 0 4px;
 }
@@ -141,8 +163,8 @@ function newElement(tag, innerHTML, className) {
   return element;
 }
 
-function makeReport(tally) {
-  var stats, table, score,
+function makeReport(tally, s, pos) {
+  var stats, label, table,
       tbody, tr, td,
       lines = [];
   stats = { chars: {}, common: {}, distinct: {}, all: {} };
@@ -157,6 +179,8 @@ function makeReport(tally) {
   stats.distinct.right = tally.distinct.total - stats.distinct.left;
   stats.all.left = tally.all.current;
   stats.all.right = tally.all.total - stats.all.left;
+  label = newElement('div', s.substring(0, pos) +
+      '<span class="cursor">|</span>' + s.substring(pos), 'label');
   table = newElement('table');
   table.className = 'report';
   table.appendChild(tbody = newElement('tbody'));
@@ -169,41 +193,21 @@ function makeReport(tally) {
     tr.appendChild(newElement('td', stats.chars[ch].right));
   });
   [ 'common', 'distinct', 'all' ].forEach(function (name) {
-    lines.push('<span class="category">' + name + '</span>' +
-        stats[name].left + 
-        '<span class="cursor">|</span>' +
-        stats[name].right);
     tbody.appendChild(tr = newElement('tr'));
     tr.appendChild(newElement('td', name, 'category'));
     tr.appendChild(newElement('td', stats[name].left, 'left'));
     tr.appendChild(newElement('td', '|', 'cursor'));
     tr.appendChild(newElement('td', stats[name].right));
   });
-  text = '<span class="report">' + lines.join('<br>') + '</span>';
-  return { stats: stats, table: table, score: score };
+  return { stats: stats, label: label, table: table };
 }
 
-function makeLabel(s, pos) {
-  var label = document.createElement('div');
-  label.innerHTML = s.substring(0, pos) +
-      '<span class="cursor">|</span>' +
-      s.substring(pos);
-  return label;
-}
-
-function refresh() {
-  var a = original.input.value,
-      b = formatted.input.value,
-      counts = getCommonCounts(a, b),
-      posA = getCursorPosition(original.input),
-      pos, posB,
-      tallies = {},
+function makeReports(s, counts, low, high) {
+  var reports = [],
       tally,
-      report,
-      ch;
-
-  // Tally original.
-  tally = tallies.original = {
+      pos, ch;
+  high = high || low;
+  tally = {
     common: {
       total: {},
       current: {},
@@ -211,10 +215,10 @@ function refresh() {
       characters: []
     },
     distinct: { total: null, current: 0 },
-    all: { total: a.length, current: null }
+    all: { total: s.length, current: 0 }
   };
-  Object.keys(counts.a).forEach(function (ch) {
-    var count = counts.a[ch];
+  Object.keys(counts).forEach(function (ch) {
+    var count = counts[ch];
     tally.common.total[ch] = count;
     tally.common.current[ch] = 0;
     tally.common.sum.total += count;
@@ -224,29 +228,90 @@ function refresh() {
     return c.charCodeAt(0) - d.charCodeAt(0);
   });
   tally.distinct.total = tally.all.total - tally.common.sum.total;
-  for (pos = 0; pos < posA; ++pos) {
-    ch = a.charAt(pos);
+  for (pos = 0; pos < high; ++pos) {
+    if (pos >= low) {
+      reports.push(makeReport(tally, s, pos));
+    }
+    ch = s.charAt(pos);
     if (ch in tally.common.total) {
       ++tally.common.current[ch];
       ++tally.common.sum.current;
     } else {
       ++tally.distinct.current;
     }
+    ++tally.all.current;
   }
-  tally.all.current = posA;
+  reports.push(makeReport(tally, s, pos));
+  return reports;
+}
 
-  // Display original partition and report.
-  report = makeReport(tally);
-  original.labels.innerHTML = original.reports.innerHTML = '';
-  original.labels.appendChild(makeLabel(a, posA));
-  original.reports.appendChild(report.table);
-
-  // Display formatted partitions.
-  formatted.labels.innerHTML = formatted.reports.innerHTML = '';
-  for (pos = 0; pos <= b.length; ++pos) {
-    formatted.labels.appendChild(makeLabel(b, pos));
+function splitWords(s) {
+  var stripped = s.replace(/^\s+|\s+$/g, '');
+  return (stripped.length == 0 ? [] : stripped.split(/\s+/));
+}
+function classAdd(element, name) {
+  var names = splitWords(element.className),
+      i;
+  for (i = 0; i < names.length; ++i) {
+    if (names[i] == name) {
+      return;
+    }
   }
+  names.push(name);
+  element.className = names.join(' ');
+}
+function classRemove(element, name) {
+  var names = splitWords(element.className),
+      newNames = [],
+      i;
+  for (i = 0; i < names.length; ++i) {
+    if (names[i] !== name) {
+      newNames.push(names[i]);
+    }
+  }
+  if (newNames.length != names.length) {
+    element.className = newNames.join(' ');
+  }
+}
 
+function makeLabelHandler(labels, tables, pos) {
+  var label = labels.children[pos],
+      table = tables.children[pos];
+  return function () {
+    if (labels.active) {
+      classRemove(labels.active, 'active');
+      classRemove(tables.active, 'active');
+    }
+    classAdd(labels.active = label, 'active');
+    classAdd(tables.active = table, 'active');
+  };
+}
+
+function refresh() {
+  var a = original.input.value,
+      b = formatted.input.value,
+      counts = getCommonCounts(a, b),
+      posA = getCursorPosition(original.input),
+      reports;
+
+  // Original.
+  reports = makeReports(a, counts.a, posA);
+  original.labels.innerHTML = original.tables.innerHTML = '';
+  original.labels.appendChild(reports[0].label);
+  original.tables.appendChild(reports[0].table);
+  classAdd(original.labels.children[0], 'active');
+  classAdd(original.tables.children[0], 'active');
+
+  // Formatted.
+  reports = makeReports(b, counts.b, 0, b.length);
+  formatted.labels.innerHTML = formatted.tables.innerHTML = '';
+  reports.forEach(function (report, pos) {
+    formatted.labels.appendChild(report.label);
+    formatted.tables.appendChild(report.table);
+    report.label.onmouseover =
+        makeLabelHandler(formatted.labels, formatted.tables, pos);
+  });
+  reports[0].label.onmouseover();
 }
 
 window.onload = function () {
@@ -254,10 +319,10 @@ window.onload = function () {
   formatted = document.getElementById('formatted');
   original.input = original.getElementsByTagName('input')[0];
   original.labels = original.getElementsByClassName('labels')[0];
-  original.reports = original.getElementsByClassName('reports')[0];
+  original.tables = original.getElementsByClassName('tables')[0];
   formatted.input = formatted.getElementsByTagName('input')[0];
   formatted.labels = formatted.getElementsByClassName('labels')[0];
-  formatted.reports = formatted.getElementsByClassName('reports')[0];
+  formatted.tables = formatted.getElementsByClassName('tables')[0];
   [ 'change', 'keydown', 'click' ].forEach(function (eventName) {
     original.input['on' + eventName] = formatted.input['on' + eventName] = 
         function () {
@@ -280,12 +345,10 @@ window.onload = function () {
 
   <div class="container" id="original">
     <input>
-    <div class="labels"></div>
-    <div class="reports"></div>
+    <div class="labels"></div><div class="tables"></div>
   </div><div class="container" id="formatted">
     <input>
-    <div class="labels"></div>
-    <div class="reports"></div>
+    <div class="labels"></div><div class="tables"></div>
   </div>
 
 </div>
