@@ -163,10 +163,10 @@ function newElement(tag, innerHTML, className) {
   return element;
 }
 
-function makeReport(tally, s, pos) {
-  var stats, label, table,
-      tbody, tr, td,
-      lines = [];
+function makeReport(tally, s, pos, aStats) {
+  var stats, score, label, table,
+      tbody, tr, td;
+  // Stats.
   stats = { chars: {}, common: {}, distinct: {}, all: {} };
   Object.keys(tally.common.current).forEach(function (ch) {
     var count = tally.common.current[ch];
@@ -179,11 +179,32 @@ function makeReport(tally, s, pos) {
   stats.distinct.right = tally.distinct.total - stats.distinct.left;
   stats.all.left = tally.all.current;
   stats.all.right = tally.all.total - stats.all.left;
+  // Score.
+  if (aStats) {
+    score = 0;
+    tally.common.characters.forEach(function (ch) {
+      var aLeft = aStats.chars[ch].left,
+          aRight = aStats.chars[ch].right,
+          a = aLeft / (aLeft + aRight),
+          bLeft = stats.chars[ch].left,
+          bRight = stats.chars[ch].right,
+          b = bLeft / (bLeft + bRight),
+          diff = Math.abs(a - b),
+          value = diff * diff;
+      score += value;
+    });
+  }
+  // Label.
   label = newElement('div', s.substring(0, pos) +
       '<span class="cursor">|</span>' + s.substring(pos), 'label');
+  // Table.
   table = newElement('table');
   table.className = 'report';
   table.appendChild(tbody = newElement('tbody'));
+  if (score !== undefined) {
+    tbody.appendChild(tr = newElement('tr'));
+    tr.appendChild(td = newElement('td', score, 'score'));
+  }
   tally.common.characters.forEach(function (ch) {
     tbody.appendChild(tr = newElement('tr'));
     tr.appendChild(td = newElement('td', null, 'character'));
@@ -199,10 +220,10 @@ function makeReport(tally, s, pos) {
     tr.appendChild(newElement('td', '|', 'cursor'));
     tr.appendChild(newElement('td', stats[name].right));
   });
-  return { stats: stats, label: label, table: table };
+  return { stats: stats, score: score, label: label, table: table };
 }
 
-function makeReports(s, counts, low, high) {
+function makeReports(s, counts, low, high, baseStats) {
   var reports = [],
       tally,
       pos, ch;
@@ -230,7 +251,7 @@ function makeReports(s, counts, low, high) {
   tally.distinct.total = tally.all.total - tally.common.sum.total;
   for (pos = 0; pos < high; ++pos) {
     if (pos >= low) {
-      reports.push(makeReport(tally, s, pos));
+      reports.push(makeReport(tally, s, pos, baseStats));
     }
     ch = s.charAt(pos);
     if (ch in tally.common.total) {
@@ -241,7 +262,7 @@ function makeReports(s, counts, low, high) {
     }
     ++tally.all.current;
   }
-  reports.push(makeReport(tally, s, pos));
+  reports.push(makeReport(tally, s, pos, baseStats));
   return reports;
 }
 
@@ -292,18 +313,19 @@ function refresh() {
       b = formatted.input.value,
       counts = getCommonCounts(a, b),
       posA = getCursorPosition(original.input),
-      reports;
+      reports,
+      originalReport;
 
   // Original.
-  reports = makeReports(a, counts.a, posA);
+  originalReport = makeReports(a, counts.a, posA)[0];
   original.labels.innerHTML = original.tables.innerHTML = '';
-  original.labels.appendChild(reports[0].label);
-  original.tables.appendChild(reports[0].table);
+  original.labels.appendChild(originalReport.label);
+  original.tables.appendChild(originalReport.table);
   classAdd(original.labels.children[0], 'active');
   classAdd(original.tables.children[0], 'active');
 
   // Formatted.
-  reports = makeReports(b, counts.b, 0, b.length);
+  reports = makeReports(b, counts.b, 0, b.length, originalReport.stats);
   formatted.labels.innerHTML = formatted.tables.innerHTML = '';
   reports.forEach(function (report, pos) {
     formatted.labels.appendChild(report.label);
