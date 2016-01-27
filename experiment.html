@@ -9,18 +9,19 @@
   margin: 0;
   padding: 0;
 }
-body {
-}
-#wrapper {
-}
 #experiment {
   height: 100%;
-  width: 850px;
+  width: 920px;
   margin: 20px auto;
 }
+#original {
+  width: 400px;
+}
+#formatted {
+  margin-left: 20px;
+  width: 500px;
+}
 .container {
-  width: 425px;
-  padding-right: 20px;
   display: inline-block;
   vertical-align: top;
   font-family: Roboto, sans-serif;
@@ -41,7 +42,7 @@ input {
   color: #b5471c;
   font-weight: bold;
 }
-.labels, .tables {
+.labels, .scores, .tables {
   font-size: 24px;
   vertical-align: top;
   display: inline-block;
@@ -50,8 +51,14 @@ input {
   width: 250px;
   color: #666;
 }
-.tables {
+.scores {
+  width: 100px;
+}
+#original .tables {
   width: calc(100% - 250px);
+}
+#formatted .tables {
+  width: calc(100% - 350px);
 }
 .report {
   color: #222;
@@ -203,7 +210,6 @@ function makeReport(tally, s, pos, aStats) {
   table.appendChild(tbody = newElement('tbody'));
   if (score !== undefined) {
     tbody.appendChild(tr = newElement('tr'));
-    tr.appendChild(td = newElement('td', score, 'score'));
   }
   tally.common.characters.forEach(function (ch) {
     tbody.appendChild(tr = newElement('tr'));
@@ -326,9 +332,11 @@ function refresh() {
 
   // Formatted.
   reports = makeReports(b, counts.b, 0, b.length, originalReport.stats);
-  formatted.labels.innerHTML = formatted.tables.innerHTML = '';
+  formatted.labels.innerHTML = formatted.scores.innerHTML =
+      formatted.tables.innerHTML = '';
   reports.forEach(function (report, pos) {
     formatted.labels.appendChild(report.label);
+    formatted.scores.appendChild(newElement('div', report.score));
     formatted.tables.appendChild(report.table);
     report.label.onmouseover =
         makeLabelHandler(formatted.labels, formatted.tables, pos);
@@ -344,6 +352,7 @@ window.onload = function () {
   original.tables = original.getElementsByClassName('tables')[0];
   formatted.input = formatted.getElementsByTagName('input')[0];
   formatted.labels = formatted.getElementsByClassName('labels')[0];
+  formatted.scores = formatted.getElementsByClassName('scores')[0];
   formatted.tables = formatted.getElementsByClassName('tables')[0];
   [ 'change', 'keydown', 'click' ].forEach(function (eventName) {
     original.input['on' + eventName] = formatted.input['on' + eventName] = 
@@ -361,20 +370,18 @@ window.onload = function () {
 </script>
 </head>
 <body>
-<div id="wrapper"> 
 
 <div id="experiment">
-
   <div class="container" id="original">
     <input>
-    <div class="labels"></div><div class="tables"></div>
+    <div class="labels">
+    </div><div class="tables"></div>
   </div><div class="container" id="formatted">
     <input>
-    <div class="labels"></div><div class="tables"></div>
+    <div class="labels"></div><div class="scores">
+    </div><div class="tables"></div>
   </div>
-
 </div>
 
-</div>
 </body>
 </html>
