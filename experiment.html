@@ -53,6 +53,8 @@ input {
 }
 .scores {
   width: 100px;
+  border-right: 10px solid #fff;
+  overflow: hidden;
 }
 #original .tables {
   width: calc(100% - 250px);
@@ -378,7 +380,7 @@ window.onload = function () {
         };
   });
   original.input.value = '11,11';
-  setCursorPosition(original.input, 4);
+  setCursorPosition(original.input, 2);
   original.input.focus();
   formatted.input.value = '1,111';
   refresh();
