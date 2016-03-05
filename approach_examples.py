@@ -15,7 +15,7 @@ class Test:
 
     trim_data = [
             ('hello ', 6, 'hello', 5),
-            ('   Hello,   friends.   ', 12, 'Hello,   friends.', 9),
+            ('   Hello,   friends.   ', 12, 'Hello,   friends. ', 9),
             ('   ', 1, '', 0)
     ]
 
@@ -35,38 +35,28 @@ class Test:
                 (formatter.reduce_whitespace, self.reduce_whitespace_data)
         ]
 
-    def test_formatting(self):
-        success = True
-        for operation, data in self.tests:
-            for original_text, _, expected_text, _ in data:
-                received_text = operation(original_text)
-                if received_text != expected_text:
-                    print('Failure:')
-                    print('   original: "%s"' % original_text)
-                    print('   received: "%s"' % received_text)
-                    print('   expected: "%s"' % expected_text)
-                    success = False
-        if success:
-            print('Tests passed.')
-        return success
+    def show_text(self, name, text, cursor=None):
+        print('   %s: "%s"' % (name, text))
+        if cursor != None:
+            print('            ' + ((cursor - 1) * ' ') + '\xe2\x86\x97')
 
-    def test_formatting_with_cursor(self):
+    def run_tests(self, with_cursor=False):
         success = True
-        arrow = '\xe2\x86\x97'
         for operation, data in self.tests:
             for (original_text, original_cursor,
                     expected_text, expected_cursor) in data:
-                received_text, received_cursor = operation(
-                        original_text, original_cursor)
-                if (received_text != expected_text or
+                if with_cursor:
+                    received_text, received_cursor = operation(
+                            original_text, original_cursor)
+                else:
+                    received_text = operation(original_text)
+                    original_cursor = received_cursor = expected_cursor = None
+                if received_text != expected_text or (with_cursor and
                         received_cursor != expected_cursor):
                     print('Failure:')
-                    print('   original: "%s"' % original_text)
-                    print('            ' + ((original_cursor - 1)*' ' + arrow))
-                    print('   received: "%s"' % received_text)
-                    print('            ' + ((received_cursor - 1)*' ' + arrow))
-                    print('   expected: "%s"' % expected_text)
-                    print('            ' + ((expected_cursor - 1)*' ' + arrow))
+                    self.show_text('original', original_text, original_cursor)
+                    self.show_text('received', received_text, received_cursor)
+                    self.show_text('expected', expected_text, expected_cursor)
                     success = False
         if success:
             print('Tests passed.')
@@ -108,4 +98,4 @@ class Formatter:
 
 
 if __name__ == '__main__':
-    Test(Formatter()).test_formatting()
+    Test(Formatter()).run_tests()
