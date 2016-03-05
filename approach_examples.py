@@ -1,50 +1,69 @@
+# -*- coding: utf-8 -*-
+
 import re
 
 
 class Test:
-    """Defines the expected behavior of a fixed set of formatting operations.
+    """Describes the behavior of a fixed set of formatting operations.
     Provides test data and testing functionality that can be used to validate
-    formatting operations with or without a cursor.
+    the formatting operations with or without cursor positioning.
     """
 
-    commatize_data = [
+    test_cases = {
+        'commatize': [
             ('24875', 2, '24,875', 3),
             ('5,4990000', 9, '54,990,000', 10),
             (',1,,8,,,', 3, '18', 1)
-    ]
-
-    trim_data = [
+        ],
+        'trim': [
             ('hello ', 6, 'hello', 5),
-            ('   Hello,   friends.   ', 12, 'Hello,   friends. ', 9),
+            ('   Hello,   friends.   ', 12, 'Hello,   friends.', 9),
             ('   ', 1, '', 0)
-    ]
-
-    reduce_whitespace_data = [
+        ],
+        'shrink': [
             ('whirled    peas', 11, 'whirled peas', 8),
             ('    Hello  there.  Hi.  ', 17, ' Hello there. Hi. ', 13),
             ('    ', 4, ' ', 1)
-    ]
+        ]
+    }
 
     def __init__(self, formatter):
-        """Takes an object that implements the formatting operations defined
+        """Takes an object that implements the formatting operations described
         by our test data.
         """
-        self.tests = [
-                (formatter.commatize, self.commatize_data),
-                (formatter.trim, self.trim_data),
-                (formatter.reduce_whitespace, self.reduce_whitespace_data)
-        ]
+        names = [ 'commatize', 'trim', 'shrink' ]
+        self.tests = [ (name, getattr(formatter, name), self.test_cases[name])
+                for name in names ]
 
-    def show_text(self, name, text, cursor=None):
-        print('   %s: "%s"' % (name, text))
+    def show_all_tests(self, with_cursor=False):
+        """Prints out the test data without running any tests.
+        """
+        print('')
+        for name, operation, data_set in self.tests:
+            print('Tests for %s:\n' % (name))
+            for (original_text, original_cursor,
+                    expected_text, expected_cursor) in data_set:
+                if not with_cursor:
+                    original_cursor, expected_cursor = None, None
+                self.show_text('original', original_text, original_cursor)
+                self.show_text('expected', expected_text, expected_cursor)
+                print('')
+
+    def show_text(self, label, text, cursor=None):
+        """Prints out a piece of test data, optionally showing a cursor.
+        """
+        prefix = '   %s: "' % label
+        print('%s%s"' % (prefix, text))
         if cursor != None:
-            print('            ' + ((cursor - 1) * ' ') + '\xe2\x86\x97')
+            print((len(prefix) + cursor) * ' ' + '↖ %d' % cursor)
 
     def run_tests(self, with_cursor=False):
+        """Applies the specified formatting operations to all the test data.
+        """
         success = True
-        for operation, data in self.tests:
+        for name, operation, data_set in self.tests:
             for (original_text, original_cursor,
-                    expected_text, expected_cursor) in data:
+                    expected_text, expected_cursor) in data_set:
                 if with_cursor:
                     received_text, received_cursor = operation(
                             original_text, original_cursor)
@@ -53,7 +72,7 @@ class Test:
                     original_cursor = received_cursor = expected_cursor = None
                 if received_text != expected_text or (with_cursor and
                         received_cursor != expected_cursor):
-                    print('Failure:')
+                    print('Failed %s:' % name)
                     self.show_text('original', original_text, original_cursor)
                     self.show_text('received', received_text, received_cursor)
                     self.show_text('expected', expected_text, expected_cursor)
@@ -63,23 +82,15 @@ class Test:
         return success
 
 
-class FailFormatter:
-
-    def commatize(self, s):
-        return s
-
-    def trim(self, s):
-        return s
-
-    def reduce_whitespace(self, s):
-        return s
-
-
-class Formatter:
+class CursorlessFormatter:
+    """Implements the operations specified in the Test class without
+    regard for cursor position. The formatting methods take only a string
+    argument and return only a string.
+    """
     
     def commatize(self, s):
-        """Takes a string of digits and commas. Adjusts commas
-        so that they separate the digits into groups of three.
+        """Takes a string of digits and commas. Adjusts commas so that they
+        separate the digits into groups of three.
         """
         s = s.replace(',', '')
         start = len(s) % 3 or 3
@@ -93,9 +104,11 @@ class Formatter:
         """
         return s.strip()
 
-    def reduce_whitespace(self, s):
+    def shrink(self, s):
+        """Reduces each sequence of whitespace with a single space.
+        """
         return re.sub('\s+', ' ', s)
 
 
 if __name__ == '__main__':
-    Test(Formatter()).run_tests()
+    Test(CursorlessFormatter()).show_all_tests(True)
