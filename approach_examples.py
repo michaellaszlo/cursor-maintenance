@@ -1,23 +1,91 @@
 import re
 
-def test(format, original, expected):
-    formatted = format(original)
-    if formatted != expected:
-        print('failure:')
-        print('   original: "%s"' % original)
-        print('   expected: "%s"' % expected)
-        print('  formatted: "%s"' % formatted)
-        return False
-    return True
+
+class Test:
+    """Defines the expected behavior of a fixed set of formatting operations.
+    Provides test data and testing functionality that can be used to validate
+    formatting operations with or without a cursor.
+    """
+
+    commatize_data = [
+            ('24875', 2, '24,875', 3),
+            ('5,4990000', 9, '54,990,000', 10),
+            (',1,,8,,,', 3, '18', 1)
+    ]
+
+    trim_data = [
+            ('hello ', 6, 'hello', 5),
+            ('   Hello,   friends.   ', 12, 'Hello,   friends.', 9),
+            ('   ', 1, '', 0)
+    ]
+
+    reduce_whitespace_data = [
+            ('whirled    peas', 11, 'whirled peas', 8),
+            ('    Hello  there.  Hi.  ', 17, ' Hello there. Hi. ', 13),
+            ('    ', 4, ' ', 1)
+    ]
+
+    def __init__(self, formatter):
+        """Takes an object that implements the formatting operations defined
+        by our test data.
+        """
+        self.tests = [
+                (formatter.commatize, self.commatize_data),
+                (formatter.trim, self.trim_data),
+                (formatter.reduce_whitespace, self.reduce_whitespace_data)
+        ]
+
+    def test_formatting(self):
+        success = True
+        for operation, data in self.tests:
+            for original_text, _, expected_text, _ in data:
+                received_text = operation(original_text)
+                if received_text != expected_text:
+                    print('Failure:')
+                    print('   original: "%s"' % original_text)
+                    print('   received: "%s"' % received_text)
+                    print('   expected: "%s"' % expected_text)
+                    success = False
+        if success:
+            print('Tests passed.')
+        return success
+
+    def test_formatting_with_cursor(self):
+        success = True
+        arrow = '\xe2\x86\x97'
+        for operation, data in self.tests:
+            for (original_text, original_cursor,
+                    expected_text, expected_cursor) in data:
+                received_text, received_cursor = operation(
+                        original_text, original_cursor)
+                if (received_text != expected_text or
+                        received_cursor != expected_cursor):
+                    print('Failure:')
+                    print('   original: "%s"' % original_text)
+                    print('            ' + ((original_cursor - 1)*' ' + arrow))
+                    print('   received: "%s"' % received_text)
+                    print('            ' + ((received_cursor - 1)*' ' + arrow))
+                    print('   expected: "%s"' % expected_text)
+                    print('            ' + ((expected_cursor - 1)*' ' + arrow))
+                    success = False
+        if success:
+            print('Tests passed.')
+        return success
+
+
+class FailFormatter:
+
+    def commatize(self, s):
+        return s
+
+    def trim(self, s):
+        return s
+
+    def reduce_whitespace(self, s):
+        return s
 
 
 class Formatter:
-    
-    commatize_test_pairs = [
-            ('24875', '24,875'),
-            ('5,4990000', '54,990,000'),
-            (',1,8,,,', '18')
-    ]
     
     def commatize(self, s):
         """Takes a string of digits and commas. Adjusts commas
@@ -30,36 +98,14 @@ class Formatter:
             groups.append(s[i:i+3])
         return ','.join(groups)
 
-    trim_test_pairs = [
-            ('hello ', 'hello'),
-            ('   Hello,   friends.   ', 'Hello,   friends.'),
-            ('   ', '')
-    ]
-
     def trim(self, s):
         """Removes spaces from the beginning and end of the string.
         """
         return s.strip()
 
-    reduce_whitespace_test_pairs = [
-            ('whirled    peas', 'whirled peas'),
-            ('    Hello  there.  Hi.  ', ' Hello there. Hi. '),
-            ('    ', ' ')
-    ]
-
     def reduce_whitespace(self, s):
         return re.sub('\s+', ' ', s)
 
-    def test_all(self):
-        success = True
-        for test_pairs, format in [
-                (self.commatize_test_pairs, self.commatize),
-                (self.trim_test_pairs, self.trim),
-                (self.reduce_whitespace_test_pairs, self.reduce_whitespace)]:
-            for original, expected in test_pairs:
-                if not test(format, original, expected):
-                    success = False
-        if success:
-            print('tests succeeded')
 
-Formatter().test_all()
+if __name__ == '__main__':
+    Test(Formatter()).test_formatting()
