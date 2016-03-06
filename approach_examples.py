@@ -11,13 +11,14 @@ class Test:
 
     test_data = {
         'commatize': [
+            ('2500', 1, '2,500', 1),
             ('12500', 3, '12,500', 4),
-            ('12500', 2, '12,500', 2),
             ('5,4990000', 9, '54,990,000', 10),
             (',1,,8,,,', 3, '18', 1),
-            ('1,0,000', 3, '10,000', 2),
+            ('1,0,0,000', 3, '100,000', 2),
             ('1,0,000', 2, '10,000', 1),
-            ('1,,000', 2, '1,000', 1)
+            ('1,,000', 2, '1,000', 1),
+            ('1,00', 2, '100', 1)
         ],
         'trimify': [
             ('  hello  ', 8, 'hello', 5),
@@ -92,7 +93,7 @@ class Test:
         """
         print('')
         for name in self.test_data.keys():
-            run(name, with_cursor)
+            self.run(name, with_cursor)
             print('')
 
 
@@ -185,13 +186,65 @@ class TextualCursorFormatter:
         return (s, cursor)
 
 
+class TextWithCursor:
+
+    def __init__(self, text='', cursor=0):
+        self.text = text
+        self.cursor = cursor
+
+    def read(self, begin, length=1):
+        return self.text[begin : begin + length]
+
+    def insert(self, begin, subtext):
+        self.text = self.text[:begin] + subtext + self.text[begin:]
+        if self.cursor > begin:
+            self.cursor += len(subtext)
+
+    def delete(self, begin, length=1):
+        self.text = self.text[:begin] + self.text[begin + length : ]
+        if self.cursor >= begin:
+            self.cursor -= min(self.cursor - begin, length)
+
+    def length(self):
+        return len(self.text)
+
+    def append(self, subtext):
+        self.insert(self.length(), subtext)
+
+    def display(self):
+        print(self.text)
+        print(self.cursor * ' ' + '↖')
+
+
 class MetaCursorFormatter:
 
     def commatize(self, s, cursor):
-        return ('', None)
+        t = TextWithCursor(s, cursor)
+        digit_count = 0
+        for pos in reversed(range(t.length())):
+            if t.read(pos) == ',':
+                t.delete(pos)
+            elif digit_count < 2:
+                digit_count += 1
+            elif pos > 0:
+                t.insert(pos, ',')
+                digit_count = 0
+        return (t.text, t.cursor)
 
     def trimify(self, s, cursor):
-        return ('', None)
+        t = TextWithCursor(s, cursor)
+        space_count = 0
+        for pos in reversed(range(t.length())):
+            if t.read(pos) != ' ':
+                space_count = 0
+            elif space_count == 0:
+                space_count = 1
+            else:
+                t.delete(pos + 1)
+        for pos in [ t.length() - 1, 0 ]:
+            if t.read(pos) == ' ':
+                t.delete(pos)
+        return (t.text, t.cursor)
 
 
 class RetrospectiveCursorFormatter:
@@ -204,5 +257,6 @@ class RetrospectiveCursorFormatter:
 
 
 if __name__ == '__main__':
-    Test(TextualCursorFormatter()).run('trimify')
+    Test().display_all()
+    Test(MetaCursorFormatter()).run_all()
 
