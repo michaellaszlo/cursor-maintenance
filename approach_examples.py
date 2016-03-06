@@ -150,10 +150,39 @@ class NumericalCursorFormatter:
 class TextualCursorFormatter:
 
     def commatize(self, s, cursor):
-        return ('', None)
+        cursor_char = '^'
+        s = s[:cursor] + cursor_char + s[cursor:]
+        groups = []
+        group_chars = []
+        digit_count = 0
+        for ch in reversed(s):
+            if ch != ',':
+                group_chars.append(ch)
+                if ch != cursor_char:
+                    digit_count += 1
+                    if digit_count == 3:
+                        groups.append(''.join(reversed(group_chars)))
+                        group_chars = []
+                        digit_count = 0
+        if group_chars != []:
+            groups.append(''.join(reversed(group_chars)))
+        s = ','.join(reversed(groups))
+        cursor = s.index(cursor_char)
+        s = s.replace(cursor_char, '')
+        return (s, cursor)
 
     def trimify(self, s, cursor):
-        return ('', None)
+        cursor_char = '^'
+        s = s[:cursor] + cursor_char + s[cursor:]
+        s = Formatter().trimify(s)[0]
+        s = s.replace(' ' + cursor_char + ' ', ' ' + cursor_char)
+        if s[0] == cursor_char:
+            s = s.replace(cursor_char + ' ', cursor_char)
+        elif s[-1] == cursor_char:
+            s = s.replace(' ' + cursor_char, cursor_char)
+        cursor = s.index(cursor_char)
+        s = s.replace(cursor_char, '')
+        return (s, cursor)
 
 
 class MetaCursorFormatter:
@@ -175,5 +204,5 @@ class RetrospectiveCursorFormatter:
 
 
 if __name__ == '__main__':
-    Test(NumericalCursorFormatter()).run('trimify')
+    Test(TextualCursorFormatter()).run('trimify')
 
