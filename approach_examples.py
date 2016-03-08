@@ -72,7 +72,7 @@ class Test:
         """
         print('Testing %s' % name)
         operation = getattr(self.formatter, name)
-        success = True
+        passing = True
         for (original_text, original_cursor,
                 expected_text, expected_cursor) in self.test_data[name]:
             received_text, received_cursor = operation(
@@ -83,10 +83,10 @@ class Test:
                 self.show_text('original', original_text, original_cursor)
                 self.show_text('expected', expected_text, expected_cursor)
                 self.show_text('received', received_text, received_cursor)
-                success = False
-        if success:
+                passing = False
+        if passing:
             print('passed')
-        return success
+        return passing
 
     def run_all(self, with_cursor=True):
         """Tests all formatting operations.
@@ -123,12 +123,12 @@ class Formatter:
         return (s, cursor)
 
 
-class NumericalCursorFormatter:
+class NumericalCursorFormatter(Formatter):
 
     def commatize(self, s, cursor):
         offset_before = s[:cursor].count(',')
         left_digit_count = cursor - s[:cursor].count(',')
-        s = Formatter().commatize(s)[0]
+        s = Formatter.commatize(self, s)[0]
         if left_digit_count == 0:
             return (s, 0)
         for pos, ch in enumerate(s):
@@ -141,14 +141,14 @@ class NumericalCursorFormatter:
 
     def trimify(self, s, cursor):
         left = s[:cursor]
-        left_trimmed = Formatter().trimify(left + 'x')[0][:-1]
+        left_trimmed = Formatter.trimify(self, left + 'x')[0][:-1]
         left_whitespace_count = cursor - len(left_trimmed)
-        s = Formatter().trimify(s)[0]
+        s = Formatter.trimify(self, s)[0]
         cursor = min(len(s), cursor - left_whitespace_count)
         return (s, cursor)
 
 
-class TextualCursorFormatter:
+class TextualCursorFormatter(Formatter):
 
     def commatize(self, s, cursor):
         cursor_char = '^'
@@ -175,7 +175,7 @@ class TextualCursorFormatter:
     def trimify(self, s, cursor):
         cursor_char = '^'
         s = s[:cursor] + cursor_char + s[cursor:]
-        s = Formatter().trimify(s)[0]
+        s = Formatter.trimify(self, s)[0]
         s = s.replace(' ' + cursor_char + ' ', ' ' + cursor_char)
         if s[0] == cursor_char:
             s = s.replace(cursor_char + ' ', cursor_char)
@@ -247,16 +247,42 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
 
-class RetrospectiveCursorFormatter:
+def zero_distance(s, t):
+    return 0
 
-    def commatize(self, s, cursor):
-        return ('', None)
+class RetrospectiveCursorFormatter(Formatter):
 
-    def trimify(self, s, cursor):
-        return ('', None)
+    def __init__(self, get_distance):
+        self.get_distance = get_distance
+
+    def recalculate_cursor(self, original, cursor, formatted):
+        cursor_char = '^'
+        get_distance = self.get_distance
+        original = original[:cursor] + cursor_char + original[cursor:]
+        best_cost = get_distance(original, cursor_char + formatted)
+        best_pos = 0
+        for pos in range(1, len(formatted) + 1):
+            cost = get_distance(original,
+                    formatted[:pos] + cursor_char + formatted[pos:])
+            if cost < best_cost:
+                best_cost = cost
+                best_pos = pos
+        return best_pos
+
+    def commatize(self, original, cursor):
+        formatted = Formatter.commatize(self, original)[0]
+        cursor = self.recalculate_cursor(original, cursor, formatted)
+        return (formatted, cursor)
+
+    def trimify(self, original, cursor):
+        formatted = Formatter.trimify(self, original)[0]
+        cursor = self.recalculate_cursor(original, cursor, formatted)
+        return (formatted, cursor)
 
 
 if __name__ == '__main__':
-    Test().display_all()
-    Test(MetaCursorFormatter()).run_all()
+    #Test(NumericalCursorFormatter()).run_all()
+    #Test(TextualCursorFormatter()).run_all()
+    #Test(MetaCursorFormatter()).run_all()
+    Test(RetrospectiveCursorFormatter(zero_distance)).run_all()
 
