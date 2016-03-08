@@ -247,7 +247,23 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
 
-def zero_distance(s, t):
+def levenshtein(s, t):
+    n, m = len(s), len(t)
+    if min(n, m) == 0:
+        return max(n, m)
+    current = list(range(m + 1))
+    previous = (m + 1) * [ None ]
+    for i in range(1, n + 1):
+        current, previous = previous, current
+        current[0] = previous[0] + 1
+        for j in range(1, m + 1):
+            if t[j - 1] == s[i - 1]:
+                current[j] = previous[j - 1]
+            else:
+                current[j] = min(previous[j - 1] + 1,
+                                 previous[j] + 1,
+                                 current[j - 1] + 1)
+    return current[m]
     return 0
 
 class RetrospectiveCursorFormatter(Formatter):
@@ -284,5 +300,5 @@ if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run_all()
     #Test(TextualCursorFormatter()).run_all()
     #Test(MetaCursorFormatter()).run_all()
-    Test(RetrospectiveCursorFormatter(zero_distance)).run_all()
+    Test(RetrospectiveCursorFormatter(levenshtein)).run_all()
 
