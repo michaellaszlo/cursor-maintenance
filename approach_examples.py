@@ -122,6 +122,17 @@ class Formatter:
         s = re.sub('\s+', ' ', s)
         return (s, cursor)
 
+    def choose_cursor_char(self, s):
+        used_chars = set(list(s))
+        for char in '^|_#':
+            if char not in used_chars:
+                return char
+        for code in range(32, 127):
+            char = chr(code)
+            if char not in used_chars:
+                return char
+        return None
+
 
 class NumericalCursorFormatter(Formatter):
 
@@ -151,7 +162,7 @@ class NumericalCursorFormatter(Formatter):
 class TextualCursorFormatter(Formatter):
 
     def commatize(self, s, cursor):
-        cursor_char = '^'
+        cursor_char = Formatter.choose_cursor_char(self, s)
         s = s[:cursor] + cursor_char + s[cursor:]
         groups = []
         group_chars = []
@@ -173,7 +184,7 @@ class TextualCursorFormatter(Formatter):
         return (s, cursor)
 
     def trimify(self, s, cursor):
-        cursor_char = '^'
+        cursor_char = Formatter.choose_cursor_char(self, s)
         s = s[:cursor] + cursor_char + s[cursor:]
         s = Formatter.trimify(self, s)[0]
         s = s.replace(' ' + cursor_char + ' ', ' ' + cursor_char)
@@ -272,7 +283,7 @@ class RetrospectiveCursorFormatter(Formatter):
         self.get_distance = get_distance
 
     def recalculate_cursor(self, original, cursor, formatted):
-        cursor_char = '^'
+        cursor_char = Formatter.choose_cursor_char(self, original + formatted)
         get_distance = self.get_distance
         original = original[:cursor] + cursor_char + original[cursor:]
         best_cost = get_distance(original, cursor_char + formatted)
@@ -298,7 +309,7 @@ class RetrospectiveCursorFormatter(Formatter):
 
 if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run_all()
-    #Test(TextualCursorFormatter()).run_all()
+    Test(TextualCursorFormatter()).run_all()
     #Test(MetaCursorFormatter()).run_all()
-    Test(RetrospectiveCursorFormatter(levenshtein)).run_all()
+    #Test(RetrospectiveCursorFormatter(levenshtein)).run_all()
 
