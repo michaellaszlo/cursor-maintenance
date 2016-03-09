@@ -97,6 +97,18 @@ class Test:
             print('')
 
 
+def choose_cursor_char(s):
+    used_chars = set(list(s))
+    for char in '^|_#':
+        if char not in used_chars:
+            return char
+    for code in range(32, 127):
+        char = chr(code)
+        if char not in used_chars:
+            return char
+    return None
+
+
 class Formatter:
     """Implements the operations specified in the Test class without
     regard for cursor position.
@@ -121,17 +133,6 @@ class Formatter:
         s = s.strip()
         s = re.sub('\s+', ' ', s)
         return (s, cursor)
-
-    def choose_cursor_char(self, s):
-        used_chars = set(list(s))
-        for char in '^|_#':
-            if char not in used_chars:
-                return char
-        for code in range(32, 127):
-            char = chr(code)
-            if char not in used_chars:
-                return char
-        return None
 
 
 class NumericalCursorFormatter(Formatter):
@@ -162,7 +163,7 @@ class NumericalCursorFormatter(Formatter):
 class TextualCursorFormatter(Formatter):
 
     def commatize(self, s, cursor):
-        cursor_char = Formatter.choose_cursor_char(self, s)
+        cursor_char = choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
         groups = []
         group_chars = []
@@ -184,7 +185,7 @@ class TextualCursorFormatter(Formatter):
         return (s, cursor)
 
     def trimify(self, s, cursor):
-        cursor_char = Formatter.choose_cursor_char(self, s)
+        cursor_char = choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
         s = Formatter.trimify(self, s)[0]
         s = s.replace(' ' + cursor_char + ' ', ' ' + cursor_char)
@@ -258,7 +259,10 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
 
-def levenshtein(s, t):
+def levenshtein(s, s_cursor, t, t_cursor):
+    cursor_char = choose_cursor_char(s + t)
+    s = s[:s_cursor] + cursor_char + s[s_cursor:]
+    t = t[:t_cursor] + cursor_char + t[t_cursor:]
     n, m = len(s), len(t)
     if min(n, m) == 0:
         return max(n, m)
@@ -277,20 +281,19 @@ def levenshtein(s, t):
     return current[m]
     return 0
 
+
 class RetrospectiveCursorFormatter(Formatter):
 
     def __init__(self, get_distance):
         self.get_distance = get_distance
 
     def recalculate_cursor(self, original, cursor, formatted):
-        cursor_char = Formatter.choose_cursor_char(self, original + formatted)
+        cursor_char = choose_cursor_char(original + formatted)
         get_distance = self.get_distance
-        original = original[:cursor] + cursor_char + original[cursor:]
-        best_cost = get_distance(original, cursor_char + formatted)
+        best_cost = get_distance(original, cursor, formatted, 0)
         best_pos = 0
         for pos in range(1, len(formatted) + 1):
-            cost = get_distance(original,
-                    formatted[:pos] + cursor_char + formatted[pos:])
+            cost = get_distance(original, cursor, formatted, pos) 
             if cost < best_cost:
                 best_cost = cost
                 best_pos = pos
@@ -309,7 +312,7 @@ class RetrospectiveCursorFormatter(Formatter):
 
 if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run_all()
-    Test(TextualCursorFormatter()).run_all()
+    #Test(TextualCursorFormatter()).run_all()
     #Test(MetaCursorFormatter()).run_all()
-    #Test(RetrospectiveCursorFormatter(levenshtein)).run_all()
+    Test(RetrospectiveCursorFormatter(levenshtein)).run_all()
 
