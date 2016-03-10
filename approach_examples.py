@@ -18,7 +18,10 @@ class Test:
             ('1,0,0,000', 3, '100,000', 2),
             ('1,0,000', 2, '10,000', 1),
             ('1,,000', 2, '1,000', 1),
-            ('1,00', 2, '100', 1)
+            ('1,00', 2, '100', 1),
+            ('1234', 1, '1,234', 1),
+            ('1,0234', 3, '10,234', 2),
+            ('10,00', 4, '1,000', 4)
         ],
         'trimify': [
             ('  hello  ', 8, 'hello', 5),
@@ -259,10 +262,7 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
 
-def levenshtein(s, s_cursor, t, t_cursor):
-    cursor_char = choose_cursor_char(s + t)
-    s = s[:s_cursor] + cursor_char + s[s_cursor:]
-    t = t[:t_cursor] + cursor_char + t[t_cursor:]
+def levenshtein(s, t):
     n, m = len(s), len(t)
     if min(n, m) == 0:
         return max(n, m)
@@ -278,8 +278,17 @@ def levenshtein(s, s_cursor, t, t_cursor):
                 current[j] = min(previous[j - 1] + 1,
                                  previous[j] + 1,
                                  current[j - 1] + 1)
-    return current[m]
-    return 0
+    result = current[m]
+    #print('%s %s %d' % (s, t, result))
+    return result
+
+def split_levenshtein(s, s_cursor, t, t_cursor):
+    cursor_char = choose_cursor_char(s + t)
+    left = levenshtein(s[:s_cursor], t[:t_cursor])
+    right = levenshtein(s[s_cursor:], t[t_cursor:])
+    result = left + right
+    #print('-> %d' % result)
+    return result
 
 
 class RetrospectiveCursorFormatter(Formatter):
@@ -314,5 +323,5 @@ if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run_all()
     #Test(TextualCursorFormatter()).run_all()
     #Test(MetaCursorFormatter()).run_all()
-    Test(RetrospectiveCursorFormatter(levenshtein)).run_all()
+    Test(RetrospectiveCursorFormatter(split_levenshtein)).run_all()
 
