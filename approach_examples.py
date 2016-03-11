@@ -291,6 +291,29 @@ def split_levenshtein(s, s_cursor, t, t_cursor):
     return result
 
 
+def left_right_freqs(s, cursor, chars):
+    freq_left = { ch: 0 for ch in chars }
+    for ch in s[:cursor]:
+        if ch in chars:
+            freq_left[ch] += 1
+    freq_right = { ch: 0 for ch in chars }
+    for ch in s[cursor:]:
+        if ch in chars:
+            freq_right[ch] += 1
+    return freq_left, freq_right
+
+def balance_frequencies(s, s_cursor, t, t_cursor):
+    chars = set(list(s)).intersection(set(list(t)))
+    s_freq_left, s_freq_right = left_right_freqs(s, s_cursor, chars)
+    t_freq_left, t_freq_right = left_right_freqs(t, t_cursor, chars)
+    cost = 0
+    for ch in chars:
+        a = 1.0 * s_freq_left[ch] / (s_freq_left[ch] + s_freq_right[ch])
+        b = 1.0 * t_freq_left[ch] / (t_freq_left[ch] + t_freq_right[ch])
+        cost += abs(a - b) ** 2
+    return cost
+
+
 class RetrospectiveCursorFormatter(Formatter):
 
     def __init__(self, get_distance):
@@ -323,5 +346,5 @@ if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run_all()
     #Test(TextualCursorFormatter()).run_all()
     #Test(MetaCursorFormatter()).run_all()
-    Test(RetrospectiveCursorFormatter(split_levenshtein)).run_all()
+    Test(RetrospectiveCursorFormatter(balance_frequencies)).run_all()
 
