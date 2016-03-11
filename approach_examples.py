@@ -70,9 +70,15 @@ class Test:
         for name in self.test_data.keys():
             self.display(name, show_cursor)
 
-    def run(self, name, with_cursor=True):
+    def run(self, name=None, with_cursor=True):
         """Tests the specified formatting operation.
         """
+        if name == None:
+            print('')
+            for name in self.test_data.keys():
+                self.run(name, with_cursor)
+                print('')
+            return
         print('Testing %s' % name)
         operation = getattr(self.formatter, name)
         passing = True
@@ -90,14 +96,6 @@ class Test:
         if passing:
             print('passed')
         return passing
-
-    def run_all(self, with_cursor=True):
-        """Tests all formatting operations.
-        """
-        print('')
-        for name in self.test_data.keys():
-            self.run(name, with_cursor)
-            print('')
 
 
 def choose_cursor_char(s):
@@ -279,7 +277,6 @@ def levenshtein(s, t):
                                  previous[j] + 1,
                                  current[j - 1] + 1)
     result = current[m]
-    #print('%s %s %d' % (s, t, result))
     return result
 
 def split_levenshtein(s, s_cursor, t, t_cursor):
@@ -287,7 +284,6 @@ def split_levenshtein(s, s_cursor, t, t_cursor):
     left = levenshtein(s[:s_cursor], t[:t_cursor])
     right = levenshtein(s[s_cursor:], t[t_cursor:])
     result = left + right
-    #print('-> %d' % result)
     return result
 
 
@@ -324,8 +320,11 @@ class RetrospectiveCursorFormatter(Formatter):
         get_distance = self.get_distance
         best_cost = get_distance(original, cursor, formatted, 0)
         best_pos = 0
+        #print(original[:cursor] + '^' + original[cursor:])
+        #print('  ^%s %d' % (formatted, best_cost))
         for pos in range(1, len(formatted) + 1):
             cost = get_distance(original, cursor, formatted, pos) 
+            #print('  %s^%s %f' % (formatted[:pos], formatted[pos:], cost))
             if cost < best_cost:
                 best_cost = cost
                 best_pos = pos
@@ -343,8 +342,8 @@ class RetrospectiveCursorFormatter(Formatter):
 
 
 if __name__ == '__main__':
-    #Test(NumericalCursorFormatter()).run_all()
-    #Test(TextualCursorFormatter()).run_all()
-    #Test(MetaCursorFormatter()).run_all()
-    Test(RetrospectiveCursorFormatter(balance_frequencies)).run_all()
+    #Test(NumericalCursorFormatter()).run()
+    #Test(TextualCursorFormatter()).run()
+    #Test(MetaCursorFormatter()).run()
+    Test(RetrospectiveCursorFormatter(balance_frequencies)).run()
 
