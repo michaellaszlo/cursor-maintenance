@@ -51,9 +51,14 @@ class Test:
         if cursor != None:
             print((len(prefix) + cursor) * ' ' + '↖ %d' % cursor)
 
-    def display(self, name, show_cursor=True):
+    def display(self, name=None, show_cursor=True):
         """Prints out the test pairs for a specified formatting operation.
         """
+        if name == None:
+            print('')
+            for name in self.test_data.keys():
+                self.display(name, show_cursor)
+            return
         print('Test cases for %s\n' % name)
         for (original_text, original_cursor,
                 expected_text, expected_cursor) in self.test_data[name]:
@@ -62,13 +67,6 @@ class Test:
             self.show_text('original', original_text, original_cursor)
             self.show_text('expected', expected_text, expected_cursor)
             print('')
-
-    def display_all(self, show_cursor=True):
-        """Displays the test pairs for every formatting operation.
-        """
-        print('')
-        for name in self.test_data.keys():
-            self.display(name, show_cursor)
 
     def run(self, name=None, with_cursor=True):
         """Tests the specified formatting operation.
@@ -345,5 +343,5 @@ if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
-    Test(RetrospectiveCursorFormatter(balance_frequencies)).run()
+    Test(RetrospectiveCursorFormatter(balance_frequencies)).display()
 
