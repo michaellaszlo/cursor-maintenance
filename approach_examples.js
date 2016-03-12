@@ -1,6 +1,13 @@
 var DemonstrateCursorMaintenance = (function () {
   'use strict';
 
+  var formatter,
+      numericalCursorFormatter,
+      textualCursorFormatter,
+      metaCursorFormatter,
+      retrospectiveCursorFormatter,
+      test;
+
 
   function TestCase(originalText, originalCursor,
       expectedText, expectedCursor) {
@@ -14,8 +21,8 @@ var DemonstrateCursorMaintenance = (function () {
   /* Test describes the behavior of a fixed set of formatting operations.
    * It provides test data and a test runner that can be used to verify
    * the formatting operations with or without cursor positioning.
-   * The constructor takes a Formatter object that implements the
-   * operations described by our test data.
+   * The constructor takes an object that implements the operations
+   * described by our test data.
    */
   function Test(formatter) {
     var testData = {
@@ -144,40 +151,39 @@ var DemonstrateCursorMaintenance = (function () {
     };
   }
 
-  /* Formatter implements the operations specified by the Test object
+
+  /* formatter implements the operations specified by the Test object
    * without altering the cursor position.
    */
-  function Formatter() {
+  formatter = {};
 
-    /* commatize takes a string of digits and commas. It adjusts commas so
-     * that they separate the digits into groups of three.
-     */
-    function commatize(s, cursor) {
-      var start,
-          groups,
-          i;
-      s = s.replace(/,/g, '');
-      start = s.length % 3 || 3;
-      groups = [ s.substring(0, start) ];
-      for (i = start; i < s.length; i += 3) {
-        groups.push(s.substring(i, i + 3));
-      }
-      s = groups.join(',');
-      return { text: s, cursor: cursor };
+  /* commatize takes a string of digits and commas. It adjusts commas so
+   * that they separate the digits into groups of three.
+   */
+  formatter.commatize = function (s, cursor) {
+    var start,
+        groups,
+        i;
+    s = s.replace(/,/g, '');
+    start = s.length % 3 || 3;
+    groups = [ s.substring(0, start) ];
+    for (i = start; i < s.length; i += 3) {
+      groups.push(s.substring(i, i + 3));
     }
+    s = groups.join(',');
+    return { text: s, cursor: cursor };
+  };
 
-    /* trimify removes spaces from the beginning and end of the string, and
-     * reduces each internal whitespace sequence to a single space.
-     */
-    function trimify(s, cursor) {
-    }
+  /* trimify removes spaces from the beginning and end of the string, and
+   * reduces each internal whitespace sequence to a single space.
+   */
+  formatter.trimify = function (s, cursor) {
+    s = s.replace(/^\s+|\s+$/g, '');
+    s = s.replace(/\s+/g, ' ');
+    return { text: s, cursor: cursor };
+  };
 
-    return {
-      commatize: commatize,
-      trimify: trimify
-    };
-  }
 
-  var test = new Test(new Formatter());
-  test.run('commatize');
+  test = new Test(formatter);
+  test.run('trimify');
 })();
