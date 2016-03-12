@@ -1,6 +1,6 @@
 var DemonstrateCursorMaintenance = (function () {
   'use strict';
-  
+
   function TestCase(originalText, originalCursor,
       expectedText, expectedCursor) {
     return {
@@ -45,11 +45,54 @@ var DemonstrateCursorMaintenance = (function () {
       }
     }
 
+    function display(options) {
+      var testCases,
+          testCase, i,
+          originalCursor,
+          expectedCursor,
+          options = options || {},
+          showCursor = (options.hideCursor !== true);
+      if (!('name' in options)) {
+        print();
+        Object.keys(testData).forEach(function (name) {
+          options.name = name;
+          display(options);
+        });
+        return;
+      }
+      print('Test cases for ' + options.name);
+      testCases = testData[options.name];
+      for (i = 0; i < testCases.length; ++i) {
+        testCase = testCases[i];
+        if (showCursor) {
+          originalCursor = testCase.original.cursor;
+          expectedCursor = testCase.expected.cursor;
+        }
+        showText('original', testCase.original.text, originalCursor);
+        showText('expected', testCase.expected.text, expectedCursor);
+        print();
+      }
+    }
+
     return {
       display: display
     };
   }
 
-  var test = new Test(new NumericalCursorFormatter());
+  function Formatter() {
+
+    function commatize(s, cursor) {
+    }
+
+    function trimify(s, cursor) {
+    }
+
+    return {
+      commatize: commatize,
+      trimify: trimify
+    };
+  }
+
+  var test = new Test(new Formatter());
   test.display();
 })();
