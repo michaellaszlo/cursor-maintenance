@@ -1,6 +1,7 @@
 var DemonstrateCursorMaintenance = (function () {
   'use strict';
 
+
   function TestCase(originalText, originalCursor,
       expectedText, expectedCursor) {
     return {
@@ -9,6 +10,13 @@ var DemonstrateCursorMaintenance = (function () {
     };
   };
 
+
+  /* Test describes the behavior of a fixed set of formatting operations.
+   * It provides test data and a test runner that can be used to verify
+   * the formatting operations with or without cursor positioning.
+   * The constructor takes a Formatter object that implements the
+   * operations described by our test data.
+   */
   function Test(formatter) {
     var testData = {
       commatize: [
@@ -38,37 +46,42 @@ var DemonstrateCursorMaintenance = (function () {
       ]
     };
 
+    /* showText prints out a single test string and optionally displays
+     * the cursor position below it.
+     */
     function showText(label, text, cursor) {
       var parts, i,
           prefix = '  ' + label + ' "';
       print(prefix + text + '"');
       if (cursor !== undefined) {
         parts = [];
-        for (i = prefix.length + cursor - 1; i >= 0; --i) {
+        for (i = prefix.length + cursor; i > 0; --i) {
           parts.push(' ');
         }
-        parts.push(' ↖ ' + cursor);
+        parts.push('↖ ' + cursor);
         print(parts.join(''));
       }
     }
 
-    function display(options) {
-      var testCases,
-          testCase, i,
-          originalCursor,
+    /* display prints out the test pairs for a specified formatting operation.
+     */
+    function display(name, showCursor) {
+      var originalCursor,
           expectedCursor,
-          options = options || {},
-          showCursor = (options.hideCursor !== true);
-      if (!('name' in options)) {
+          testCases,
+          testCase, i;
+      if (showCursor === undefined) {
+        showCursor = true;
+      }
+      if (!name) {
         print();
         Object.keys(testData).forEach(function (name) {
-          options.name = name;
-          display(options);
+          display(name, showCursor);
         });
         return;
       }
-      print('Test cases for ' + options.name);
-      testCases = testData[options.name];
+      print('Test cases for ' + name);
+      testCases = testData[name];
       for (i = 0; i < testCases.length; ++i) {
         testCase = testCases[i];
         if (showCursor) {
@@ -81,16 +94,81 @@ var DemonstrateCursorMaintenance = (function () {
       }
     }
 
+    /* run tests a specified formatting operation or all of them.
+     */
+    function run(name, withCursor) {
+      var operation,
+          passing,
+          testCases,
+          testCase, i,
+          original,
+          expected,
+          received;
+      if (withCursor === undefined) {
+        withCursor = true;
+      }
+      if (!name) {
+        print('');
+        Object.keys(testData).forEach(function (name) {
+          run(name, withCursor);
+        });
+        return;
+      }
+      print('Testing ' + name);
+      operation = formatter[name];
+      passing = true;
+      testCases = testData[name];
+      for (i = 0; i < testCases.length; ++i) {
+        testCase = testCases[i];
+        original = testCase.original;
+        expected = testCase.expected;
+        received = operation(original.text, original.cursor);
+        if (received.text != expected.text || (withCursor &&
+            received.cursor != expected.cursor)) {
+          print('failed');
+          showText('original', original.text, original.cursor);
+          showText('expected', expected.text, expected.cursor);
+          showText('received', received.text, received.cursor);
+          passing = false;
+        }
+      }
+      if (passing) {
+        print('passed');
+      }
+      return passing;
+    }
+
     return {
-      display: display
+      display: display,
+      run: run
     };
   }
 
+  /* Formatter implements the operations specified by the Test object
+   * without altering the cursor position.
+   */
   function Formatter() {
 
+    /* commatize takes a string of digits and commas. It adjusts commas so
+     * that they separate the digits into groups of three.
+     */
     function commatize(s, cursor) {
+      var start,
+          groups,
+          i;
+      s = s.replace(/,/g, '');
+      start = s.length % 3 || 3;
+      groups = [ s.substring(0, start) ];
+      for (i = start; i < s.length; i += 3) {
+        groups.push(s.substring(i, i + 3));
+      }
+      s = groups.join(',');
+      return { text: s, cursor: cursor };
     }
 
+    /* trimify removes spaces from the beginning and end of the string, and
+     * reduces each internal whitespace sequence to a single space.
+     */
     function trimify(s, cursor) {
     }
 
@@ -101,5 +179,5 @@ var DemonstrateCursorMaintenance = (function () {
   }
 
   var test = new Test(new Formatter());
-  test.display();
+  test.run('commatize');
 })();

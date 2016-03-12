@@ -69,7 +69,7 @@ class Test:
             print('')
 
     def run(self, name=None, with_cursor=True):
-        """Tests the specified formatting operation.
+        """Tests a specified formatting operation or all of them.
         """
         if name == None:
             print('')
@@ -110,7 +110,7 @@ def choose_cursor_char(s):
 
 class Formatter:
     """Implements the operations specified in the Test class without
-    regard for cursor position.
+    altering the cursor position.
     """
     
     def commatize(self, s, cursor=None):
@@ -121,7 +121,7 @@ class Formatter:
         start = len(s) % 3 or 3
         groups = [ s[:start] ]
         for i in range(start, len(s), 3):
-            groups.append(s[i:i+3])
+            groups.append(s[i : i + 3])
         s = ','.join(groups)
         return (s, cursor)
 
@@ -340,8 +340,9 @@ class RetrospectiveCursorFormatter(Formatter):
 
 
 if __name__ == '__main__':
+    Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
-    Test(RetrospectiveCursorFormatter(balance_frequencies)).display()
+    #Test(RetrospectiveCursorFormatter(balance_frequencies)).display()
 
