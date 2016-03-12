@@ -212,7 +212,7 @@ class TextWithCursor:
 
     def delete(self, begin, length=1):
         self.text = self.text[:begin] + self.text[begin + length : ]
-        if self.cursor >= begin:
+        if self.cursor > begin:
             self.cursor -= min(self.cursor - begin, length)
 
     def length(self):
@@ -341,7 +341,7 @@ class RetrospectiveCursorFormatter(Formatter):
 if __name__ == '__main__':
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
-    Test(TextualCursorFormatter()).run()
-    #Test(MetaCursorFormatter()).run()
+    #Test(TextualCursorFormatter()).run()
+    Test(MetaCursorFormatter()).run()
     #Test(RetrospectiveCursorFormatter(balance_frequencies)).display()
 

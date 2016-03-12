@@ -292,12 +292,95 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
 
+  function TextWithCursor(text, cursor) {
+    this.text = text || '';
+    this.cursor = cursor || 0;
+  }
+
+  TextWithCursor.prototype.read = function (begin, length) {
+    if (length === undefined) {
+      length = 1;
+    }
+    return this.text.substring(begin, begin + length);
+  };
+
+  TextWithCursor.prototype.insert = function (begin, subtext) {
+    this.text = this.text.substring(0, begin) + subtext +
+        this.text.substring(begin);
+    if (this.cursor > begin) {
+      this.cursor += subtext.length;
+    }
+  };
+
+  TextWithCursor.prototype.delete = function (begin, length) {
+    if (length === undefined) {
+      length = 1;
+    }
+    this.text = this.text.substring(0, begin) +
+        this.text.substring(begin + length);
+    if (this.cursor > begin) {
+      this.cursor -= Math.min(this.cursor - begin, length);
+    }
+  };
+
+  TextWithCursor.prototype.length = function () {
+    return this.text.length;
+  };
+
+  TextWithCursor.prototype.append = function (subtext) {
+    this.insert(this.length(), subtext);
+  };
+
+  TextWithCursor.prototype.display = function () {
+    var parts = [],
+        i;
+    print(this.text);
+    for (i = 0; i < this.cursor; ++i) {
+      parts.push(' ');
+    }
+    parts.push('↖');
+    print(parts.join(''));
+  };
+
+
   metaCursorFormatter = {};
 
   metaCursorFormatter.commatize = function (s, cursor) {
+    var t = new TextWithCursor(s, cursor),
+        digitCount = 0,
+        pos;
+    for (pos = t.length() - 1; pos >= 0; --pos) {
+      if (t.read(pos) == ',') {
+        t.delete(pos);
+      } else if (digitCount < 2) {
+        ++digitCount;
+      } else if (pos > 0) {
+        t.insert(pos, ',');
+        digitCount = 0;
+      }
+    }
+    return t;
   };
 
   metaCursorFormatter.trimify = function (s, cursor) {
+    var t = new TextWithCursor(s, cursor),
+        spaceCount = 0,
+        pos;
+    for (pos = t.length() - 1; pos >= 0; --pos) {
+      if (t.read(pos) != ' ') {
+        spaceCount = 0;
+      } else if (spaceCount == 0) {
+        spaceCount = 1;
+      } else {
+        t.delete(pos + 1);
+      }
+    }
+    [ t.length() - 1, 0 ].forEach(function (pos) {
+      if (t.read(pos) == ' ') {
+        t.delete(pos);
+      }
+    });
+    return t;
   };
 
 
@@ -310,6 +393,6 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
 
-  test = new Test(textualCursorFormatter);
+  test = new Test(metaCursorFormatter);
   test.run('trimify');
 })();
