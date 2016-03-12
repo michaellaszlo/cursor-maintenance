@@ -39,9 +39,16 @@ var DemonstrateCursorMaintenance = (function () {
     };
 
     function showText(label, text, cursor) {
-      var prefix = '  ' + label + ' "';
+      var parts, i,
+          prefix = '  ' + label + ' "';
       print(prefix + text + '"');
       if (cursor !== undefined) {
+        parts = [];
+        for (i = prefix.length + cursor - 1; i >= 0; --i) {
+          parts.push(' ');
+        }
+        parts.push(' ↖ ' + cursor);
+        print(parts.join(''));
       }
     }
 
