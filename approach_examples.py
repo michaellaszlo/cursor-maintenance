@@ -98,7 +98,7 @@ class Test:
 
 def choose_cursor_char(s):
     used_chars = set(list(s))
-    for char in '^|_#':
+    for char in '|^_#':
         if char not in used_chars:
             return char
     for code in range(32, 127):
@@ -137,7 +137,6 @@ class Formatter:
 class NumericalCursorFormatter(Formatter):
 
     def commatize(self, s, cursor):
-        offset_before = s[:cursor].count(',')
         left_digit_count = cursor - s[:cursor].count(',')
         s = Formatter.commatize(self, s)[0]
         if left_digit_count == 0:
@@ -152,8 +151,8 @@ class NumericalCursorFormatter(Formatter):
 
     def trimify(self, s, cursor):
         left = s[:cursor]
-        left_trimmed = Formatter.trimify(self, left + 'x')[0][:-1]
-        left_whitespace_count = cursor - len(left_trimmed)
+        left_trimmed = Formatter.trimify(self, left + '|')[0]
+        left_whitespace_count = cursor - len(left_trimmed) + 1
         s = Formatter.trimify(self, s)[0]
         cursor = min(len(s), cursor - left_whitespace_count)
         return (s, cursor)
@@ -340,8 +339,8 @@ class RetrospectiveCursorFormatter(Formatter):
 
 
 if __name__ == '__main__':
-    Test(Formatter()).run('commatize', with_cursor=False)
-    #Test(NumericalCursorFormatter()).run()
+    #Test(Formatter()).run('commatize', with_cursor=False)
+    Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
     #Test(RetrospectiveCursorFormatter(balance_frequencies)).display()

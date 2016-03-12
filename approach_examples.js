@@ -19,11 +19,10 @@ var DemonstrateCursorMaintenance = (function () {
 
 
   /* Test describes the behavior of a fixed set of formatting operations.
-   * It provides test data and a test runner that can be used to verify
-   * the formatting operations with or without cursor positioning.
-   * The constructor takes an object that implements the operations
-   * described by our test data.
-   */
+     It provides test data and a test runner that can be used to verify
+     the formatting operations with or without cursor positioning.
+     The constructor takes an object that implements the operations
+     described by our test data. */
   function Test(formatter) {
     var testData = {
       commatize: [
@@ -54,8 +53,7 @@ var DemonstrateCursorMaintenance = (function () {
     };
 
     /* showText prints out a single test string and optionally displays
-     * the cursor position below it.
-     */
+       the cursor position below it. */
     function showText(label, text, cursor) {
       var parts, i,
           prefix = '  ' + label + ' "';
@@ -70,8 +68,8 @@ var DemonstrateCursorMaintenance = (function () {
       }
     }
 
-    /* display prints out the test pairs for a specified formatting operation.
-     */
+    /* display prints out the test pairs for a specified formatting
+       operation. */
     function display(name, showCursor) {
       var originalCursor,
           expectedCursor,
@@ -101,8 +99,7 @@ var DemonstrateCursorMaintenance = (function () {
       }
     }
 
-    /* run tests a specified formatting operation or all of them.
-     */
+    /* run tests a specified formatting operation or all of them. */
     function run(name, withCursor) {
       var operation,
           passing,
@@ -115,9 +112,10 @@ var DemonstrateCursorMaintenance = (function () {
         withCursor = true;
       }
       if (!name) {
-        print('');
+        print();
         Object.keys(testData).forEach(function (name) {
           run(name, withCursor);
+          print();
         });
         return;
       }
@@ -153,13 +151,11 @@ var DemonstrateCursorMaintenance = (function () {
 
 
   /* formatter implements the operations specified by the Test object
-   * without altering the cursor position.
-   */
+     without altering the cursor position. */
   formatter = {};
 
   /* commatize takes a string of digits and commas. It adjusts commas so
-   * that they separate the digits into groups of three.
-   */
+     that they separate the digits into groups of three. */
   formatter.commatize = function (s, cursor) {
     var start,
         groups,
@@ -175,8 +171,7 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
   /* trimify removes spaces from the beginning and end of the string, and
-   * reduces each internal whitespace sequence to a single space.
-   */
+     reduces each internal whitespace sequence to a single space. */
   formatter.trimify = function (s, cursor) {
     s = s.replace(/^\s+|\s+$/g, '');
     s = s.replace(/\s+/g, ' ');
@@ -184,6 +179,77 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
 
-  test = new Test(formatter);
-  test.run('trimify');
+  // Utilities.
+
+  function count(s, sub) {
+    var count = 0,
+        searchedTo = -1;
+    while ((searchedTo = s.indexOf(sub, searchedTo + 1)) != -1) {
+      ++count;
+    }
+    return count;
+  }
+
+
+  numericalCursorFormatter = {};
+
+  numericalCursorFormatter.commatize = function (s, cursor) {
+    var pos, ch,
+        leftDigitCount = cursor - count(s.substring(0, cursor), ',');
+    s = formatter.commatize(s).text;
+    if (leftDigitCount == 0) {
+      return { text: s, cursor: 0 };
+    }
+    for (pos = 0; pos < s.length; ++pos) {
+      ch = s.charAt(pos);
+      if (ch != ',') {
+        if (--leftDigitCount == 0) {
+          break;
+        }
+      }
+    }
+    cursor = pos + 1;
+    return { text: s, cursor: cursor };
+  };
+
+  numericalCursorFormatter.trimify = function (s, cursor) {
+    var leftWhitespaceCount,
+        left = s.substring(0, cursor),
+        leftTrimmed = formatter.trimify(left + '|').text;
+    leftWhitespaceCount = cursor - leftTrimmed.length + 1;
+    s = formatter.trimify(s).text;
+    cursor = Math.min(s.length, cursor - leftWhitespaceCount);
+    return { text: s, cursor: cursor };
+  };
+
+
+  textualCursorFormatter = {};
+
+  textualCursorFormatter.commatize = function (s, cursor) {
+  };
+
+  textualCursorFormatter.trimify = function (s, cursor) {
+  };
+
+
+  metaCursorFormatter = {};
+
+  metaCursorFormatter.commatize = function (s, cursor) {
+  };
+
+  metaCursorFormatter.trimify = function (s, cursor) {
+  };
+
+
+  retrospectiveCursorFormatter = {};
+
+  retrospectiveCursorFormatter.commatize = function (s, cursor) {
+  };
+
+  retrospectiveCursorFormatter.trimify = function (s, cursor) {
+  };
+
+
+  test = new Test(numericalCursorFormatter);
+  test.run();
 })();
