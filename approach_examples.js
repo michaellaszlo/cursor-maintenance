@@ -190,6 +190,28 @@ var DemonstrateCursorMaintenance = (function () {
     return count;
   }
 
+  function chooseCursorChar(s) {
+    var usedChars = {},
+        seekChars = '|^_#',
+        i, ch, code;
+    for (i = 0; i < s.length; ++i) {
+      usedChars[s.charAt(i)] = true;
+    }
+    for (i = 0; i < seekChars.length; ++i) {
+      ch = seekChars.charAt(i);
+      if (!(ch in usedChars)) {
+        return ch;
+      }
+    }
+    for (code = 32; code < 127; ++code) {
+      ch = String.fromCharCode(code);
+      if (!(ch in usedChars)) {
+        return ch;
+      }
+    }
+    return null;
+  }
+
 
   numericalCursorFormatter = {};
 
@@ -226,9 +248,47 @@ var DemonstrateCursorMaintenance = (function () {
   textualCursorFormatter = {};
 
   textualCursorFormatter.commatize = function (s, cursor) {
+    var cursorChar = chooseCursorChar(s),
+        groups = [],
+        groupChars = [],
+        digitCount = 0,
+        i, ch;
+    s = s.substring(0, cursor) + cursorChar + s.substring(cursor);
+    for (i = s.length - 1; i >= 0; --i) {
+      ch = s.charAt(i);
+      if (ch != ',') {
+        groupChars.push(ch);
+        if (ch != cursorChar) {
+          if (++digitCount == 3) {
+            groups.push(groupChars.reverse().join(''));
+            groupChars = [];
+            digitCount = 0;
+          }
+        }
+      }
+    }
+    if (groupChars.length > 0) {
+      groups.push(groupChars.reverse().join(''));
+    }
+    s = groups.reverse().join(',');
+    cursor = s.indexOf(cursorChar);
+    s = s.replace(cursorChar, '');
+    return { text: s, cursor: cursor };
   };
 
   textualCursorFormatter.trimify = function (s, cursor) {
+    var cursorChar = chooseCursorChar(s);
+    s = s.substring(0, cursor) + cursorChar + s.substring(cursor);
+    s = formatter.trimify(s).text;
+    s = s.replace(' ' + cursorChar + ' ', ' ' + cursorChar);
+    if (s.charAt(0) == cursorChar) {
+      s = s.replace(cursorChar + ' ', cursorChar);
+    } else if (s.charAt(s.length - 1) == cursorChar) {
+      s = s.replace(' ' + cursorChar, cursorChar);
+    }
+    cursor = s.indexOf(cursorChar);
+    s = s.replace(cursorChar, '');
+    return { text: s, cursor: cursor };
   };
 
 
@@ -250,6 +310,6 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
 
-  test = new Test(numericalCursorFormatter);
-  test.run();
+  test = new Test(textualCursorFormatter);
+  test.run('trimify');
 })();

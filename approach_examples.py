@@ -98,13 +98,13 @@ class Test:
 
 def choose_cursor_char(s):
     used_chars = set(list(s))
-    for char in '|^_#':
-        if char not in used_chars:
-            return char
+    for ch in '|^_#':
+        if ch not in used_chars:
+            return ch
     for code in range(32, 127):
-        char = chr(code)
-        if char not in used_chars:
-            return char
+        ch = chr(code)
+        if ch not in used_chars:
+            return ch
     return None
 
 
@@ -340,8 +340,8 @@ class RetrospectiveCursorFormatter(Formatter):
 
 if __name__ == '__main__':
     #Test(Formatter()).run('commatize', with_cursor=False)
-    Test(NumericalCursorFormatter()).run()
-    #Test(TextualCursorFormatter()).run()
+    #Test(NumericalCursorFormatter()).run()
+    Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
     #Test(RetrospectiveCursorFormatter(balance_frequencies)).display()
 
