@@ -56,7 +56,7 @@ class Test:
         """
         if name == None:
             print('')
-            for name in self.test_data.keys():
+            for name in sorted(self.test_data.keys()):
                 self.display(name, show_cursor)
             return
         print('Test cases for %s\n' % name)
@@ -73,7 +73,7 @@ class Test:
         """
         if name == None:
             print('')
-            for name in self.test_data.keys():
+            for name in sorted(self.test_data.keys()):
                 self.run(name, with_cursor)
                 print('')
             return
@@ -273,36 +273,35 @@ def levenshtein(s, t):
                 current[j] = min(previous[j - 1] + 1,
                                  previous[j] + 1,
                                  current[j - 1] + 1)
-    result = current[m]
-    return result
+    return current[m]
 
 def split_levenshtein(s, s_cursor, t, t_cursor):
     cursor_char = choose_cursor_char(s + t)
     left = levenshtein(s[:s_cursor], t[:t_cursor])
     right = levenshtein(s[s_cursor:], t[t_cursor:])
-    result = left + right
-    return result
+    return left + right
 
 
-def left_right_freqs(s, cursor, chars):
-    freq_left = { ch: 0 for ch in chars }
-    for ch in s[:cursor]:
+def get_counts(s, chars):
+    counts = { ch: 0 for ch in chars }
+    for ch in s:
         if ch in chars:
-            freq_left[ch] += 1
-    freq_right = { ch: 0 for ch in chars }
-    for ch in s[cursor:]:
-        if ch in chars:
-            freq_right[ch] += 1
-    return freq_left, freq_right
+            counts[ch] += 1
+    return counts
+
+def left_right_counts(s, cursor, chars):
+    count_left = get_counts(s[:cursor], chars)
+    count_right = get_counts(s[cursor:], chars)
+    return count_left, count_right
 
 def balance_frequencies(s, s_cursor, t, t_cursor):
     chars = set(list(s)).intersection(set(list(t)))
-    s_freq_left, s_freq_right = left_right_freqs(s, s_cursor, chars)
-    t_freq_left, t_freq_right = left_right_freqs(t, t_cursor, chars)
+    s_count_left, s_count_right = left_right_counts(s, s_cursor, chars)
+    t_count_left, t_count_right = left_right_counts(t, t_cursor, chars)
     cost = 0
     for ch in chars:
-        a = 1.0 * s_freq_left[ch] / (s_freq_left[ch] + s_freq_right[ch])
-        b = 1.0 * t_freq_left[ch] / (t_freq_left[ch] + t_freq_right[ch])
+        a = 1.0 * s_count_left[ch] / (s_count_left[ch] + s_count_right[ch])
+        b = 1.0 * t_count_left[ch] / (t_count_left[ch] + t_count_right[ch])
         cost += abs(a - b) ** 2
     return cost
 
@@ -312,7 +311,8 @@ class RetrospectiveCursorFormatter(Formatter):
     def __init__(self, get_distance):
         self.get_distance = get_distance
 
-    def recalculate_cursor(self, original, cursor, formatted):
+    def adjust_cursor(self, original, cursor, formatting_method):
+        formatted = formatting_method(self, original)[0]
         cursor_char = choose_cursor_char(original + formatted)
         get_distance = self.get_distance
         best_cost = get_distance(original, cursor, formatted, 0)
@@ -325,23 +325,19 @@ class RetrospectiveCursorFormatter(Formatter):
             if cost < best_cost:
                 best_cost = cost
                 best_pos = pos
-        return best_pos
+        return (formatted, best_pos)
 
     def commatize(self, original, cursor):
-        formatted = Formatter.commatize(self, original)[0]
-        cursor = self.recalculate_cursor(original, cursor, formatted)
-        return (formatted, cursor)
+        return self.adjust_cursor(original, cursor, Formatter.commatize)
 
     def trimify(self, original, cursor):
-        formatted = Formatter.trimify(self, original)[0]
-        cursor = self.recalculate_cursor(original, cursor, formatted)
-        return (formatted, cursor)
+        return self.adjust_cursor(original, cursor, Formatter.trimify)
 
 
 if __name__ == '__main__':
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
-    Test(MetaCursorFormatter()).run()
-    #Test(RetrospectiveCursorFormatter(balance_frequencies)).display()
+    #Test(MetaCursorFormatter()).run()
+    Test(RetrospectiveCursorFormatter(balance_frequencies)).run();
 

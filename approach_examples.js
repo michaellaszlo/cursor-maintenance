@@ -80,7 +80,7 @@ var DemonstrateCursorMaintenance = (function () {
       }
       if (!name) {
         print();
-        Object.keys(testData).forEach(function (name) {
+        Object.keys(testData).sort().forEach(function (name) {
           display(name, showCursor);
         });
         return;
@@ -113,14 +113,14 @@ var DemonstrateCursorMaintenance = (function () {
       }
       if (!name) {
         print();
-        Object.keys(testData).forEach(function (name) {
+        Object.keys(testData).sort().forEach(function (name) {
           run(name, withCursor);
           print();
         });
         return;
       }
       print('Testing ' + name);
-      operation = formatter[name];
+      operation = formatter[name].bind(formatter);
       passing = true;
       testCases = testData[name];
       for (i = 0; i < testCases.length; ++i) {
@@ -384,15 +384,139 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
 
-  retrospectiveCursorFormatter = {};
+  function levenshtein(s, t) {
+    var n = s.length,
+        m = t.length,
+        current,
+        previous,
+        temp,
+        i, j;
+    if (Math.min(n, m) == 0) {
+      return Math.max(n, m);
+    }
+    current = new Array(m + 1);
+    for (i = 0; i <= m; ++i) {
+      current[i] = i;
+    }
+    previous = new Array(m + 1);
+    for (i = 1; i <= n; ++i) {
+      temp = current;
+      current = previous;
+      previous = temp;
+      current[0] = previous[0] + 1;
+      for (j = 1; j <= m; ++j) {
+        if (t.charAt(j - 1) == s.charAt(i - 1)) {
+          current[j] = previous[j - 1];
+        } else {
+          current[j] = Math.min(previous[j - 1] + 1,
+                                previous[j] + 1,
+                                current[j - 1] + 1);
+        }
+      }
+    }
+    return current[m];
+  }
 
-  retrospectiveCursorFormatter.commatize = function (s, cursor) {
+  function splitLevenshtein(s, sCursor, t, tCursor) {
+    var cursorChar = chooseCursorChar(s + t),
+        left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
+        right = levenshtein(s.substring(sCursor), t.substring(tCursor));
+    return left + right;
+  }
+
+
+  function getCounts(s, chars) {
+    var counts = {},
+        i, ch;
+    for (i = 0; i < chars.length; ++i) {
+      counts[chars[i]] = 0;
+    }
+    for (i = 0; i < s.length; ++i) {
+      ch = s.charAt(i);
+      if (ch in counts) {
+        counts[ch] += 1;
+      }
+    }
+    return counts;
+  }
+
+  function leftRightCounts(s, cursor, chars) {
+    var countLeft = getCounts(s.substring(0, cursor), chars),
+        countRight = getCounts(s.substring(cursor), chars);
+    return { left: countLeft, right: countRight };
+  }
+
+  function getCommonChars(s, t) {
+    var sCharSet = {},
+        tCharSet = {},
+        chars = [],
+        i;
+    for (i = 0; i < s.length; ++i) {
+      sCharSet[s.charAt(i)] = true;
+    }
+    for (i = 0; i < t.length; ++i) {
+      tCharSet[t.charAt(i)] = true;
+    }
+    Object.keys(sCharSet).forEach(function (ch) {
+      if (ch in tCharSet) {
+        chars.push(ch);
+      }
+    });
+    return chars;
+  }
+
+  function balanceFrequencies(s, sCursor, t, tCursor) {
+    var chars = getCommonChars(s, t),
+        sCounts = leftRightCounts(s, sCursor, chars),
+        tCounts = leftRightCounts(t, tCursor, chars),
+        cost = 0,
+        i, ch, a, b;
+    for (i = 0; i < chars.length; ++i) {
+      ch = chars[i];
+      a = sCounts.left[ch] / (sCounts.left[ch] + sCounts.right[ch]);
+      b = tCounts.left[ch] / (tCounts.left[ch] + tCounts.right[ch]);
+      cost += Math.pow(Math.abs(a - b), 2);
+    }
+    return cost;
+  }
+
+
+  retrospectiveCursorFormatter = {
+    getDistance: balanceFrequencies
   };
 
-  retrospectiveCursorFormatter.trimify = function (s, cursor) {
+  retrospectiveCursorFormatter.adjustCursor = function (original, cursor,
+      formatter) {
+    var formatted = formatter(original).text,
+        cursorChar = chooseCursorChar(original + formatted),
+        getDistance = this.getDistance,
+        bestCost = getDistance(original, cursor, formatted, 0),
+        bestPos = 0,
+        cost,
+        pos;
+    //print(original.substring(0, cursor) + '^' + original.substring(cursor));
+    //print('  ^' + formatted + ' ' + bestCost);
+    for (pos = 1; pos <= formatted.length; ++pos) {
+      cost = getDistance(original, cursor, formatted, pos);
+      //print('  ' + formatted.substring(0, pos) + '^' +
+      //    formatted.substring(pos) + ' ' + bestCost);
+      if (cost < bestCost) {
+        bestCost = cost;
+        bestPos = pos;
+      }
+    }
+    return { text: formatted, cursor: bestPos };
+  };
+
+  retrospectiveCursorFormatter.commatize = function (original, cursor) {
+    return this.adjustCursor(original, cursor, formatter.commatize);
+  };
+
+  retrospectiveCursorFormatter.trimify = function (original, cursor) {
+    return this.adjustCursor(original, cursor, formatter.trimify);
   };
 
 
-  test = new Test(metaCursorFormatter);
-  test.run('trimify');
+  test = new Test(retrospectiveCursorFormatter);
+  test.run();
 })();
