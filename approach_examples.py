@@ -335,9 +335,10 @@ class RetrospectiveCursorFormatter(Formatter):
 
 
 if __name__ == '__main__':
+    Test().display()
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
-    Test(RetrospectiveCursorFormatter(balance_frequencies)).run();
+    #Test(RetrospectiveCursorFormatter(balance_frequencies)).run();
 
