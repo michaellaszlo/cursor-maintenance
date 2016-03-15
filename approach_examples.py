@@ -1,10 +1,24 @@
 # -*- coding: utf-8 -*-
+"""A script demonstrating four approaches to maintaining cursor position.
+
+Test -- test cases and a test runner for two formatting operations
+Formatter -- implements the formatting operations without cursor maintenance
+NumericalCursorFormatter -- adjusts the cursor position with ad hoc rules
+TextualCursorFormatter -- includes the cursor in the string while formatting
+TextWithCursor -- implements basic string operations with cursor maintenance
+MetaCursorFormatter -- formats TextWithCursor objects instead of strings
+Distance -- implements several measures of string distance
+RetrospectiveCursorFormatter -- repositions the cursor using distance functions
+Utilities -- functions to choose a cursor and tally character frequencies
+"""
+
 
 import re
 
 
 class Test:
     """Describes the behavior of a fixed set of formatting operations.
+
     Provides test data and a test runner that can be used to verify
     the formatting operations with or without cursor positioning.
     """
@@ -38,39 +52,34 @@ class Test:
     }
 
     def __init__(self, formatter=None):
-        """Takes an object that implements the formatting operations described
-        by our test data.
-        """
+        """Take an object that implements formatting operations."""
         self.formatter = formatter
 
     def show_text(self, label, text, cursor=None):
-        """Prints out a single test string, optionally with cursor position.
-        """
+        """Print out a test string, optionally with cursor position."""
         prefix = '   %s: "' % label
         print('%s%s"' % (prefix, text))
         if cursor != None:
             print((len(prefix) + cursor) * ' ' + '↖ %d' % cursor)
 
-    def display(self, name=None, show_cursor=True):
-        """Prints out the test pairs for a specified formatting operation.
-        """
+    def display(self, name=None, with_cursor=True):
+        """Print out the test pairs for a formatting operation."""
         if name == None:
             print('')
             for name in sorted(self.test_data.keys()):
-                self.display(name, show_cursor)
+                self.display(name, with_cursor)
             return
         print('Test cases for %s\n' % name)
         for (original_text, original_cursor,
                 expected_text, expected_cursor) in self.test_data[name]:
-            if not show_cursor:
+            if not with_cursor:
                 original_cursor, expected_cursor = None, None
             self.show_text('original', original_text, original_cursor)
             self.show_text('expected', expected_text, expected_cursor)
             print('')
 
     def run(self, name=None, with_cursor=True):
-        """Tests a specified formatting operation or all of them.
-        """
+        """Test a specified formatting operation or all of them."""
         if name == None:
             print('')
             for name in sorted(self.test_data.keys()):
@@ -96,27 +105,11 @@ class Test:
         return passing
 
 
-def choose_cursor_char(s):
-    used_chars = set(list(s))
-    for ch in '|^_#':
-        if ch not in used_chars:
-            return ch
-    for code in range(32, 127):
-        ch = chr(code)
-        if ch not in used_chars:
-            return ch
-    return None
-
-
 class Formatter:
-    """Implements the operations specified in the Test class without
-    altering the cursor position.
-    """
+    """Implements formatting operations without moving the cursor."""
     
     def commatize(self, s, cursor=None):
-        """Takes a string of digits and commas. Adjusts commas so that they
-        separate the digits into groups of three.
-        """
+        """Distribute commas to separate digits into groups of three."""
         s = s.replace(',', '')
         start = len(s) % 3 or 3
         groups = [ s[:start] ]
@@ -126,9 +119,7 @@ class Formatter:
         return (s, cursor)
 
     def trimify(self, s, cursor=None):
-        """Removes spaces from the beginning and end of the string, and
-        reduces each internal whitespace sequence to a single space.
-        """
+        """Trim spaces around the string and condense internal whitespace."""
         s = s.strip()
         s = re.sub('\s+', ' ', s)
         return (s, cursor)
@@ -161,7 +152,7 @@ class NumericalCursorFormatter(Formatter):
 class TextualCursorFormatter(Formatter):
 
     def commatize(self, s, cursor):
-        cursor_char = choose_cursor_char(s)
+        cursor_char = Utilities.choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
         groups = []
         group_chars = []
@@ -183,7 +174,7 @@ class TextualCursorFormatter(Formatter):
         return (s, cursor)
 
     def trimify(self, s, cursor):
-        cursor_char = choose_cursor_char(s)
+        cursor_char = Utilities.choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
         s = Formatter.trimify(self, s)[0]
         s = s.replace(' ' + cursor_char + ' ', ' ' + cursor_char)
@@ -257,53 +248,51 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
 
-def levenshtein(s, t):
-    n, m = len(s), len(t)
-    if min(n, m) == 0:
-        return max(n, m)
-    current = list(range(m + 1))
-    previous = (m + 1) * [ None ]
-    for i in range(1, n + 1):
-        current, previous = previous, current
-        current[0] = previous[0] + 1
-        for j in range(1, m + 1):
-            if t[j - 1] == s[i - 1]:
-                current[j] = previous[j - 1]
-            else:
-                current[j] = min(previous[j - 1] + 1,
-                                 previous[j] + 1,
-                                 current[j - 1] + 1)
-    return current[m]
+class Distance:
 
-def split_levenshtein(s, s_cursor, t, t_cursor):
-    cursor_char = choose_cursor_char(s + t)
-    left = levenshtein(s[:s_cursor], t[:t_cursor])
-    right = levenshtein(s[s_cursor:], t[t_cursor:])
-    return left + right
+    def levenshtein(s, t):
+        n, m = len(s), len(t)
+        if min(n, m) == 0:
+            return max(n, m)
+        current = list(range(m + 1))
+        previous = (m + 1) * [ None ]
+        for i in range(1, n + 1):
+            current, previous = previous, current
+            current[0] = previous[0] + 1
+            for j in range(1, m + 1):
+                if t[j - 1] == s[i - 1]:
+                    current[j] = previous[j - 1]
+                else:
+                    current[j] = min(previous[j - 1] + 1,
+                                     previous[j] + 1,
+                                     current[j - 1] + 1)
+        return current[m]
+    levenshtein = staticmethod(levenshtein)
 
+    def split_levenshtein(s, s_cursor, t, t_cursor):
+        cursor_char = Utilities.choose_cursor_char(s + t)
+        left = Distance.levenshtein(s[:s_cursor], t[:t_cursor])
+        right = Distance.levenshtein(s[s_cursor:], t[t_cursor:])
+        return left + right
+    split_levenshtein = staticmethod(split_levenshtein)
 
-def get_counts(s, chars):
-    counts = { ch: 0 for ch in chars }
-    for ch in s:
-        if ch in chars:
-            counts[ch] += 1
-    return counts
+    def split_counts(s, cursor, chars):
+        count_left = Utilities.get_counts(s[:cursor], chars)
+        count_right = Utilities.get_counts(s[cursor:], chars)
+        return count_left, count_right
+    split_counts = staticmethod(split_counts)
 
-def left_right_counts(s, cursor, chars):
-    count_left = get_counts(s[:cursor], chars)
-    count_right = get_counts(s[cursor:], chars)
-    return count_left, count_right
-
-def balance_frequencies(s, s_cursor, t, t_cursor):
-    chars = set(list(s)).intersection(set(list(t)))
-    s_count_left, s_count_right = left_right_counts(s, s_cursor, chars)
-    t_count_left, t_count_right = left_right_counts(t, t_cursor, chars)
-    cost = 0
-    for ch in chars:
-        a = 1.0 * s_count_left[ch] / (s_count_left[ch] + s_count_right[ch])
-        b = 1.0 * t_count_left[ch] / (t_count_left[ch] + t_count_right[ch])
-        cost += abs(a - b) ** 2
-    return cost
+    def balance_frequencies(s, s_cursor, t, t_cursor):
+        chars = set(list(s)).intersection(set(list(t)))
+        s_count_left, s_count_right = Distance.split_counts(s, s_cursor, chars)
+        t_count_left, t_count_right = Distance.split_counts(t, t_cursor, chars)
+        cost = 0
+        for ch in chars:
+            a = 1.0 * s_count_left[ch] / (s_count_left[ch] + s_count_right[ch])
+            b = 1.0 * t_count_left[ch] / (t_count_left[ch] + t_count_right[ch])
+            cost += abs(a - b) ** 2
+        return cost
+    balance_frequencies = staticmethod(balance_frequencies)
 
 
 class RetrospectiveCursorFormatter(Formatter):
@@ -313,7 +302,7 @@ class RetrospectiveCursorFormatter(Formatter):
 
     def adjust_cursor(self, original, cursor, formatting_method):
         formatted = formatting_method(self, original)[0]
-        cursor_char = choose_cursor_char(original + formatted)
+        cursor_char = Utilities.choose_cursor_char(original + formatted)
         get_distance = self.get_distance
         best_cost = get_distance(original, cursor, formatted, 0)
         best_pos = 0
@@ -334,11 +323,34 @@ class RetrospectiveCursorFormatter(Formatter):
         return self.adjust_cursor(original, cursor, Formatter.trimify)
 
 
+class Utilities:
+
+    def choose_cursor_char(s):
+        used_chars = set(list(s))
+        for ch in '|^_#':
+            if ch not in used_chars:
+                return ch
+        for code in range(32, 127):
+            ch = chr(code)
+            if ch not in used_chars:
+                return ch
+        return None
+    choose_cursor_char = staticmethod(choose_cursor_char)
+
+    def get_counts(s, chars):
+        counts = { ch: 0 for ch in chars }
+        for ch in s:
+            if ch in chars:
+                counts[ch] += 1
+        return counts
+    get_counts = staticmethod(get_counts)
+
+
 if __name__ == '__main__':
-    Test().display()
+    #Test().display('commatize', with_cursor=False)
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
-    #Test(RetrospectiveCursorFormatter(balance_frequencies)).run();
+    Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
 
