@@ -126,8 +126,10 @@ class Formatter:
 
 
 class NumericalCursorFormatter(Formatter):
+    """Moves the cursor with ad hoc rules for each formatting operation."""
 
     def commatize(self, s, cursor):
+        """Adjust the cursor by counting commas to its left."""
         left_digit_count = cursor - s[:cursor].count(',')
         s = Formatter.commatize(self, s)[0]
         if left_digit_count == 0:
@@ -141,6 +143,7 @@ class NumericalCursorFormatter(Formatter):
         return (s, cursor)
 
     def trimify(self, s, cursor):
+        """Adjust the cursor by counting whitespace to its left."""
         left = s[:cursor]
         left_trimmed = Formatter.trimify(self, left + '|')[0]
         left_whitespace_count = cursor - len(left_trimmed) + 1
@@ -150,8 +153,10 @@ class NumericalCursorFormatter(Formatter):
 
 
 class TextualCursorFormatter(Formatter):
+    """Incorporates the cursor into the string while formatting it."""
 
     def commatize(self, s, cursor):
+        """Scan from right to left, counting only digit characters."""
         cursor_char = Utilities.choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
         groups = []
@@ -174,6 +179,7 @@ class TextualCursorFormatter(Formatter):
         return (s, cursor)
 
     def trimify(self, s, cursor):
+        """Trimify the string normally and fix the spaces around the cursor."""
         cursor_char = Utilities.choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
         s = Formatter.trimify(self, s)[0]
@@ -188,6 +194,11 @@ class TextualCursorFormatter(Formatter):
 
 
 class TextWithCursor:
+    """Implements general-purpose string operations on text with a cursor.
+
+    The essential string operations are read, insert, and delete.
+    For convenience, we also provide length, append, and display.
+    """
 
     def __init__(self, text='', cursor=0):
         self.text = text
@@ -218,6 +229,7 @@ class TextWithCursor:
 
 
 class MetaCursorFormatter:
+    """Applies formatting operations to TextWithCursor objects, not strings."""
 
     def commatize(self, s, cursor):
         t = TextWithCursor(s, cursor)
@@ -249,6 +261,7 @@ class MetaCursorFormatter:
 
 
 class Distance:
+    """Implements measures of string distance."""
 
     def levenshtein(s, t):
         n, m = len(s), len(t)
@@ -296,6 +309,7 @@ class Distance:
 
 
 class RetrospectiveCursorFormatter(Formatter):
+    """Uses string distance to calculate a cursor position after formatting."""
 
     def __init__(self, get_distance):
         self.get_distance = get_distance
@@ -324,6 +338,7 @@ class RetrospectiveCursorFormatter(Formatter):
 
 
 class Utilities:
+    """Methods for choosing a cursor character and counting characters."""
 
     def choose_cursor_char(s):
         used_chars = set(list(s))
