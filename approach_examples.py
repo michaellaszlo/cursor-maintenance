@@ -52,7 +52,7 @@ class Test:
     }
 
     def __init__(self, formatter=None):
-        """Take an object that implements formatting operations."""
+        """Store an object that implements formatting operations."""
         self.formatter = formatter
 
     def show_text(self, label, text, cursor=None):
@@ -63,7 +63,7 @@ class Test:
             print((len(prefix) + cursor) * ' ' + '↖ %d' % cursor)
 
     def display(self, name=None, with_cursor=True):
-        """Print out the test pairs for a formatting operation."""
+        """Print out the test pairs for one or all formatting operations."""
         if name == None:
             print('')
             for name in sorted(self.test_data.keys()):
@@ -79,7 +79,7 @@ class Test:
             print('')
 
     def run(self, name=None, with_cursor=True):
-        """Test a specified formatting operation or all of them."""
+        """Process the test cases for one or all formatting operations."""
         if name == None:
             print('')
             for name in sorted(self.test_data.keys()):
@@ -153,7 +153,7 @@ class NumericalCursorFormatter(Formatter):
 
 
 class TextualCursorFormatter(Formatter):
-    """Incorporates the cursor into the string while formatting it."""
+    """Represents the cursor with a character while formatting the string."""
 
     def commatize(self, s, cursor):
         """Scan from right to left, counting only digit characters."""
@@ -201,37 +201,72 @@ class TextWithCursor:
     """
 
     def __init__(self, text='', cursor=0):
+        """Store a string for the text and an integer for the cursor."""
         self.text = text
         self.cursor = cursor
 
     def read(self, begin, length=1):
+        """Starting from a text position, read one or more characters."""
         return self.text[begin : begin + length]
 
     def insert(self, begin, subtext):
+        """Starting at a text position, insert a string.
+        
+        The cursor is unaffected if it is exactly at the insertion point or
+        to the left of the insertion point. If the cursor is to the right of
+        the insertion point, it gets shifted further to the right by the
+        length of the inserted string.
+        """
         self.text = self.text[:begin] + subtext + self.text[begin:]
         if self.cursor > begin:
             self.cursor += len(subtext)
 
     def delete(self, begin, length=1):
+        """Starting from a text position, delete one or more characters.
+        
+        The cursor is unaffected if it is to the left of the first deleted
+        character. Otherwise, the cursor is shifted to the left by the
+        number of deleted characters that lie to the left of it.
+        """
         self.text = self.text[:begin] + self.text[begin + length : ]
         if self.cursor > begin:
             self.cursor -= min(self.cursor - begin, length)
 
     def length(self):
+        """Return the length of the text. The cursor has zero width."""
         return len(self.text)
 
     def append(self, subtext):
+        """Insert a string at the end of the text.
+        
+        This method does not move the cursor to the end of the text. It does
+        not modify the cursor position at all.
+        """
         self.insert(self.length(), subtext)
 
-    def display(self):
+    def display(self, with_cursor=True):
+        """Display the string and, by default, the cursor below it.
+
+        The cursor character is a Unicode northwest arrow. It points toward
+        the upper left corner of its containing rectangle. When this arrow
+        is printed below a text character, it reminds us that the cursor is
+        to the immediate left of the character. In other words, the cursor
+        lies between the current character and the preceding character.
+        """
         print(self.text)
-        print(self.cursor * ' ' + '↖')
+        if with_cursor:
+            print(self.cursor * ' ' + '↖')
 
 
 class MetaCursorFormatter:
     """Applies formatting operations to TextWithCursor objects, not strings."""
 
     def commatize(self, s, cursor):
+        """Go from right to left, counting digits and inserting commas.
+
+        Extraneous commas are deleted along the way. Cursor maintenance is
+        handled by the TextWithCursor object.
+        """
         t = TextWithCursor(s, cursor)
         digit_count = 0
         for pos in reversed(range(t.length())):
@@ -245,6 +280,7 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
     def trimify(self, s, cursor):
+        """Condense whitespace sequences and trim around the text."""
         t = TextWithCursor(s, cursor)
         space_count = 0
         for pos in reversed(range(t.length())):
@@ -264,6 +300,7 @@ class Distance:
     """Implements measures of string distance."""
 
     def levenshtein(s, t):
+        """Measure the Levenshtein distance between two strings."""
         n, m = len(s), len(t)
         if min(n, m) == 0:
             return max(n, m)
@@ -283,6 +320,12 @@ class Distance:
     levenshtein = staticmethod(levenshtein)
 
     def split_levenshtein(s, s_cursor, t, t_cursor):
+        """Split each string and sum the respective Levenshtein distances.
+
+        The Levenshtein distance between the substrings to the left of each
+        cursor is added to the Levenshtein distance between the substrings
+        to the right of each cursor.
+        """
         cursor_char = Utilities.choose_cursor_char(s + t)
         left = Distance.levenshtein(s[:s_cursor], t[:t_cursor])
         right = Distance.levenshtein(s[s_cursor:], t[t_cursor:])
@@ -290,12 +333,20 @@ class Distance:
     split_levenshtein = staticmethod(split_levenshtein)
 
     def split_counts(s, cursor, chars):
+        """Split the string and get character frequencies for each side."""
         count_left = Utilities.get_counts(s[:cursor], chars)
         count_right = Utilities.get_counts(s[cursor:], chars)
         return count_left, count_right
     split_counts = staticmethod(split_counts)
 
     def balance_frequencies(s, s_cursor, t, t_cursor):
+        """Sum the squares of the differences in character distribution ratios.
+
+        Only characters that occur in each string at least once are counted.
+        The distribution ratio of a character is the number of times it occurs
+        to the left of the cursor divided by the number of times it occurs in
+        the whole string.
+        """
         chars = set(list(s)).intersection(set(list(t)))
         s_count_left, s_count_right = Distance.split_counts(s, s_cursor, chars)
         t_count_left, t_count_right = Distance.split_counts(t, t_cursor, chars)
@@ -312,9 +363,23 @@ class RetrospectiveCursorFormatter(Formatter):
     """Uses string distance to calculate a cursor position after formatting."""
 
     def __init__(self, get_distance):
+        """Store a function that measures string distance (with cursors).
+        
+        The distance function takes four arguments: a string followed by its
+        cursor position, then another string and its cursor position. The
+        function returns a floating-point value representing the distance
+        from the first string with cursor to the second string with cursor.
+        """
         self.get_distance = get_distance
 
     def adjust_cursor(self, original, cursor, formatting_method):
+        """Apply a formatting operation, then adjust the cursor position.
+
+        We are given a string and a cursor position. We apply some formatting
+        operation to obtain a new string. We choose a new cursor position that
+        minimizes the distance from the original string with cursor to the
+        formatted string with cursor.
+        """
         formatted = formatting_method(self, original)[0]
         cursor_char = Utilities.choose_cursor_char(original + formatted)
         get_distance = self.get_distance
@@ -331,9 +396,11 @@ class RetrospectiveCursorFormatter(Formatter):
         return (formatted, best_pos)
 
     def commatize(self, original, cursor):
+        """Pass the cursorless commatize function to adjust_cursor."""
         return self.adjust_cursor(original, cursor, Formatter.commatize)
 
     def trimify(self, original, cursor):
+        """Pass the cursorless trimify function to adjust_cursor."""
         return self.adjust_cursor(original, cursor, Formatter.trimify)
 
 
@@ -341,6 +408,12 @@ class Utilities:
     """Methods for choosing a cursor character and counting characters."""
 
     def choose_cursor_char(s):
+        """Return a printable ASCII character not found in the given string.
+
+        We prioritize a hard-coded set of characters. If all occur in the
+        string, we try each character with code 32 through 126, inclusive.
+        If all of them occur, we give up and return None.
+        """
         used_chars = set(list(s))
         for ch in '|^_#':
             if ch not in used_chars:
@@ -353,6 +426,7 @@ class Utilities:
     choose_cursor_char = staticmethod(choose_cursor_char)
 
     def get_counts(s, chars):
+        """In a given string, count the frequencies of the given characters."""
         counts = { ch: 0 for ch in chars }
         for ch in s:
             if ch in chars:
@@ -362,6 +436,7 @@ class Utilities:
 
 
 if __name__ == '__main__':
+    #Test().display()
     #Test().display('commatize', with_cursor=False)
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
