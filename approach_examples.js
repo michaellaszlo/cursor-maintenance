@@ -85,7 +85,7 @@ var DemonstrateCursorMaintenance = (function () {
         });
         return;
       }
-      print('Test cases for ' + name);
+      print('Test cases for ' + name + '\n');
       testCases = testData[name];
       for (i = 0; i < testCases.length; ++i) {
         testCase = testCases[i];
@@ -517,6 +517,7 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
 
-  test = new Test(retrospectiveCursorFormatter);
-  test.run();
+  //test = new Test(retrospectiveCursorFormatter);
+  //test.run();
+  (new Test()).display('commatize', false);
 })();

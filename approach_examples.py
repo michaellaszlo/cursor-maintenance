@@ -437,11 +437,11 @@ class Utilities:
 
 if __name__ == '__main__':
     #Test().display()
-    #Test().display('commatize', with_cursor=False)
+    Test().display('commatize', False)
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
-    Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
-    Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
+    #Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
+    #Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
 

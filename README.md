@@ -6,35 +6,73 @@ demonstrates several approaches to solving the problem and provides a
 practical implementation of one approach.
 
 
-## Command-line demonstrations
+## The four approaches
 
-To run the Python demonstration:
+We demonstrate four ways to approach the problem of cursor maintenance:
 
+- Numerical: use ad hoc rules while formatting to move the cursor
+
+- Textual: incorporate the cursor into the text as a special character
+
+- Meta: apply formatting to objects that represent text with a cursor
+
+- Retrospective: after formatting the text, calculate a new cursor position
+
+
+### Executing the demonstrations
+
+To run the Python demonstration, execute this on the command line:
+
+```
 $ python approach_examples.py
+```
 
 The code is compatible with Python 2 and Python 3.
 
 To run the JavaScript demonstration:
 
+```
 $ d8 approach_examples.js
+```
 
 The Python and JavaScript files implement the same algorithms. They
-should return exactly the same result for any given input.
+should return identical results for any test case.
 
 
-## Formatting operations
+### The formatting operations
 
 Two formatting operations, commatize and trimify, are applied to test
 cases that each consist of a string and a cursor position. To display
-the test cases for both operations, execute:
+the test cases for both operations, execute this in Python:
 
-Test.display()
+```python
+Test().display()
+```
 
-To display the test cases for only one operation, say, commatize:
+In JavaScript:
 
-Test.display('commatize')
+```javascript
+(new Test()).display();
+```
 
-To suppress
+To display the test cases for one operation, say, commatize:
 
+```python
+Test().display('commatize')
+```
+
+```javascript
+(new Test()).display('commatize');
+```
+
+To suppress the display of cursor positions:
+
+```python
+Test().display('commatize', False)
+```
+
+```javascript
+(new Test()).display('commatize', false);
+```
 
 
