@@ -119,9 +119,9 @@ class Formatter:
         return (s, cursor)
 
     def trimify(self, s, cursor=None):
-        """Trim spaces around the string and condense internal whitespace."""
+        """Trim spaces around the string and condense internal spaces."""
         s = s.strip()
-        s = re.sub('\s+', ' ', s)
+        s = re.sub('[ ]+', ' ', s)
         return (s, cursor)
 
 
@@ -143,7 +143,7 @@ class NumericalCursorFormatter(Formatter):
         return (s, cursor)
 
     def trimify(self, s, cursor):
-        """Adjust the cursor by counting whitespace to its left."""
+        """Adjust the cursor by counting spaces to its left."""
         left = s[:cursor]
         left_trimmed = Formatter.trimify(self, left + '|')[0]
         left_whitespace_count = cursor - len(left_trimmed) + 1
@@ -179,7 +179,7 @@ class TextualCursorFormatter(Formatter):
         return (s, cursor)
 
     def trimify(self, s, cursor):
-        """Trimify the string normally and fix the spaces around the cursor."""
+        """Trimify the string normally and fix spaces around the cursor."""
         cursor_char = Utilities.choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
         s = Formatter.trimify(self, s)[0]
@@ -280,7 +280,7 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
     def trimify(self, s, cursor):
-        """Condense whitespace sequences and trim around the text."""
+        """Condense internal space sequences and trim around the text."""
         t = TextWithCursor(s, cursor)
         space_count = 0
         for pos in reversed(range(t.length())):
@@ -442,5 +442,6 @@ if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
+    Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
     Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
 
