@@ -16,8 +16,8 @@ The Python script, `approach_examples.py`, is compatible with Python 2
 and Python 3.
 
 The JavaScript equivalent, `approach_examples.js`, can be executed
-with d8, a command-line environment that comes with Google's [V8
-engine](https://developers.google.com/v8/build).
+on the command line with [`nodejs`](https://nodejs.org/) or
+[`d8`](https://developers.google.com/v8/build).
 
 The Python and JavaScript files implement the same algorithms. They
 should return identical results for any test case.
@@ -63,21 +63,20 @@ The *commatize* operation takes a string representing a whole number
 and inserts commas so that each group of three digits is separated by
 a comma, proceeding from right to left. For example:
 
-`"3141"` &mdash; `"3,141"`
+`"3141"` &rarrow; `"3,141"`
 
 Any incorrect commas are removed:
 
-`",3141,59,"` &mdash; `"314,159"`
+`",3141,59,"` &rarrow; `"314,159"`
 
 The *trimify* operation strips space characters from the beginning and
 end of a string, and condenses all other sequences of space characters
 into one space each. For example:
 
-`" Hello,   world.  Hi  there.  " &mdash; `"Hello, world. Hi there."`
+`" Hello,   world.  Hi  there.  " &rarrow; `"Hello, world. Hi there."`
 
-Only the visible space character, `' '` (code 32), is considered
-by *trimify*, not other kinds of whitespace such as tab and newline
-characters.
+Only the visible space character, `' '` (code 32), is considered by
+trimify, not other kinds of whitespace such as tab and newline characters.
 
 
 ### Test cases

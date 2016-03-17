@@ -480,7 +480,6 @@ var DemonstrateCursorMaintenance = (function () {
     return cost;
   }
 
-
   retrospectiveCursorFormatter = {
     getDistance: balanceFrequencies
   };
@@ -517,7 +516,12 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
 
-  //test = new Test(retrospectiveCursorFormatter);
-  //test.run();
-  (new Test()).display('commatize', false);
+  if (typeof print === 'undefined') {
+    global.print = console.log;
+  }
+
+
+  test = new Test(retrospectiveCursorFormatter);
+  test.run();
+  //(new Test()).display('commatize', false);
 })();
