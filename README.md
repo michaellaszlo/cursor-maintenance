@@ -6,9 +6,41 @@ demonstrates several approaches to solving the problem and provides a
 practical implementation of one approach.
 
 
-## The four approaches
+## Demonstrations
 
-We demonstrate four ways to approach the problem of cursor maintenance:
+Among the files in this repository are a pair of equivalent scripts,
+`approach_examples.py` and `approach_examples.js`, that demonstrate four
+approaches to maintaining cursor position.
+
+The Python script, `approach_examples.py`, is compatible with Python 2
+and Python 3.
+
+The JavaScript equivalent, `approach_examples.js`, can be executed
+with d8, a command-line environment that comes with Google's [V8
+engine](https://developers.google.com/v8/build).
+
+The Python and JavaScript files implement the same algorithms. They
+should return identical results for any test case.
+
+To run the Python demonstration, execute this on the command line:
+
+```
+$ python approach_examples.py
+```
+
+To run the JavaScript demonstration:
+
+```
+$ d8 approach_examples.js
+```
+
+The following sections explain what it is you're seeing when you run
+the demonstrations.
+
+
+### The four approaches
+
+We demonstrate four broad ways to solve the problem of cursor maintenance:
 
 - Numerical: use ad hoc rules while formatting to move the cursor
 
@@ -18,32 +50,41 @@ We demonstrate four ways to approach the problem of cursor maintenance:
 
 - Retrospective: after formatting the text, calculate a new cursor position
 
-
-### Executing the demonstrations
-
-To run the Python demonstration, execute this on the command line:
-
-```
-$ python approach_examples.py
-```
-
-The code is compatible with Python 2 and Python 3.
-
-To run the JavaScript demonstration:
-
-```
-$ d8 approach_examples.js
-```
-
-The Python and JavaScript files implement the same algorithms. They
-should return identical results for any test case.
+Each approach works toward the same goal, namely, keeping the cursor in
+a position that minimizes user surprise while the string is transformed
+by a formatting operation.
 
 
 ### The formatting operations
 
-Two formatting operations, commatize and trimify, are applied to test
-cases that each consist of a string and a cursor position. To display
-the test cases for both operations, execute this in Python:
+Each approach is demonstrated with two string-formatting operations.
+
+The *commatize* operation takes a string representing a whole number
+and inserts commas so that each group of three digits is separated by
+a comma, proceeding from right to left. For example:
+
+`"3141"` &mdash; `"3,141"`
+
+Any incorrect commas are removed:
+
+`",3141,59,"` &mdash; `"314,159"`
+
+The *trimify* operation strips space characters from the beginning and
+end of a string, and condenses all other sequences of space characters
+into one space each. For example:
+
+`" Hello,   world.  Hi  there.  " &mdash; `"Hello, world. Hi there."`
+
+Only the visible space character, `' '` (code 32), is considered
+by *trimify*, not other kinds of whitespace such as tab and newline
+characters.
+
+
+### Test cases
+
+The formatting operations are applied to test cases that each consist
+of a string and a cursor position. To display the test cases for both
+operations, execute this in Python:
 
 ```python
 Test().display()
@@ -74,5 +115,4 @@ Test().display('commatize', False)
 ```javascript
 (new Test()).display('commatize', false);
 ```
-
 
