@@ -1,0 +1,463 @@
+
+===
+Maintaining cursor position across formatting operations
+
+
+How can we format the contents of an input field without changing the
+user's cursor position? By formatting we mean any systematic text
+manipulation, such as normalizing the textual representation of a
+number or condensing whitespace sequences in a document. If the user
+has placed a cursor somewhere in the text for navigation or editing
+purposes, we would like the cursor to stay in place while the text is
+modified. Sometimes the text around the cursor is modified in such a
+way that it isn't clear what staying in place is supposed to mean. Even
+when the cursor's desired position is clear to a human observer, it can
+be tricky to calculate it automatically.
+
+The problem of maintaining cursor position arises in web forms with input
+fields that check the format of the input text after each keystroke and
+reformat the text if necessary. In many implementations, the cursor is
+moved to the end of the input field whenever the text is reformatted. This
+results in a poor experience for a user who is trying to edit the input
+value. One keystroke can trigger a formatting operation that moves the
+cursor to the end of the string, forcing the user to move the cursor back
+to the editing location for the next keystroke. This article examines
+the problem in detail and explores a number of ways to solve it.
+
+
+Illustrating the problem
+
+Suppose we're making an input field that expects the user to type in
+an integer value. The only characters allowed are digits 0 through 9
+and commas. We want the input field to automatically format the text
+by separating each group of three digits with a comma, proceeding from
+right to left.
+
+This text value has not been formatted:
+
+  12500
+
+After formatting, it looks like this:
+
+  12,500
+
+Now let's consider the cursor position. If the input field is initially
+empty and the user's first action is to paste in the string "129000",
+we denote the state of the input field as follows, with ^ representing
+the cursor:
+
+  129000^
+
+This is the state immediately after a user-initiated editing
+operation, namely the paste action, and before the automatic formatting
+operation. The user sees this state momentarily or not at all, because
+the input field is quickly updated to show the commatized text.
+
+Where should we put the cursor after the formatting operation? The easy
+answer is to place the cursor at the far right of the input field:
+
+  129,000^
+
+It can't always be this easy. Suppose the user moves the cursor between
+the first and second zeros. We're in this state:
+
+  129,0^00
+
+Now the user hits the backspace key:
+
+  129,^00
+
+The text value "129,00" gets commatized to "12,900", and the input field
+is updated with the formatted text. Moving the cursor to the far right
+of the input field isn't such a hot idea this time, because it makes
+the cursor jump over two zeros:
+
+  12,900^
+
+A jumping cursor makes for a poor visual experience and can lead to
+additional aggravation. If the user intended to backspace over several
+characters in a row, she has to manually reposition the cursor:
+
+  12,9^00
+
+It would be better to automatically put the cursor there after the
+formatting operation.
+
+Let's describe the cursor position precisely. If there are i characters
+to the left of the cursor, we'll say that the cursor is at position i.
+
+For example, in the text "ant", this is cursor position 0:
+
+  ^ant
+
+This is cursor position 3:
+
+  ant^
+
+Let's make a new rule for cursor maintenance. If the cursor is at position
+i in the text before formatting, we will also put it at index i in the
+formatted text.
+
+To repeat the previous example, the cursor is at position 4 immediately
+after the user backspaced over the leftmost zero:
+
+  129,^00
+
+After reformatting, we put the cursor at position 4:
+
+  12,9^00
+
+That is exactly where the user expects to see the cursor.
+
+Suppose that the user's next action is to type a '1':
+
+  12,91^00
+
+The cursor is at position 5. The text is formatted and the cursor is
+placed at position 5 again:
+
+  129,1^00
+
+Again the rule works.
+
+Now suppose the user types a '9':
+
+  129,19^00
+
+The cursor is at position 6. The text is formatted and the cursor is placed at
+position 6:
+
+  1,291,^900
+
+Oops! The cursor seems to have jumped over the '9' that the user
+just typed. Our simple rule doesn't work. Keeping the cursor position
+numerically constant doesn't always put the cursor where the user expects
+to see it.
+
+
+What can we do?
+
+The root of the problem is that the formatting operation is defined for
+text, not for text with a cursor. Formatting is carried out independently
+of the cursor: it takes text as input and returns text as output. But
+the user interface superimposes a cursor on the text, and we want to
+present the illusion that the user is in full control of the cursor.
+
+We let the user move the cursor around in the text. The user performs
+an edit action. We send the user-edited text to an automatic formatting
+operation. When we get back the formatted text, we have to decide where
+to position the cursor so that the user isn't surprised.
+
+If that sounds like a fuzzy problem statement, it's because the problem
+is inherently fuzzy. To ask where the cursor should be placed after
+formatting is to pose a psychological question about user satisfaction. No
+hard and fast strategy exists because there are cases where human
+observers disagree on what would be the most natural cursor placement.
+
+Consider a formatting operation that strips space characters from each
+end of the text and reduces internal space sequences to one space each.
+
+
+Because of such ambiguities, we can't hope to eliminate user surprise
+entirely. At best we can aim to minimize user surprise.
+
+We're aiming to minimize  There is no hard and fast way to prescribe a cursor position
+for all possible text formatting. Ther
+
+If we could format the left and right substrings independently,
+we wouldn't have a problem. We would format the left, then format the
+right, and put the cursor between the two. In general this can't be done.
+Many formatting operations, including the ones we've dealt with above,
+only make sense when they're applied to the entire string.
+
+For the numerical input
+
+  1234^5678
+
+it wouldn't help to independently format the left part to 1,234 and the
+right part to 5,678 because concatenating them yields this incorrectly
+formatted string:
+
+  1,234^5,678
+
+We still have the problem of formatting the string as
+
+  12,34^5,678
+
+which requires simultaneous knowledge of what lies to the left of the
+cursor and what lies to the right.
+
+Similarly, if we want to remove superfluous spaces from the input
+
+  The quick brown fox  ^  jumps
+
+  149,5^00
+  149,50^00 -> 1,495,0^00
+
+  1,495,0^00
+  1,^00 -> 1^00
+
+    Hello, world.  Hello there.^  How are you?  
+  Hello, world. Hello there.^ How are you?
+
+
+Commatize and trimify
+
+
+    test_data = {
+        'commatize': [
+            ('2500', 1, '2,500', 1),
+            ('12500', 3, '12,500', 4),
+            ('5,4990000', 9, '54,990,000', 10),
+            (',1,,8,,,', 3, '18', 1),
+            ('1,0,0,000', 3, '100,000', 2),
+            ('1,0,000', 2, '10,000', 1),
+            ('1,,000', 2, '1,000', 1),
+            ('1,00', 2, '100', 1),
+            ('1234', 1, '1,234', 1),
+            ('1,0234', 3, '10,234', 2),
+            ('10,00', 4, '1,000', 4)
+        ],
+        'trimify': [
+            ('  hello  ', 8, 'hello', 5),
+            ('  hello  ', 1, 'hello', 0),
+            ('Hello,  friends.', 7, 'Hello, friends.', 7),
+            ('Hello,  friends.', 8, 'Hello, friends.', 7),
+            ('  whirled    peas  now  ', 9, 'whirled peas now', 7),
+            ('  whirled    peas  now  ', 10, 'whirled peas now', 8),
+            ('  whirled    peas  now  ', 11, 'whirled peas now', 8),
+            ('  whirled    peas  now  ', 12, 'whirled peas now', 8),
+            ('  whirled    peas  now  ', 13, 'whirled peas now', 8),
+            ('     ', 3, '', 0)
+        ]
+    }
+
+
+def choose_cursor_char(s):
+    used_chars = set(list(s))
+    for ch in '|^_#':
+        if ch not in used_chars:
+            return ch
+    for code in range(32, 127):
+        ch = chr(code)
+        if ch not in used_chars:
+            return ch
+    return None
+
+
+class Formatter:
+    
+    def commatize(self, s, cursor=None):
+        s = s.replace(',', '')
+        start = len(s) % 3 or 3
+        groups = [ s[:start] ]
+        for i in range(start, len(s), 3):
+            groups.append(s[i : i + 3])
+        s = ','.join(groups)
+        return (s, cursor)
+
+    def trimify(self, s, cursor=None):
+        s = s.strip()
+        s = re.sub('\s+', ' ', s)
+        return (s, cursor)
+
+
+class NumericalCursorFormatter(Formatter):
+
+    def commatize(self, s, cursor):
+        left_digit_count = cursor - s[:cursor].count(',')
+        s = Formatter.commatize(self, s)[0]
+        if left_digit_count == 0:
+            return (s, 0)
+        for pos, ch in enumerate(s):
+            if ch != ',':
+                left_digit_count -= 1
+                if left_digit_count == 0:
+                    break
+        cursor = pos + 1
+        return (s, cursor)
+
+    def trimify(self, s, cursor):
+        left = s[:cursor]
+        left_trimmed = Formatter.trimify(self, left + '|')[0]
+        left_whitespace_count = cursor - len(left_trimmed) + 1
+        s = Formatter.trimify(self, s)[0]
+        cursor = min(len(s), cursor - left_whitespace_count)
+        return (s, cursor)
+
+
+class TextualCursorFormatter(Formatter):
+
+    def commatize(self, s, cursor):
+        cursor_char = choose_cursor_char(s)
+        s = s[:cursor] + cursor_char + s[cursor:]
+        groups = []
+        group_chars = []
+        digit_count = 0
+        for ch in reversed(s):
+            if ch != ',':
+                group_chars.append(ch)
+                if ch != cursor_char:
+                    digit_count += 1
+                    if digit_count == 3:
+                        groups.append(''.join(reversed(group_chars)))
+                        group_chars = []
+                        digit_count = 0
+        if group_chars != []:
+            groups.append(''.join(reversed(group_chars)))
+        s = ','.join(reversed(groups))
+        cursor = s.index(cursor_char)
+        s = s.replace(cursor_char, '')
+        return (s, cursor)
+
+    def trimify(self, s, cursor):
+        cursor_char = choose_cursor_char(s)
+        s = s[:cursor] + cursor_char + s[cursor:]
+        s = Formatter.trimify(self, s)[0]
+        s = s.replace(' ' + cursor_char + ' ', ' ' + cursor_char)
+        if s[0] == cursor_char:
+            s = s.replace(cursor_char + ' ', cursor_char)
+        elif s[-1] == cursor_char:
+            s = s.replace(' ' + cursor_char, cursor_char)
+        cursor = s.index(cursor_char)
+        s = s.replace(cursor_char, '')
+        return (s, cursor)
+
+
+class TextWithCursor:
+
+    def __init__(self, text='', cursor=0):
+        self.text = text
+        self.cursor = cursor
+
+    def read(self, begin, length=1):
+        return self.text[begin : begin + length]
+
+    def insert(self, begin, subtext):
+        self.text = self.text[:begin] + subtext + self.text[begin:]
+        if self.cursor > begin:
+            self.cursor += len(subtext)
+
+    def delete(self, begin, length=1):
+        self.text = self.text[:begin] + self.text[begin + length : ]
+        if self.cursor > begin:
+            self.cursor -= min(self.cursor - begin, length)
+
+    def length(self):
+        return len(self.text)
+
+    def append(self, subtext):
+        self.insert(self.length(), subtext)
+
+    def display(self):
+        print(self.text)
+        print(self.cursor * ' ' + '↖')
+
+
+class MetaCursorFormatter:
+
+    def commatize(self, s, cursor):
+        t = TextWithCursor(s, cursor)
+        digit_count = 0
+        for pos in reversed(range(t.length())):
+            if t.read(pos) == ',':
+                t.delete(pos)
+            elif digit_count < 2:
+                digit_count += 1
+            elif pos > 0:
+                t.insert(pos, ',')
+                digit_count = 0
+        return (t.text, t.cursor)
+
+    def trimify(self, s, cursor):
+        t = TextWithCursor(s, cursor)
+        space_count = 0
+        for pos in reversed(range(t.length())):
+            if t.read(pos) != ' ':
+                space_count = 0
+            elif space_count == 0:
+                space_count = 1
+            else:
+                t.delete(pos + 1)
+        for pos in [ t.length() - 1, 0 ]:
+            if t.read(pos) == ' ':
+                t.delete(pos)
+        return (t.text, t.cursor)
+
+
+def levenshtein(s, t):
+    n, m = len(s), len(t)
+    if min(n, m) == 0:
+        return max(n, m)
+    current = list(range(m + 1))
+    previous = (m + 1) * [ None ]
+    for i in range(1, n + 1):
+        current, previous = previous, current
+        current[0] = previous[0] + 1
+        for j in range(1, m + 1):
+            if t[j - 1] == s[i - 1]:
+                current[j] = previous[j - 1]
+            else:
+                current[j] = min(previous[j - 1] + 1,
+                                 previous[j] + 1,
+                                 current[j - 1] + 1)
+    return current[m]
+
+def split_levenshtein(s, s_cursor, t, t_cursor):
+    cursor_char = choose_cursor_char(s + t)
+    left = levenshtein(s[:s_cursor], t[:t_cursor])
+    right = levenshtein(s[s_cursor:], t[t_cursor:])
+    return left + right
+
+
+def get_counts(s, chars):
+    counts = { ch: 0 for ch in chars }
+    for ch in s:
+        if ch in chars:
+            counts[ch] += 1
+    return counts
+
+def left_right_counts(s, cursor, chars):
+    count_left = get_counts(s[:cursor], chars)
+    count_right = get_counts(s[cursor:], chars)
+    return count_left, count_right
+
+def balance_frequencies(s, s_cursor, t, t_cursor):
+    chars = set(list(s)).intersection(set(list(t)))
+    s_count_left, s_count_right = left_right_counts(s, s_cursor, chars)
+    t_count_left, t_count_right = left_right_counts(t, t_cursor, chars)
+    cost = 0
+    for ch in chars:
+        a = 1.0 * s_count_left[ch] / (s_count_left[ch] + s_count_right[ch])
+        b = 1.0 * t_count_left[ch] / (t_count_left[ch] + t_count_right[ch])
+        cost += abs(a - b) ** 2
+    return cost
+
+
+class RetrospectiveCursorFormatter(Formatter):
+
+    def __init__(self, get_distance):
+        self.get_distance = get_distance
+
+    def adjust_cursor(self, original, cursor, formatting_method):
+        formatted = formatting_method(self, original)[0]
+        cursor_char = choose_cursor_char(original + formatted)
+        get_distance = self.get_distance
+        best_cost = get_distance(original, cursor, formatted, 0)
+        best_pos = 0
+        #print(original[:cursor] + '^' + original[cursor:])
+        #print('  ^%s %d' % (formatted, best_cost))
+        for pos in range(1, len(formatted) + 1):
+            cost = get_distance(original, cursor, formatted, pos) 
+            #print('  %s^%s %f' % (formatted[:pos], formatted[pos:], cost))
+            if cost < best_cost:
+                best_cost = cost
+                best_pos = pos
+        return (formatted, best_pos)
+
+    def commatize(self, original, cursor):
+        return self.adjust_cursor(original, cursor, Formatter.commatize)
+
+    def trimify(self, original, cursor):
+        return self.adjust_cursor(original, cursor, Formatter.trimify)
+

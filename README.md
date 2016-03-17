@@ -40,7 +40,7 @@ the demonstrations.
 
 ### The four approaches
 
-We demonstrate four broad ways to solve the problem of cursor maintenance:
+We demonstrate four broad ways to solve the problem of cursor maintenance.
 
 - Numerical: use ad hoc rules while formatting to move the cursor
 
@@ -51,13 +51,13 @@ We demonstrate four broad ways to solve the problem of cursor maintenance:
 - Retrospective: after formatting the text, calculate a new cursor position
 
 Each approach works toward the same goal, namely, keeping the cursor in
-a position that minimizes user surprise while the string is transformed
+a position that minimizes user surprise while the text is transformed
 by a formatting operation.
 
 
 ### The formatting operations
 
-Each approach is demonstrated with two string-formatting operations.
+Each approach is demonstrated with two formatting operations.
 
 The *commatize* operation takes a string representing a whole number
 and inserts commas so that each group of three digits is separated by
@@ -67,7 +67,7 @@ a comma, proceeding from right to left. For example:
 
 Any incorrect commas are removed:
 
-`",3141,59,"` &rarrow; `"314,159"`
+`",3141,592,65"` &rarrow; `"314,159,265"`
 
 The *trimify* operation strips space characters from the beginning and
 end of a string, and condenses all other sequences of space characters
