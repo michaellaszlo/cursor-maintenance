@@ -1,65 +1,64 @@
 
-===
-Maintaining cursor position across formatting operations
+# Maintaining cursor position across formatting operations
+
+How can we format the contents of an input field without perturbing the
+user's cursor? By formatting we mean any systematic text manipulation,
+such as normalizing the textual representation of a number or condensing
+whitespace sequences in a document. If the user has placed a cursor
+somewhere in the text for navigation or editing purposes, we would like
+the cursor to stay in place while the text is modified. Sometimes the
+text around the cursor is modified so extensively that it isn't clear
+what staying in place is supposed to mean. Even when the cursor's optimal
+position is clear to a human observer, it can be tricky to calculate
+automatically.
+
+The problem of maintaining cursor position arises in forms with input
+fields that check the format of the input text after each keystroke
+and reformat the text if the business logic deems it necessary. In many
+web implementations, the cursor is moved to the end of the input field
+whenever the text is reformatted. This results in a poor experience for
+a user who is trying to edit the input value. One keystroke can trigger
+a formatting operation that causes the cursor to be abruptly moved
+to the end of the string, forcing the user to move the cursor back to
+the editing location for the next keystroke. This article examines the
+problem in detail and explores a number of ways to solve it.
 
 
-How can we format the contents of an input field without changing the
-user's cursor position? By formatting we mean any systematic text
-manipulation, such as normalizing the textual representation of a
-number or condensing whitespace sequences in a document. If the user
-has placed a cursor somewhere in the text for navigation or editing
-purposes, we would like the cursor to stay in place while the text is
-modified. Sometimes the text around the cursor is modified in such a
-way that it isn't clear what staying in place is supposed to mean. Even
-when the cursor's desired position is clear to a human observer, it can
-be tricky to calculate it automatically.
+## Illustrating the problem
 
-The problem of maintaining cursor position arises in web forms with input
-fields that check the format of the input text after each keystroke and
-reformat the text if necessary. In many implementations, the cursor is
-moved to the end of the input field whenever the text is reformatted. This
-results in a poor experience for a user who is trying to edit the input
-value. One keystroke can trigger a formatting operation that moves the
-cursor to the end of the string, forcing the user to move the cursor back
-to the editing location for the next keystroke. This article examines
-the problem in detail and explores a number of ways to solve it.
-
-
-Illustrating the problem
-
-Suppose we're making an input field that expects the user to type in
+Suppose we're building an input field that expects the user to type in
 an integer value. The only characters allowed are digits 0 through 9
 and commas. We want the input field to automatically format the text
 by separating each group of three digits with a comma, proceeding from
 right to left.
 
-This text value has not been formatted:
+Here is a valid input that hasn't been formatted yet:
 
-  12500
+  13500
 
 After formatting, it looks like this:
 
-  12,500
+  13,500
 
-Now let's consider the cursor position. If the input field is initially
-empty and the user's first action is to paste in the string "129000",
-we denote the state of the input field as follows, with ^ representing
-the cursor:
+Now let's consider the cursor. If the input field is initially empty and
+the user's first action is to paste in the string "129000", we denote
+the state of the input field as follows, with ^ representing the cursor:
 
   129000^
 
 This is the state immediately after a user-initiated editing
 operation, namely the paste action, and before the automatic formatting
 operation. The user sees this state momentarily or not at all, because
-the input field is quickly updated to show the commatized text.
+the input field is quickly updated to show the formatted text.
 
 Where should we put the cursor after the formatting operation? The easy
 answer is to place the cursor at the far right of the input field:
 
   129,000^
 
-It can't always be this easy. Suppose the user moves the cursor between
-the first and second zeros. We're in this state:
+It isn't always this easy. Suppose the user moves the cursor leftward by
+two characters, positioning it between the first and second zeros. We're
+in this state:
 
   129,0^00
 
@@ -67,23 +66,24 @@ Now the user hits the backspace key:
 
   129,^00
 
-The text value "129,00" gets commatized to "12,900", and the input field
+The text value "129,00" gets formatted to "12,900", and the input field
 is updated with the formatted text. Moving the cursor to the far right
 of the input field isn't such a hot idea this time, because it makes
 the cursor jump over two zeros:
 
   12,900^
 
-A jumping cursor makes for a poor visual experience and can lead to
-additional aggravation. If the user intended to backspace over several
+A jumping cursor makes for a poor visual experience and may lead to
+further aggravation. If the user intended to backspace over several
 characters in a row, she has to manually reposition the cursor:
 
   12,9^00
 
 It would be better to automatically put the cursor there after the
-formatting operation.
+formatting operation because that's where the user would expect to see
+the cursor after backspacing over the leftmost zero digit.
 
-Let's describe the cursor position precisely. If there are i characters
+Let's describe the cursor position precisely. When there are i characters
 to the left of the cursor, we'll say that the cursor is at position i.
 
 For example, in the text "ant", this is cursor position 0:
@@ -94,9 +94,9 @@ This is cursor position 3:
 
   ant^
 
-Let's make a new rule for cursor maintenance. If the cursor is at position
-i in the text before formatting, we will also put it at index i in the
-formatted text.
+Let's manage the cursor position by following a simple rule. If the
+cursor is at position i in the text before formatting, we will also put
+it at position i in the formatted text.
 
 To repeat the previous example, the cursor is at position 4 immediately
 after the user backspaced over the leftmost zero:
@@ -129,40 +129,74 @@ position 6:
 
   1,291,^900
 
-Oops! The cursor seems to have jumped over the '9' that the user
-just typed. Our simple rule doesn't work. Keeping the cursor position
+Whoah! The cursor has jumped over the '9' that the user just typed. It
+turns out that our simple rule doesn't work. Keeping the cursor position
 numerically constant doesn't always put the cursor where the user expects
 to see it.
 
 
-What can we do?
+## What can we do?
 
 The root of the problem is that the formatting operation is defined for
 text, not for text with a cursor. Formatting is carried out independently
-of the cursor: it takes text as input and returns text as output. But
-the user interface superimposes a cursor on the text, and we want to
-present the illusion that the user is in full control of the cursor.
+of the cursor: it takes text as input and returns text as output. The
+cursor is an interface widget that we superimpose on the text. It works
+without a hitch when the user edits the text manually because the cursor's
+movement is strictly determined by each user input. It gets tricky when
+we carry out automatic text formatting and we want to present the illusion
+that the user remains in control of the cursor.
 
-We let the user move the cursor around in the text. The user performs
-an edit action. We send the user-edited text to an automatic formatting
-operation. When we get back the formatted text, we have to decide where
+Let's be clear about the distinction between the user's edit actions
+and the input field's automatic formatting operations. A user-initiated
+edit action can trigger automatic formatting, but these are different
+processes. We have an interface that allows the user to move the cursor
+around the text. At some location in the text, the user performs an edit
+action, which may be a single keystroke or a mouse-driven action that
+deletes or inserts a substring of text. We send the user-edited text to
+an automatic formatting operation that may cause the text to be further
+modified. When we get back the formatted text, we have to decide where
 to position the cursor so that the user isn't surprised.
 
-If that sounds like a fuzzy problem statement, it's because the problem
-is inherently fuzzy. To ask where the cursor should be placed after
-formatting is to pose a psychological question about user satisfaction. No
-hard and fast strategy exists because there are cases where human
-observers disagree on what would be the most natural cursor placement.
+If that sounds like a fuzzy problem statement, it's because the
+problem is inherently fuzzy. To ask where the cursor should be placed
+after formatting is to pose a psychological question about user
+expectations. There is no definitive answer because there are cases
+where human observers disagree on what would be the most natural cursor
+placement.
 
-Consider a formatting operation that strips space characters from each
-end of the text and reduces internal space sequences to one space each.
+Consider a formatting operation that strips space characters from each end
+of the text and reduces internal space sequences to one space each. Its
+effect on text is clearly defined, but it's unclear how it should affect
+the cursor. Here is a piece of text prior to formatting:
 
+    Hello, world.  Hello there.  ^ How are you?  
+
+Here it is after formatting:
+
+  Hello, world. Hello there. ^How are you?
+
+Is that where the user expects to find the cursor? Perhaps it would be
+more natural to position it at the end of the preceding sentence:
+
+  Hello, world. Hello there.^ How are you?
+
+Or maybe the cursor should be moved next to whichever sentence is
+closer. What if the cursor is exactly halfway between two sentences? Break
+ties to the left? Then maybe the cursor should always move left. Or
+should it always move right?
+
+However we choose to resolve the matter, it should be clear that we are
+making a new rule that goes beyond the text formatting operation. There
+is no perfect strategy for implementing a cursor-maintenance layer on
+top of formatting operations that are defined for text. We must strike
+a compromise in one direction or another. We can apply an all-purpose
+strategy that doesn't always put the cursor where the user expects it to.
+Alternatively, we can make new rules that go beyond the text formatting
+operation by
 
 Because of such ambiguities, we can't hope to eliminate user surprise
 entirely. At best we can aim to minimize user surprise.
 
-We're aiming to minimize  There is no hard and fast way to prescribe a cursor position
-for all possible text formatting. Ther
 
 If we could format the left and right substrings independently,
 we wouldn't have a problem. We would format the left, then format the
@@ -197,11 +231,8 @@ Similarly, if we want to remove superfluous spaces from the input
   1,495,0^00
   1,^00 -> 1^00
 
-    Hello, world.  Hello there.^  How are you?  
-  Hello, world. Hello there.^ How are you?
 
-
-Commatize and trimify
+## Commatize and trimify
 
 
     test_data = {
@@ -233,18 +264,6 @@ Commatize and trimify
     }
 
 
-def choose_cursor_char(s):
-    used_chars = set(list(s))
-    for ch in '|^_#':
-        if ch not in used_chars:
-            return ch
-    for code in range(32, 127):
-        ch = chr(code)
-        if ch not in used_chars:
-            return ch
-    return None
-
-
 class Formatter:
     
     def commatize(self, s, cursor=None):
@@ -261,6 +280,8 @@ class Formatter:
         s = re.sub('\s+', ' ', s)
         return (s, cursor)
 
+
+## Numerical approach
 
 class NumericalCursorFormatter(Formatter):
 
@@ -285,6 +306,20 @@ class NumericalCursorFormatter(Formatter):
         cursor = min(len(s), cursor - left_whitespace_count)
         return (s, cursor)
 
+
+def choose_cursor_char(s):
+    used_chars = set(list(s))
+    for ch in '|^_#':
+        if ch not in used_chars:
+            return ch
+    for code in range(32, 127):
+        ch = chr(code)
+        if ch not in used_chars:
+            return ch
+    return None
+
+
+## Textual approach
 
 class TextualCursorFormatter(Formatter):
 
@@ -323,6 +358,8 @@ class TextualCursorFormatter(Formatter):
         s = s.replace(cursor_char, '')
         return (s, cursor)
 
+
+## Meta approach
 
 class TextWithCursor:
 
@@ -384,6 +421,8 @@ class MetaCursorFormatter:
                 t.delete(pos)
         return (t.text, t.cursor)
 
+
+## Retrospective approach
 
 def levenshtein(s, t):
     n, m = len(s), len(t)
@@ -460,4 +499,9 @@ class RetrospectiveCursorFormatter(Formatter):
 
     def trimify(self, original, cursor):
         return self.adjust_cursor(original, cursor, Formatter.trimify)
+
+
+## Lessons learned
+
+
 
