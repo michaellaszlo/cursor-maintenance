@@ -160,7 +160,7 @@ to position the cursor so that the user isn't surprised.
 If that sounds like a fuzzy problem statement, it's because the
 problem is inherently fuzzy. To ask where the cursor should be placed
 after formatting is to pose a psychological question about user
-expectations. There is no definitive answer because there are cases
+expectations. There is no hard and fast answer because there are cases
 where human observers disagree on what would be the most natural cursor
 placement.
 
@@ -169,33 +169,36 @@ of the text and reduces internal space sequences to one space each. Its
 effect on text is clearly defined, but it's unclear how it should affect
 the cursor. Here is a piece of text prior to formatting:
 
-    Hello, world.  Hello there.  ^ How are you?  
+    Hello, world.  Hello there. ^  How are you?  
 
 Here it is after formatting:
 
-  Hello, world. Hello there. ^How are you?
-
-Is that where the user expects to find the cursor? Perhaps it would be
-more natural to position it at the end of the preceding sentence:
-
   Hello, world. Hello there.^ How are you?
 
-Or maybe the cursor should be moved next to whichever sentence is
-closer. What if the cursor is exactly halfway between two sentences? Break
-ties to the left? Then maybe the cursor should always move left. Or
-should it always move right?
+Is that where the user expects to find the cursor? Perhaps it would feel
+more natural to keep the space to the left of the cursor:
+
+  Hello, world. Hello there. ^How are you?
+
+Or maybe the cursor should be moved toward whichever word is closer. What
+if the cursor is exactly halfway between two sentences? Do we break ties
+toward the right? Maybe we should always go right because a predictable
+interface is generally better for users.
+
+Because of such ambiguities, there is no definitive strategy for
+implementing a cursor maintenance layer on top of text formatting
+operations. We can't hope to eliminate user surprise. We must aim to
+minimize it.
 
 However we choose to resolve the matter, it should be clear that we are
-making a new rule that goes beyond the text formatting operation. There
-is no perfect strategy for implementing a cursor-maintenance layer on
-top of formatting operations that are defined for text. We must strike
-a compromise in one direction or another. We can apply an all-purpose
-strategy that doesn't always put the cursor where the user expects it to.
-Alternatively, we can make new rules that go beyond the text formatting
-operation by
+making a new rule that goes beyond the text formatting operation.
 
-Because of such ambiguities, we can't hope to eliminate user surprise
-entirely. At best we can aim to minimize user surprise.
+We must strike a compromise in one direction or another. We can use
+an all-purpose guessing strategy to guess where the user would like
+to see the cursor, and we'll get some inconsistency because there is
+no precisely defined relationship between cursor placement and text
+formatting. Alternatively, we can define the relationship precisely by
+formulating a fixed rule for each formatting operation.
 
 
 If we could format the left and right substrings independently,
