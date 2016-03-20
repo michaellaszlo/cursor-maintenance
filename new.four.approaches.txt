@@ -24,7 +24,7 @@ the editing location for the next keystroke. This article examines the
 problem in detail and explores a number of ways to solve it.
 
 
-## Illustrating the problem
+## First signs of trouble
 
 Suppose we're building an input field that expects the user to type in
 an integer value. The only characters allowed are digits 0 through 9
@@ -129,106 +129,195 @@ position 6:
 
   1,291,^900
 
-Whoah! The cursor has jumped over the '9' that the user just typed. It
-turns out that our simple rule doesn't work. Keeping the cursor position
-numerically constant doesn't always put the cursor where the user expects
-to see it.
+The cursor has jumped over the '9' that the user just typed. It turns out
+that our simple rule doesn't work. Keeping the cursor position numerically
+constant doesn't always put the cursor where the user expects to see it.
 
 
-## What can we do?
+## The nature of the beast
 
-The root of the problem is that the formatting operation is defined for
-text, not for text with a cursor. Formatting is carried out independently
-of the cursor: it takes text as input and returns text as output. The
-cursor is an interface widget that we superimpose on the text. It works
-without a hitch when the user edits the text manually because the cursor's
-movement is strictly determined by each user input. It gets tricky when
-we carry out automatic text formatting and we want to present the illusion
-that the user remains in control of the cursor.
+The problem of cursor maintenance exists because we have automatic
+formatting operations that are defined for text, not for text with a
+cursor. Text formatting is carried out independently of the cursor:
+it takes text as input and returns text as output. The cursor is an
+interface widget that we superimpose on the text. In the absence of
+automatic formatting, the cursor's movement is strictly determined by
+the user's actions. It gets tricky when we add automatic text formatting
+and we want to present the illusion that the user remains in control of
+the cursor.
 
-Let's be clear about the distinction between the user's edit actions
-and the input field's automatic formatting operations. A user-initiated
-edit action can trigger automatic formatting, but these are different
-processes. We have an interface that allows the user to move the cursor
-around the text. At some location in the text, the user performs an edit
-action, which may be a single keystroke or a mouse-driven action that
-deletes or inserts a substring of text. We send the user-edited text to
-an automatic formatting operation that may cause the text to be further
-modified. When we get back the formatted text, we have to decide where
-to position the cursor so that the user isn't surprised.
+Let's be clear about the distinction between the user's edit actions and
+the input field's formatting operations. We have an interface that allows
+the user to move the cursor around the text. At some location in the
+text, the user performs an edit action, which may be a single keystroke
+or a mouse-driven action that deletes or inserts a substring of text. We
+send the user-edited text to an automatic formatting operation that may
+cause the text to be further modified. When we get back the formatted
+text, we have to decide where to position the cursor so that the user
+isn't surprised.
 
 If that sounds like a fuzzy problem statement, it's because the
 problem is inherently fuzzy. To ask where the cursor should be placed
 after formatting is to pose a psychological question about user
 expectations. There is no hard and fast answer because there are cases
-where human observers disagree on what would be the most natural cursor
-placement.
+where human observers disagree on cursor placement.
 
-Consider a formatting operation that strips space characters from each end
-of the text and reduces internal space sequences to one space each. Its
-effect on text is clearly defined, but it's unclear how it should affect
-the cursor. Here is a piece of text prior to formatting:
+Consider a formatting operation that trims space characters from each end
+of the text and reduces internal space sequences to one space each. The
+text manipulation is clearly defined, but it's not clear how it should
+affect the cursor.
 
-    Hello, world.  Hello there. ^  How are you?  
+Here is a piece of text prior to formatting, with the cursor surrounded
+by spaces:
 
-Here it is after formatting:
+    'Twas brillig,  and the  slithy ^  toves
 
-  Hello, world. Hello there.^ How are you?
+Here is the text after formatting, with a provisional cursor placement:
+
+  'Twas brillig, and the slithy^ toves
 
 Is that where the user expects to find the cursor? Perhaps it would feel
 more natural to keep the space to the left of the cursor:
 
-  Hello, world. Hello there. ^How are you?
+  'Twas brillig, and the slithy ^toves
 
-Or maybe the cursor should be moved toward whichever word is closer. What
-if the cursor is exactly halfway between two sentences? Do we break ties
-toward the right? Maybe we should always go right because a predictable
-interface is generally better for users.
+Maybe the cursor should be moved toward whichever non-space character
+is closer. What if the cursor is exactly halfway between two non-space
+characters? Do we break ties toward the right? Maybe we should always
+go right because a predictable interface is desirable.
 
 Because of such ambiguities, there is no definitive strategy for
 implementing a cursor maintenance layer on top of text formatting
-operations. We can't hope to eliminate user surprise. We must aim to
-minimize it. In cases where the correct cursor placement is obvious,
-we want to automatically calculate it.
-
-For example, it's clear that a cursor found among spaces at the beginning
-or end of the text should be placed at the beginning or end of the text
-after formatting. Or when the cursor has a non-space character on one
-side, it should adhere to that character through the formatting operation.
+operations. We are aiming not to eliminate user surprise but to
+minimize it.
 
 
-If we could format the left and right substrings independently,
-we wouldn't have a problem. We would format the left, then format the
-right, and put the cursor between the two. In general this can't be done.
-Many formatting operations, including the ones we've dealt with above,
-only make sense when they're applied to the entire string.
+## Obvious cases are obvious
 
-For the numerical input
+Sometimes the correct cursor placement is clear to a human observer. If
+the cursor is found among spaces at the beginning or end of the text,
+it should be placed at the beginning or end of the trimmed text.
 
-  1234^5678
+Before formatting:
 
-it wouldn't help to independently format the left part to 1,234 and the
-right part to 5,678 because concatenating them yields this incorrectly
-formatted string:
+     Did  gyre  and  gimble  ^
 
-  1,234^5,678
+After formatting:
 
-We still have the problem of formatting the string as
+  Did gyre and gimble^
 
-  12,34^5,678
+If the cursor is next to a non-space character, it should remain next
+to that character through the formatting operation.
 
-which requires simultaneous knowledge of what lies to the left of the
-cursor and what lies to the right.
+Before:
 
-Similarly, if we want to remove superfluous spaces from the input
+   in  the  ^wabe: 
 
-  The quick brown fox  ^  jumps
+After:
 
-  149,5^00
-  149,50^00 -> 1,495,0^00
+  in the ^wabe:
 
-  1,495,0^00
-  1,^00 -> 1^00
+How do we resolve such cases automatically? Earlier in this article we
+tried a very simple strategy and learned that it was ineffective. Let's
+see if we can do better with a more elaborate but still very
+straightforward approach.
+
+We can think of the cursor as splitting the text into two parts, the
+one to the left and the one to the right. Why not format the two parts
+separately? This would handle cursor placement without ambiguity. Before
+and after the formatting operation, the cursor is precisely between the
+left and right parts.
+
+Here is some text with a cursor:
+
+    All  mim^sy  were  the borogoves,  
+
+Format the left part:
+
+    All  mim  ->  All mim
+
+Format the right part:
+
+  sy  were  the borogoves,    ->  sy were the borogoves,
+
+Concatenate them at the cursor position:
+
+  All mim^sy were the borogoves,
+
+That was easy. Now for the bad news. This approach is unviable because
+in general it doesn't make sense to format the left and right parts
+separately. It is only guaranteed to work with formatting operations
+that consider one character at a time, such as capitalization.
+
+Text with cursor, before capitalization:
+
+  And the^ mome
+
+Left and right parts capitalized:
+
+  And the  ->  AND THE
+
+   mome  ->   MOME
+
+Concatenated:
+
+  AND THE^ MOME
+
+As soon as we have an operation that works on a sequence of characters,
+it becomes necessary to preserve continuity between the characters on
+each side of the cursor.
+
+Here is a case where we want to apply our space-reducing operation:
+
+   raths ^  outgrabe 
+
+Left and right parts formatted separately:
+
+   raths   ->  raths
+
+    outgrabe   ->  outgrabe
+
+Concatenated:
+
+  raths^outgrabe
+
+To deal with this case correctly, we have to be simultaneously aware of
+what lies to the left and to the right of the cursor.
+
+One might argue that the text-splitting approach is almost correct. It
+only fails to work for spaces surrounding the cursor. After concatenating
+the independently formatted left and right parts, we can examine the
+one or two characters in the immediate vicinity of the cursor and adjust
+them as necessary. Indeed, that would work for this operation. It doesn't
+work in general.
+
+Recall the number-formatting operation that we described earlier. Consider
+this input:
+
+  1234^12345
+
+Left and right parts formatted separately:
+
+  1234  ->  1,234
+
+  12345  ->  12,345
+
+Concatenated:
+
+  1,234^12,345
+
+The result is completely wrong. It doesn't help to examine a few
+characters around the cursor. We have to examine the entirety of the
+text to format it correctly:
+
+  123412345  ->  123,412,345
+
+And we have to maintain the cursor in its original position:
+
+  123,4^12,345
+
+It remains to be seen what "original position" is supposed to mean and
+how we can maintain it.
 
 
 ## Commatize and trimify
