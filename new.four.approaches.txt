@@ -188,17 +188,13 @@ interface is generally better for users.
 Because of such ambiguities, there is no definitive strategy for
 implementing a cursor maintenance layer on top of text formatting
 operations. We can't hope to eliminate user surprise. We must aim to
-minimize it.
+minimize it. In cases where the correct cursor placement is obvious,
+we want to automatically calculate it.
 
-However we choose to resolve the matter, it should be clear that we are
-making a new rule that goes beyond the text formatting operation.
-
-We must strike a compromise in one direction or another. We can use
-an all-purpose guessing strategy to guess where the user would like
-to see the cursor, and we'll get some inconsistency because there is
-no precisely defined relationship between cursor placement and text
-formatting. Alternatively, we can define the relationship precisely by
-formulating a fixed rule for each formatting operation.
+For example, it's clear that a cursor found among spaces at the beginning
+or end of the text should be placed at the beginning or end of the text
+after formatting. Or when the cursor has a non-space character on one
+side, it should adhere to that character through the formatting operation.
 
 
 If we could format the left and right substrings independently,
@@ -507,4 +503,15 @@ class RetrospectiveCursorFormatter(Formatter):
 ## Lessons learned
 
 
+Formatting operations are defined for text alone and don't tell us what
+to do with the cursor. In some cases the optimal cursor placement is
+a subjective matter. We have to make a policy about cursor positioning
+that goes beyond the formatting operation. We have to accept the risk
+that in some cases, our choice of cursor position will not agree with
+the user's expectations.
+
+We can use an all-purpose strategy to guess at a sensible position
+for the cursor after an arbitrary formatting operation. Alternatively,
+we can define a precise relationship between cursor placement and text
+formatting by prescribing a fixed rule for each formatting operation.
 
