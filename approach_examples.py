@@ -62,16 +62,34 @@ class Test:
         if cursor != None:
             print((len(prefix) + cursor) * ' ' + '↖ %d' % cursor)
 
-    def display(self, name=None, with_cursor=True):
+    def text_markup(self, text, cursor=None):
+        if cursor != None:
+            text = text[:cursor] + '^' + text[cursor:]
+        return '"%s"' % text
+
+    def case_markup(self, case, cursor=None):
+        """Make an inline Markdown string for a test case."""
+        a_text, a_cursor, b_text, b_cursor = case
+        a_markup = self.text_markup(a_text, a_cursor)
+        b_markup = self.text_markup(b_text, b_cursor)
+        return '  %s -> %s' % (a_markup, b_markup)
+
+    def display(self, name=None, with_cursor=True, compact=False):
         """Print out the test pairs for one or all formatting operations."""
         if name == None:
             print('')
             for name in sorted(self.test_data.keys()):
-                self.display(name, with_cursor)
+                self.display(name, with_cursor, compact)
             return
         print('Test cases for %s\n' % name)
+        cases = self.test_data[name]
+        if compact:
+            for case in cases:
+                print(self.case_markup(case))
+            print('')
+            return
         for (original_text, original_cursor,
-                expected_text, expected_cursor) in self.test_data[name]:
+                expected_text, expected_cursor) in cases:
             if not with_cursor:
                 original_cursor, expected_cursor = None, None
             self.show_text('original', original_text, original_cursor)
@@ -437,7 +455,7 @@ class Utilities:
 
 if __name__ == '__main__':
     #Test().display()
-    Test().display('commatize', False)
+    Test().display(compact=True)
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()

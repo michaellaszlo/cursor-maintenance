@@ -1,7 +1,7 @@
 
 # Maintaining cursor position across formatting operations
 
-How can we format the contents of an input field without perturbing the
+How can we format the contents of an input field without displacing the
 user's cursor? By formatting we mean any systematic text manipulation,
 such as normalizing the textual representation of a number or condensing
 whitespace sequences in a document. If the user has placed a cursor
@@ -20,8 +20,8 @@ whenever the text is reformatted. This results in a poor experience for
 a user who is trying to edit the input value. One keystroke can trigger
 a formatting operation that causes the cursor to be abruptly moved
 to the end of the string, forcing the user to move the cursor back to
-the editing location for the next keystroke. This article examines the
-problem in detail and explores a number of ways to solve it.
+the editing location for the next keystroke. This article explores the
+problem in depth and offers several concrete ways to solve it.
 
 
 ## First signs of trouble
@@ -141,8 +141,8 @@ formatting operations that are defined for text, not for text with a
 cursor. Text formatting is carried out independently of the cursor:
 it takes text as input and returns text as output. The cursor is an
 interface widget that we superimpose on the text. In the absence of
-automatic formatting, the cursor's movement is strictly determined by
-the user's actions. It gets tricky when we add automatic text formatting
+automatic formatting, the cursor's movement is strictly determined by the
+user's actions. The trouble begins when we add automatic text formatting
 and we want to present the illusion that the user remains in control of
 the cursor.
 
@@ -207,7 +207,7 @@ After formatting:
   Did gyre and gimble^
 
 If the cursor is next to a non-space character, it should remain next
-to that character through the formatting operation.
+to that character across the formatting operation.
 
 Before:
 
@@ -219,14 +219,13 @@ After:
 
 How do we resolve such cases automatically? Earlier in this article we
 tried a very simple strategy and learned that it was ineffective. Let's
-see if we can do better with a more elaborate but still very
-straightforward approach.
+see if we can do better with a slightly more elaborate approach.
 
 We can think of the cursor as splitting the text into two parts, the
 one to the left and the one to the right. Why not format the two parts
 separately? This would handle cursor placement without ambiguity. Before
-and after the formatting operation, the cursor is precisely between the
-left and right parts.
+and after the formatting operation, the cursor is positioned between
+the left and right parts.
 
 Here is some text with a cursor:
 
@@ -244,8 +243,8 @@ Concatenate them at the cursor position:
 
   All mim^sy were the borogoves,
 
-That was easy. Now for the bad news. This approach is unviable because
-in general it doesn't make sense to format the left and right parts
+That was easy. Now for the bad news. This approach is unviable because,
+in general, it doesn't make sense to format the left and right parts
 separately. It is only guaranteed to work with formatting operations
 that consider one character at a time, such as capitalization.
 
@@ -286,90 +285,143 @@ what lies to the left and to the right of the cursor.
 
 One might argue that the text-splitting approach is almost correct. It
 only fails to work for spaces surrounding the cursor. After concatenating
-the independently formatted left and right parts, we can examine the
-one or two characters in the immediate vicinity of the cursor and adjust
-them as necessary. Indeed, that would work for this operation. It doesn't
-work in general.
+the independently formatted left and right parts, we can examine the one
+or two characters in the immediate vicinity of the cursor and adjust them
+as necessary. That would indeed work for this operation. It doesn't work
+in general.
 
 Recall the number-formatting operation that we described earlier. Consider
 this input:
 
-  1234^12345
+  1234^56789
 
 Left and right parts formatted separately:
 
   1234  ->  1,234
 
-  12345  ->  12,345
+  56789  ->  56,789
 
 Concatenated:
 
-  1,234^12,345
+  1,234^56,789
 
-The result is completely wrong. It doesn't help to examine a few
-characters around the cursor. We have to examine the entirety of the
-text to format it correctly:
+The result is completely wrong. It doesn't help to inspect a few
+characters around the cursor. We have to scan the entirety of the text
+to format it correctly:
 
-  123412345  ->  123,412,345
+  123456789  ->  123,456,789
 
-And we have to maintain the cursor in its original position:
+And we have to keep the cursor in its original position:
 
-  123,4^12,345
+  123,4^56,789
 
-It remains to be seen what "original position" is supposed to mean and
-how we can maintain it.
+It remains to be seen what "original position" means and how we can
+maintain it.
 
 
 ## Commatize and trimify
 
+We will demonstrate various approaches to cursor maintenance using the
+two formatting operations that we have already seen.
 
-    test_data = {
-        'commatize': [
-            ('2500', 1, '2,500', 1),
-            ('12500', 3, '12,500', 4),
-            ('5,4990000', 9, '54,990,000', 10),
-            (',1,,8,,,', 3, '18', 1),
-            ('1,0,0,000', 3, '100,000', 2),
-            ('1,0,000', 2, '10,000', 1),
-            ('1,,000', 2, '1,000', 1),
-            ('1,00', 2, '100', 1),
-            ('1234', 1, '1,234', 1),
-            ('1,0234', 3, '10,234', 2),
-            ('10,00', 4, '1,000', 4)
-        ],
-        'trimify': [
-            ('  hello  ', 8, 'hello', 5),
-            ('  hello  ', 1, 'hello', 0),
-            ('Hello,  friends.', 7, 'Hello, friends.', 7),
-            ('Hello,  friends.', 8, 'Hello, friends.', 7),
-            ('  whirled    peas  now  ', 9, 'whirled peas now', 7),
-            ('  whirled    peas  now  ', 10, 'whirled peas now', 8),
-            ('  whirled    peas  now  ', 11, 'whirled peas now', 8),
-            ('  whirled    peas  now  ', 12, 'whirled peas now', 8),
-            ('  whirled    peas  now  ', 13, 'whirled peas now', 8),
-            ('     ', 3, '', 0)
-        ]
+From now on, we will refer to the numerical formatting operation as
+*commatize*. We can define it exactly by means of a Python script:
+
+  def commatize(self, s, cursor=None):
+      s = s.replace(',', '')
+      start = len(s) % 3 or 3
+      groups = [ s[:start] ]
+      for i in range(start, len(s), 3):
+          groups.append(s[i : i + 3])
+      s = ','.join(groups)
+      return (s, cursor)
+
+As for the formatting operation that trims and condenses space sequences,
+we call it *commatize*. Here it is in Python:
+
+  def trimify(self, s, cursor=None):
+      s = s.strip()
+      s = re.sub('\s+', ' ', s)
+      return (s, cursor)
+
+A test runner and a suite of test cases are provided for each operation
+in a GitHub repository. The `Formatter` class in approach_examples.py
+has the commatize and trimify methods shown here. There is an equivalent
+JavaScript file, approach_examples.js, in which commatize and trimify
+are the properties of the `formatter` object.
+
+Here is `commatize` in JavaScript:
+
+  formatter.commatize = function (s, cursor) {
+    var start,
+        groups,
+        i;
+    s = s.replace(/,/g, '');
+    start = s.length % 3 || 3;
+    groups = [ s.substring(0, start) ];
+    for (i = start; i < s.length; i += 3) {
+      groups.push(s.substring(i, i + 3));
     }
+    s = groups.join(',');
+    return { text: s, cursor: cursor };
+  };
+
+This is the JavaScript version of `trimify`:
+
+  formatter.trimify = function (s, cursor) {
+    s = s.replace(/^\s+|\s+$/g, '');
+    s = s.replace(/\s+/g, ' ');
+    return { text: s, cursor: cursor };
+  };
+
+In the rest of this article we show only Python code for the sake of
+brevity. The GitHub repository contains equivalent JavaScript for each
+code fragment shown here.
+
+The implementations of commatize and trimify each take a cursor argument
+and return it as part of a tuple, but do not modify its value. The
+objects that own these methods are interchangeable with other objects
+that implement the same text formatting operations but have smarter
+policies for maintaining cursor position. The test runner can take
+any of these objects and evaluate its performance on the formatting
+operation alone or on the task of maintaining cursor operation across
+the formatting operation.
+
+For each operation, the test runner contains a list of test cases
+exemplifying the cursor behavior we expect to see.
+
+The test cases for commatize are the following.
+
+  'commatize': [
+      ('2500', 1, '2,500', 1),
+      ('12500', 3, '12,500', 4),
+      ('5,4990000', 9, '54,990,000', 10),
+      (',1,,8,,,', 3, '18', 1),
+      ('1,0,0,000', 3, '100,000', 2),
+      ('1,0,000', 2, '10,000', 1),
+      ('1,,000', 2, '1,000', 1),
+      ('1,00', 2, '100', 1),
+      ('1234', 1, '1,234', 1),
+      ('1,0234', 3, '10,234', 2),
+      ('10,00', 4, '1,000', 4)
+  ]
+
+  'trimify': [
+      ('  hello  ', 8, 'hello', 5),
+      ('  hello  ', 1, 'hello', 0),
+      ('Hello,  friends.', 7, 'Hello, friends.', 7),
+      ('Hello,  friends.', 8, 'Hello, friends.', 7),
+      ('  whirled    peas  now  ', 9, 'whirled peas now', 7),
+      ('  whirled    peas  now  ', 10, 'whirled peas now', 8),
+      ('  whirled    peas  now  ', 11, 'whirled peas now', 8),
+      ('  whirled    peas  now  ', 12, 'whirled peas now', 8),
+      ('  whirled    peas  now  ', 13, 'whirled peas now', 8),
+      ('     ', 3, '', 0)
+  ]
 
 
-class Formatter:
-    
-    def commatize(self, s, cursor=None):
-        s = s.replace(',', '')
-        start = len(s) % 3 or 3
-        groups = [ s[:start] ]
-        for i in range(start, len(s), 3):
-            groups.append(s[i : i + 3])
-        s = ','.join(groups)
-        return (s, cursor)
 
-    def trimify(self, s, cursor=None):
-        s = s.strip()
-        s = re.sub('\s+', ' ', s)
-        return (s, cursor)
-
-
-## Numerical approach
+## The numerical approach
 
 class NumericalCursorFormatter(Formatter):
 
@@ -407,7 +459,7 @@ def choose_cursor_char(s):
     return None
 
 
-## Textual approach
+## The textual approach
 
 class TextualCursorFormatter(Formatter):
 
@@ -447,7 +499,7 @@ class TextualCursorFormatter(Formatter):
         return (s, cursor)
 
 
-## Meta approach
+## The meta approach
 
 class TextWithCursor:
 
@@ -510,7 +562,7 @@ class MetaCursorFormatter:
         return (t.text, t.cursor)
 
 
-## Retrospective approach
+## The retrospective approach
 
 def levenshtein(s, t):
     n, m = len(s), len(t)
@@ -603,4 +655,10 @@ We can use an all-purpose strategy to guess at a sensible position
 for the cursor after an arbitrary formatting operation. Alternatively,
 we can define a precise relationship between cursor placement and text
 formatting by prescribing a fixed rule for each formatting operation.
+
+runnable test scripts in Python and JavaScript
+
+practical web implementation in JavaScript
+
+end-user documentation for everything
 
