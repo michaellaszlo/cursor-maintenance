@@ -24,7 +24,7 @@ the editing location for the next keystroke. This article explores the
 problem in depth and offers several concrete ways to solve it.
 
 
-## First signs of trouble
+## Illustrating the problem
 
 Suppose we're building an input field that expects the user to type in
 an integer value. The only characters allowed are digits 0 through 9
@@ -134,7 +134,7 @@ that our simple rule doesn't work. Keeping the cursor position numerically
 constant doesn't always put the cursor where the user expects to see it.
 
 
-## The nature of the beast
+## What can we do?
 
 The problem of cursor maintenance exists because we have automatic
 formatting operations that are defined for text, not for text with a
@@ -192,7 +192,7 @@ operations. We are aiming not to eliminate user surprise but to
 minimize it.
 
 
-## Obvious cases are obvious
+## Easy cases
 
 Sometimes the correct cursor placement is clear to a human observer. If
 the cursor is found among spaces at the beginning or end of the text,
@@ -319,7 +319,7 @@ It remains to be seen what "original position" means and how we can
 maintain it.
 
 
-## Commatize and trimify
+## Our formatting operations
 
 We will demonstrate various approaches to cursor maintenance using the
 two formatting operations that we have already seen.
@@ -350,7 +350,7 @@ has the commatize and trimify methods shown here. There is an equivalent
 JavaScript file, approach_examples.js, in which `commatize` and `trimify`
 are the properties of the `formatter` object.
 
-Here is `commatize` in JavaScript:
+This is the JavaScript implementation of `commatize`:
 
   formatter.commatize = function (s, cursor) {
     var start,
@@ -366,7 +366,7 @@ Here is `commatize` in JavaScript:
     return { text: s, cursor: cursor };
   };
 
-This is the JavaScript version of `trimify`:
+Here is `trimify` in JavaScript:
 
   formatter.trimify = function (s, cursor) {
     s = s.replace(/^\s+|\s+$/g, '');
@@ -381,15 +381,17 @@ piece of code shown here.
 The implementations above are the baseline versions of `commatize`
 and `trimify`. They each take a `cursor` argument denoting the cursor
 position and return it as part of the result. They do not modify the
-value of `cursor`. The objects that own these methods are interchangeable
-with other objects that implement the same text formatting operations
-and apply smarter policies for maintaining cursor position. The test
-runner can take any of these objects and evaluate its performance on the
-formatting operation alone or on the task of maintaining cursor position
-across the formatting operation.
+value of `cursor`.
 
-For each operation, the test runner contains a list of test cases
-defining the cursor behavior we expect to see.
+The objects that own these methods are interchangeable with other
+objects that implement the same text formatting operations and apply
+smarter policies for maintaining cursor position. The test runner can
+take any of these objects and evaluate its performance on the formatting
+operation alone or on the task of maintaining cursor position across
+the formatting operation.
+
+For each operation, the test runner contains a list of test cases defining
+the cursor-maintenance behavior that we expect to see.
 
 The test cases for `commatize` are the following.
 
@@ -413,10 +415,10 @@ like this:
   "2^500" -> "2^,500"
 
 Some users may prefer to see the cursor to the right of the comma. This
-is a subjective matter that we have to decide one way or the other. This
-test suite exemplifies the policy of consistently putting the cursor
-to the left whenever the cursor and the comma end up next to each other
-after a formatting operation.
+is a subjective matter that we have to decide one way or the other. Our
+test suite follows the policy of consistently putting the cursor to the
+left whenever the cursor and the comma end up next to each other after
+a formatting operation.
 
 It is important to bear in mind that the cursor position chosen by a
 cursor-maintenance policy may differ from the user's intention. Therefore,
@@ -434,9 +436,8 @@ The cursor-maintenance policy calls for a different cursor position:
 
   "2,^500" -> "2^,500"
 
-However, the formatted text is the same as the user's text. This means
-that the text is already in the correct format. To avoid interfering
-with navigation, the input field must let the cursor stay where the user
+However, the text is already in the correct format. To avoid interfering
+with navigation, the input field must keep the cursor where the user
 left it.
 
 The test cases for `trimify` are the following.
@@ -452,15 +453,25 @@ The test cases for `trimify` are the following.
   "  whirled    ^peas  now  " -> "whirled ^peas now"
   "   ^  " -> "^"
 
-Here we have made the decision to keep the cursor to the right of the
-space character whenever the cursor and the space appear side by side in
-the formatted text. Again we have a policy that may not agree with the
-user's preference or intention. The same caveats apply as for `commatize`.
+Here we have decided to place the cursor to the right of the space
+character whenever the cursor and the space appear side by side in the
+formatted text. Again, our policy may not agree with the user's preference
+or intention.
 
 
 ## The numerical approach
 
-class NumericalCursorFormatter(Formatter):
+When an input field applies a small variety of formatting operations,
+it is tempting to devise a specific cursor-maintenance algorithm for
+each operation. For `commatize`, we can treat the number of digits
+to the left of the cursor as an invariant to be preserved across the
+formatting operation.
+
+In the following implementation, we count the digit characters to the left
+of the cursor before calling the baseline version of `commatize` to format
+the text. Then we traverse the formatted text from left to right, counting
+digits as we go. Once we have counted the required number of digits,
+we set the cursor to the immediate right of the last digit we counted:
 
     def commatize(self, s, cursor):
         left_digit_count = cursor - s[:cursor].count(',')
@@ -475,13 +486,53 @@ class NumericalCursorFormatter(Formatter):
         cursor = pos + 1
         return (s, cursor)
 
+By counting digits from left to right and inserting the cursor to the
+immediate right of the last counted digit, we ensure that the cursor is
+placed to the left of the comma whenever the cursor and comma are found
+between the same two digits. What if we wanted to apply the policy that
+the cursor should be to the right of the comma whenever the two are
+found side by side? Then we could count digits from right to left and
+insert the cursor to the immediate left of the last counted digit.
+
+To calculate a new cursor position after `trimify`, we could count the
+non-space characters to the left of the cursor and enforce this as an
+invariant across the formatting operation. We would have to do additional
+work to account for any space characters found adjacent to the cursor.
+
+Instead of counting characters directly, we can let the baseline version
+of `trimify` do the work for us. We take the portion of the text lying to
+the left of the cursor, append an arbitrary character at its right end,
+and call `Formatter.trimify`. This reduces the space sequences to the
+left of the cursor.
+
+In most cases, the correct cursor position is one less than the length
+of the formatted left portion of the text. The exception is when the
+cursor is in the midst of spaces at the right end of the whole text. In
+this case, we end up with an extraneous space at the end of the formatted
+left portion. We handle it by setting the cursor position to the minimum
+of the length of the whole string and the length of the formatted left
+portion minus one.
+
+After this subtle reasoning, we end up with a concise Python
+implementation:
+
     def trimify(self, s, cursor):
-        left = s[:cursor]
-        left_trimmed = Formatter.trimify(self, left + '|')[0]
-        left_whitespace_count = cursor - len(left_trimmed) + 1
+        left_trimmed = Formatter.trimify(self, s[:cursor] + '|')[0]
         s = Formatter.trimify(self, s)[0]
-        cursor = min(len(s), cursor - left_whitespace_count)
+        cursor = min(len(s), len(left_trimmed) - 1)
         return (s, cursor)
+
+The numerical approach, which is what we call the act of calculating a
+cursor position according to the mechanics of each formatting operation,
+does work. The implementations above conform to the behavior defined
+by the test suite. As a general strategy for cursor maintenance, the
+numerical approach is weak stuff. In limited scenarios it may be easy
+enough to devise ad hoc rules to maintain cursor position. As formatting
+operations increase in number and complexity, it becomes burdensome to
+work out a specific calculation for each one.
+
+
+## The textual approach
 
 
 def choose_cursor_char(s):
@@ -495,8 +546,6 @@ def choose_cursor_char(s):
             return ch
     return None
 
-
-## The textual approach
 
 class TextualCursorFormatter(Formatter):
 
@@ -692,6 +741,9 @@ We can use an all-purpose strategy to guess at a sensible position
 for the cursor after an arbitrary formatting operation. Alternatively,
 we can define a precise relationship between cursor placement and text
 formatting by prescribing a fixed rule for each formatting operation.
+
+given all trouble, is cursor maintenance a good idea at all? yes, it
+may be desirable
 
 runnable test scripts in Python and JavaScript
 

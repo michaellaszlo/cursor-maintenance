@@ -162,11 +162,9 @@ class NumericalCursorFormatter(Formatter):
 
     def trimify(self, s, cursor):
         """Adjust the cursor by counting spaces to its left."""
-        left = s[:cursor]
-        left_trimmed = Formatter.trimify(self, left + '|')[0]
-        left_whitespace_count = cursor - len(left_trimmed) + 1
+        left_trimmed = Formatter.trimify(self, s[:cursor] + '|')[0]
         s = Formatter.trimify(self, s)[0]
-        cursor = min(len(s), cursor - left_whitespace_count)
+        cursor = min(len(s), len(left_trimmed) - 1)
         return (s, cursor)
 
 
@@ -455,9 +453,9 @@ class Utilities:
 
 if __name__ == '__main__':
     #Test().display()
-    Test().display(compact=True)
+    #Test().display(compact=True)
     #Test(Formatter()).run('commatize', with_cursor=False)
-    #Test(NumericalCursorFormatter()).run()
+    Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
     #Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()

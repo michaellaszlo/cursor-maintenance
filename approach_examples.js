@@ -235,12 +235,9 @@ var DemonstrateCursorMaintenance = (function () {
   };
 
   numericalCursorFormatter.trimify = function (s, cursor) {
-    var leftWhitespaceCount,
-        left = s.substring(0, cursor),
-        leftTrimmed = formatter.trimify(left + '|').text;
-    leftWhitespaceCount = cursor - leftTrimmed.length + 1;
+    var leftTrimmed = formatter.trimify(s.substring(0, cursor) + '|').text;
     s = formatter.trimify(s).text;
-    cursor = Math.min(s.length, cursor - leftWhitespaceCount);
+    cursor = Math.min(s.length, leftTrimmed.length - 1);
     return { text: s, cursor: cursor };
   };
 
@@ -521,7 +518,7 @@ var DemonstrateCursorMaintenance = (function () {
   }
 
 
-  test = new Test(retrospectiveCursorFormatter);
+  test = new Test(numericalCursorFormatter);
   test.run();
   //(new Test()).display('commatize', false);
 })();
