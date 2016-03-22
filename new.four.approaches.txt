@@ -325,7 +325,7 @@ We will demonstrate various approaches to cursor maintenance using the
 two formatting operations that we have already seen.
 
 From now on, we will refer to the numerical formatting operation as
-*commatize*. We can define it exactly by means of a Python script:
+`commatize`. We implement it in Python as follows:
 
   def commatize(self, s, cursor=None):
       s = s.replace(',', '')
@@ -337,7 +337,7 @@ From now on, we will refer to the numerical formatting operation as
       return (s, cursor)
 
 As for the formatting operation that trims and condenses space sequences,
-we call it *commatize*. Here it is in Python:
+we call it `trimify`. Here it is in Python:
 
   def trimify(self, s, cursor=None):
       s = s.strip()
@@ -347,7 +347,7 @@ we call it *commatize*. Here it is in Python:
 A test runner and a suite of test cases are provided for each operation
 in a GitHub repository. The `Formatter` class in approach_examples.py
 has the commatize and trimify methods shown here. There is an equivalent
-JavaScript file, approach_examples.js, in which commatize and trimify
+JavaScript file, approach_examples.js, in which `commatize` and `trimify`
 are the properties of the `formatter` object.
 
 Here is `commatize` in JavaScript:
@@ -375,50 +375,81 @@ This is the JavaScript version of `trimify`:
   };
 
 In the rest of this article we show only Python code for the sake of
-brevity. The GitHub repository contains equivalent JavaScript for each
-code fragment shown here.
+brevity. The GitHub repository contains equivalent JavaScript for every
+piece of code shown here.
 
-The implementations of commatize and trimify each take a cursor argument
-and return it as part of a tuple, but do not modify its value. The
-objects that own these methods are interchangeable with other objects
-that implement the same text formatting operations but have smarter
-policies for maintaining cursor position. The test runner can take
-any of these objects and evaluate its performance on the formatting
-operation alone or on the task of maintaining cursor operation across
-the formatting operation.
+The implementations above are the baseline versions of `commatize`
+and `trimify`. They each take a `cursor` argument denoting the cursor
+position and return it as part of the result. They do not modify the
+value of `cursor`. The objects that own these methods are interchangeable
+with other objects that implement the same text formatting operations
+and apply smarter policies for maintaining cursor position. The test
+runner can take any of these objects and evaluate its performance on the
+formatting operation alone or on the task of maintaining cursor position
+across the formatting operation.
 
 For each operation, the test runner contains a list of test cases
-exemplifying the cursor behavior we expect to see.
+defining the cursor behavior we expect to see.
 
-The test cases for commatize are the following.
+The test cases for `commatize` are the following.
 
-  'commatize': [
-      ('2500', 1, '2,500', 1),
-      ('12500', 3, '12,500', 4),
-      ('5,4990000', 9, '54,990,000', 10),
-      (',1,,8,,,', 3, '18', 1),
-      ('1,0,0,000', 3, '100,000', 2),
-      ('1,0,000', 2, '10,000', 1),
-      ('1,,000', 2, '1,000', 1),
-      ('1,00', 2, '100', 1),
-      ('1234', 1, '1,234', 1),
-      ('1,0234', 3, '10,234', 2),
-      ('10,00', 4, '1,000', 4)
-  ]
+  "2^500" -> "2^,500"
+  "125^00" -> "12,5^00"
+  "5,4990000^" -> "54,990,000^"
+  ",1,^,8,,," -> "1^8"
+  "1,0^,0,000" -> "10^0,000"
+  "1,^0,000" -> "1^0,000"
+  "1,^,000" -> "1^,000"
+  "1,^00" -> "1^00"
+  "1^234" -> "1^,234"
+  "1,0^234" -> "10^,234"
+  "10,0^0" -> "1,00^0"
 
-  'trimify': [
-      ('  hello  ', 8, 'hello', 5),
-      ('  hello  ', 1, 'hello', 0),
-      ('Hello,  friends.', 7, 'Hello, friends.', 7),
-      ('Hello,  friends.', 8, 'Hello, friends.', 7),
-      ('  whirled    peas  now  ', 9, 'whirled peas now', 7),
-      ('  whirled    peas  now  ', 10, 'whirled peas now', 8),
-      ('  whirled    peas  now  ', 11, 'whirled peas now', 8),
-      ('  whirled    peas  now  ', 12, 'whirled peas now', 8),
-      ('  whirled    peas  now  ', 13, 'whirled peas now', 8),
-      ('     ', 3, '', 0)
-  ]
+Clearly it's desirable to keep the cursor between the same two digits
+before and after the formatting operation. Where controversy may arise
+is the decision to place the cursor to the left of the comma in cases
+like this:
 
+  "2^500" -> "2^,500"
+
+Some users may prefer to see the cursor to the right of the comma. This
+is a subjective matter that we have to decide one way or the other. This
+test suite exemplifies the policy of consistently putting the cursor
+to the left whenever the cursor and the comma end up next to each other
+after a formatting operation.
+
+It is important to bear in mind that the cursor position chosen by a
+cursor-maintenance policy may differ from the user's intention. Therefore,
+an input field that employs cursor maintenance should reposition the
+cursor only after the text has been modified by an automatic formatting
+operation. If the text is unaltered, the input field must not meddle
+with the cursor.
+
+Consider a situation in which the user has positioned the cursor to the
+right of a comma:
+
+  "2,^500"
+
+The cursor-maintenance policy calls for a different cursor position:
+
+  "2,^500" -> "2^,500"
+
+However, the formatted text is the same as the user's text. This means
+that the text is already in the correct format. To avoid interfering
+with navigation, the input field must let the cursor stay where the user
+left it.
+
+
+  "  hello ^ " -> "hello^"
+  " ^ hello  " -> "^hello"
+  "Hello, ^ friends." -> "Hello, ^friends."
+  "Hello,  ^friends." -> "Hello, ^friends."
+  "  whirled^    peas  now  " -> "whirled^ peas now"
+  "  whirled ^   peas  now  " -> "whirled ^peas now"
+  "  whirled  ^  peas  now  " -> "whirled ^peas now"
+  "  whirled   ^ peas  now  " -> "whirled ^peas now"
+  "  whirled    ^peas  now  " -> "whirled ^peas now"
+  "   ^  " -> "^"
 
 
 ## The numerical approach
