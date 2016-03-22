@@ -439,6 +439,7 @@ that the text is already in the correct format. To avoid interfering
 with navigation, the input field must let the cursor stay where the user
 left it.
 
+The test cases for `trimify` are the following.
 
   "  hello ^ " -> "hello^"
   " ^ hello  " -> "^hello"
@@ -450,6 +451,11 @@ left it.
   "  whirled   ^ peas  now  " -> "whirled ^peas now"
   "  whirled    ^peas  now  " -> "whirled ^peas now"
   "   ^  " -> "^"
+
+Here we have made the decision to keep the cursor to the right of the
+space character whenever the cursor and the space appear side by side in
+the formatted text. Again we have a policy that may not agree with the
+user's preference or intention. The same caveats apply as for `commatize`.
 
 
 ## The numerical approach
