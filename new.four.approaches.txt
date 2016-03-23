@@ -383,6 +383,8 @@ and `trimify`. They each take a `cursor` argument denoting the cursor
 position and return it as part of the result. They do not modify the
 value of `cursor`.
 
+TODO: define "baseline"
+
 The objects that own these methods are interchangeable with other
 objects that implement the same text formatting operations and apply
 smarter policies for maintaining cursor position. The test runner can
@@ -461,11 +463,12 @@ or intention.
 
 ## The numerical approach
 
-When an input field applies a small variety of formatting operations,
-it is tempting to devise a specific cursor-maintenance algorithm for
-each operation. For `commatize`, we can treat the number of digits
-to the left of the cursor as an invariant to be preserved across the
-formatting operation.
+When an input field applies a small variety of formatting operations, it
+is tempting to devise a specific cursor-maintenance algorithm for each
+operation. We'll call this the numerical approach because it typically
+entails counting characters to calculate a new cursor position. For
+`commatize`, we can treat the number of digits to the left of the cursor
+as an invariant to be preserved across the formatting operation.
 
 In the following implementation, we count the digit characters to the left
 of the cursor before calling the baseline version of `commatize` to format
@@ -494,6 +497,8 @@ the cursor should be to the right of the comma whenever the two are
 found side by side? Then we could count digits from right to left and
 insert the cursor to the immediate left of the last counted digit.
 
+TODO: provide examples
+
 To calculate a new cursor position after `trimify`, we could count the
 non-space characters to the left of the cursor and enforce this as an
 invariant across the formatting operation. We would have to do additional
@@ -513,8 +518,7 @@ left portion. We handle it by setting the cursor position to the minimum
 of the length of the whole string and the length of the formatted left
 portion minus one.
 
-After this subtle reasoning, we end up with a concise Python
-implementation:
+After this reasoning, we end up with a concise Python implementation:
 
     def trimify(self, s, cursor):
         left_trimmed = Formatter.trimify(self, s[:cursor] + '|')[0]
@@ -522,32 +526,41 @@ implementation:
         cursor = min(len(s), len(left_trimmed) - 1)
         return (s, cursor)
 
-The numerical approach, which is what we call the act of calculating a
-cursor position according to the mechanics of each formatting operation,
-does work. The implementations above conform to the behavior defined
-by the test suite. As a general strategy for cursor maintenance, the
-numerical approach is weak stuff. In limited scenarios it may be easy
-enough to devise ad hoc rules to maintain cursor position. As formatting
-operations increase in number and complexity, it becomes burdensome to
+The numerical approach, which says that we calculate a new cursor
+position according to the mechanics of each formatting operation, does
+work. The implementations above conform to the behavior defined by the
+test suite. As a general strategy for cursor maintenance, the numerical
+approach is weak stuff. In limited scenarios it may be easy enough
+to devise ad hoc rules to maintain cursor position. With formatting
+operations of greater number and complexity, it becomes burdensome to
 work out a specific calculation for each one.
 
 
 ## The textual approach
 
+Let's try out a more systematic approach to maintaining cursor position.
+Instead of treating the cursor position as a number, let's incorporate it
+into the text as a special character. We'll identify a character that is
+not used anywhere in the text and can thus represent the cursor without
+ambiguity. We insert this special character into the text at the original
+cursor position, carry out the formatting operation, set the new cursor
+position to the location of the special character, and finally remove
+the special character.
 
-def choose_cursor_char(s):
-    used_chars = set(list(s))
-    for ch in '|^_#':
-        if ch not in used_chars:
-            return ch
-    for code in range(32, 127):
-        ch = chr(code)
-        if ch not in used_chars:
-            return ch
-    return None
+This sounds like a straightforward approach, except it doesn't specify how
+we are to format text that includes a special character for the temporary
+presence of marking the cursor location. Some formatting operations
+may work without modification regardless of the presence of the cursor
+character. Others, including `commatize` and `trimify`, require that we
+rewrite the formatting operation to work around the cursor character.
 
-
-class TextualCursorFormatter(Formatter):
+To implement `commatize` with a cursor character, we traverse the
+original text from right to left, skipping commas and collecting the
+other characters in a list. We increment a counter for each digit that
+gets added to the list, but not for the cursor character. Whenever
+the counter hits three or when we complete our traversal of the text,
+we join the list contents into a substring and clear the list. Finally,
+the substrings are joined with commas:
 
     def commatize(self, s, cursor):
         cursor_char = choose_cursor_char(s)
@@ -571,6 +584,27 @@ class TextualCursorFormatter(Formatter):
         s = s.replace(cursor_char, '')
         return (s, cursor)
 
+This cursor-maintaining `commatize` is longer than the one with the
+numerical approach because we can't use the baseline `commatize` to
+format the text. On the other hand, one might say that this code is
+easier to understand because it doesn't require the subtle reasoning of
+the numerical approach. It is nearly a pure expression of the formatting
+operation.
+
+When it comes to `trimify`, we can take advantage of the baseline
+version to format the text because the result will be correct in most
+places. `Formatter.trimify` is guaranteed to condense all space sequences
+that do not include the cursor character. All that remains is to fix up
+the immediate neighborhood of the cursor character.
+
+TODO: provide examples
+
+There can be at most one space on each side of the cursor. If there is
+a space on both sides, we delete the one on the right to conform with
+our cursor policy. The last cases to consider are the ones in which
+the cursor is at the far left or far right of the text. In these cases,
+we delete any space character found between the cursor and the text:
+
     def trimify(self, s, cursor):
         cursor_char = choose_cursor_char(s)
         s = s[:cursor] + cursor_char + s[cursor:]
@@ -583,6 +617,20 @@ class TextualCursorFormatter(Formatter):
         cursor = s.index(cursor_char)
         s = s.replace(cursor_char, '')
         return (s, cursor)
+
+The resulting code contains more steps than in the numerical approach,
+but the reasoning is no more complicated. Both implementations make use
+of the baseline version of `trimify` to do most of the work. The main
+difference is that the textual approach makes local adjustments around
+the cursor character.
+
+Thus, the textual approach may be especially well suited to maintaining
+cursor position in long text. Imagine a document-wide formatting operation
+like repagination or reindentation. The textual approach lets us enjoy
+the convenience and performance of running the existing formatting
+operation. All that remains is to tidy up the formatting around the
+cursor character, use the physical position of the cursor character to
+set the logical cursor position, and delete the cursor character.
 
 
 ## The meta approach
@@ -744,6 +792,15 @@ formatting by prescribing a fixed rule for each formatting operation.
 
 given all trouble, is cursor maintenance a good idea at all? yes, it
 may be desirable
+
+ad hoc approaches:
+  numerical -- not really an approach
+  textual -- may be the best solution when formatting large text
+
+systematic approaches:
+  meta -- theoretically a drop-in replacement, with caveats
+  retrospective -- the simplest approach of all
+
 
 runnable test scripts in Python and JavaScript
 
