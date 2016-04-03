@@ -285,9 +285,9 @@ what lies to the left and to the right of the cursor.
 
 One might argue that the text-splitting approach is almost correct. It
 only fails to work for spaces surrounding the cursor. After concatenating
-the independently formatted left and right parts, we can examine the one
-or two characters in the immediate vicinity of the cursor and adjust them
-as necessary. That would indeed work for this operation. It doesn't work
+the independently formatted left and right parts, we can examine the
+one or two characters in the vicinity of the cursor and adjust them as
+necessary. That would indeed work for this operation. It doesn't work
 in general.
 
 Recall the number-formatting operation that we described earlier. Consider
@@ -539,17 +539,18 @@ work out a specific calculation for each one.
 ## The textual approach
 
 Let's try out a more systematic approach to maintaining cursor position.
-Instead of treating the cursor position as a number, let's incorporate it
-into the text as a special character. We'll identify a character that is
-not used anywhere in the text and can thus represent the cursor without
-ambiguity. We insert this special character into the text at the original
-cursor position, carry out the formatting operation, set the new cursor
-position to the location of the special character, and finally remove
-the special character.
+Instead of treating the cursor position as a number, let's incorporate
+it into the text as a special character. We'll identify a character
+that is not used anywhere in the text and can thus represent the cursor
+without ambiguity. We insert this special character into the text at the
+original cursor position, carry out the formatting operation, and set the
+new cursor position to the location of the special character. Finally,
+we delete the special character because it was only a marker for the
+logical cursor position.
 
-This sounds like a straightforward approach, except it doesn't specify how
-we are to format text that includes a special character for the temporary
-presence of marking the cursor location. Some formatting operations
+This sounds like a straightforward approach, except it doesn't specify
+how we are to format text that includes a special character which will be
+deleted before we return the text to the user. Some formatting operations
 may work without modification regardless of the presence of the cursor
 character. Others, including `commatize` and `trimify`, require that we
 rewrite the formatting operation to work around the cursor character.
@@ -594,8 +595,8 @@ operation.
 When it comes to `trimify`, we can take advantage of the baseline
 version to format the text because the result will be correct in most
 places. `Formatter.trimify` is guaranteed to condense all space sequences
-that do not include the cursor character. All that remains is to fix up
-the immediate neighborhood of the cursor character.
+that do not include the cursor character. All that remains is to tinker
+with the immediate neighborhood of the cursor character.
 
 TODO: provide examples
 
@@ -626,14 +627,81 @@ the cursor character.
 
 Thus, the textual approach may be especially well suited to maintaining
 cursor position in long text. Imagine a document-wide formatting operation
-like repagination or reindentation. The textual approach lets us enjoy
-the convenience and performance of running the existing formatting
-operation. All that remains is to tidy up the formatting around the
-cursor character, use the physical position of the cursor character to
-set the logical cursor position, and delete the cursor character.
+like repagination or reindentation. We insert one character at the cursor
+position to serve as a proxy for the logical cursor. The textual approach
+lets us enjoy the convenience and performance of running the existing
+formatting operation. Afterward we tidy up the formatting around the
+cursor character, use the cursor character's position to set the logical
+cursor position, and delete the cursor character.
 
 
 ## The meta approach
+
+Every attempt to maintain cursor position that we have seen so far
+has been a kludge. The numerical approach deals with the text and the
+cursor as separate values which it tries to synchronize by means of ad
+hoc calculations. The textual approach incorporates the cursor into the
+text for the duration of the formatting operation, and massages the
+text around the cursor. These are haphazard ways of dealing with the
+true nature of cursor maintenance. The truth that some operations on
+text affect the position of the cursor and some don't.
+
+We can enumerate these operations precisely. An operation that inserts
+text to the right of the cursor does not affect the cursor position. An
+operation that inserts text to the left of the cursor increases the
+cursor position by the number of characters that were inserted. Similar
+statements apply to deletion: an operation that deletes text to the right
+of the cursor does not affect the cursor position, and an operation that
+deletes text to the left of the cursor reduces the cursor position by
+the number of characters that were deleted. The only remaining case is
+the one in which an operation deletes text that includes the cursor. In
+this case, the cursor position decreases by the number of characters
+that are deleted to the left of it.
+
+TODO: provide examples
+
+If these are the essential facts of cursor maintenance, we can stop
+dancing around them. We can confront them squarely by implementing
+the formatting operations on a new data type that reflects these
+facts. Instead of operating on a string that contains the text and
+separately manipulating an integer value that contains the cursor
+position, we will operate on an object that simultaneously contains
+the text and the cursor position. For each operation that we perform,
+the object will update the text and the cursor. Thus, we never have to
+fiddle with the cursor ourselves. The text-with-cursor object takes care
+of maintaining it.
+
+What are the elementary operations that the text-with-cursor data
+type must offer so that we can perform any formatting operation? The
+implementations of formatting operations that we have seen so far have
+employed many different string operations, including substring replacement
+and regular-expression matching. However, all of these can be implemented
+in terms of four elementary operations.
+
+- read
+- insert
+- delete
+- length
+
+The `read` operation reads one or more characters starting from a
+given position in the text. The `insert` operation inserts one or more
+characters at a given position. The `delete` operation deletes one or more
+characters starting from a given position. The `length` operation returns
+the length of the text so that we know what text positions are valid and
+can thus do things like traverse the text from left to right. In theory it
+would suffice to offer operations that read, insert, and delete only one
+character at a time. We are being generous for the sake of convenience.
+
+In addition to the text operations, we require a method to set the cursor
+position and another to read the cursor position. These allow us to move
+the cursor in response to user input and to update the user interface
+after a formatting operation has been performed.
+
+The following Python class implements the text-with-cursor data type
+sufficiently well for experimental purposes. The `begin` and `length`
+arguments are used without validation. There are no getter and setter
+methods for cursor position because Python lets us access the `cursor`
+property directly.
 
 class TextWithCursor:
 
@@ -657,15 +725,12 @@ class TextWithCursor:
     def length(self):
         return len(self.text)
 
-    def append(self, subtext):
-        self.insert(self.length(), subtext)
-
-    def display(self):
-        print(self.text)
-        print(self.cursor * ' ' + '↖')
-
-
-class MetaCursorFormatter:
+Now we can implement `commatize` in a very straightforward fashion. We
+traverse the text from right to left, counting digits and inserting a
+comma to the left of every third one, while deleting all other commas. The
+following implementation makes no mention of the cursor except when the
+`TextWithCursor` object is instantiated and when the `cursor` property
+is consulted at the end of the function.
 
     def commatize(self, s, cursor):
         t = TextWithCursor(s, cursor)
@@ -679,6 +744,17 @@ class MetaCursorFormatter:
                 t.insert(pos, ',')
                 digit_count = 0
         return (t.text, t.cursor)
+
+We are using `TextWithCursor` as a temporary cursor manager in order
+to make this function compatible with the other functions in this
+comparison. In a comprehensive implementation, we would maintain a
+persistent `TextWithCursor` object.
+
+The `trimify` implementation traverses the text from right to left,
+deleting every space character beyond the first one encountered in each
+sequence of space characters. This leaves at most one space character
+at the far left and far right of the text. We check for these and delete
+them if necessary.
 
     def trimify(self, s, cursor):
         t = TextWithCursor(s, cursor)
@@ -694,6 +770,29 @@ class MetaCursorFormatter:
             if t.read(pos) == ' ':
                 t.delete(pos)
         return (t.text, t.cursor)
+
+This implementation of `trimify` is straightforward except for the
+subtleties that arise when the cursor happens is in the middle of a space
+sequence prior to formatting. In other words, we're considering cases
+in which there is a space character on the immediate left and immediate
+right of the cursor. Our direction of traversal determines what happens
+in these cases. Traversing the text from right to left, and deleting all
+but the rightmost space in each sequence of space characters, has the
+effect of pushing the cursor to the left end of the space sequence. This
+the behavior specified by the formatting operation. We noted earlier
+that this was an arbitrary choice in the specification. If the `trimify`
+formatting operation were defined with the opposite choice, decreeing
+that the cursor should be pushed to the right end of a space sequence,
+we would want to traverse the text from left to right as we delete
+extraneous spaces.
+
+Thus, we must observe that even though the `TextWithCursor` object
+relieves us of the bookkeeping duties of maintaining cursor position, we
+cannot be oblivious to the effects of text operations on the cursor. The
+abstract definition of a formatting operation must specify exactly what
+happens to the cursor. When we implement the formatting operation, we
+must use the `delete` and `insert` operations in such a way that the
+underlying cursor movements will result in the specified behavior.
 
 
 ## The retrospective approach
