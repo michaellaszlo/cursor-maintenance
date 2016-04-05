@@ -191,6 +191,10 @@ implementing a cursor maintenance layer on top of text formatting
 operations. We are aiming not to eliminate user surprise but to
 minimize it.
 
+TODO: describe the bifurcated question
+- what is a good policy for deciding ambiguous cursor placement?
+- if an arbitrary policy is prescribed, how do we comply with it?
+
 
 ## Easy cases
 
@@ -637,8 +641,8 @@ cursor position, and delete the cursor character.
 
 ## The meta approach
 
-Each of our efforts so far to maintain cursor position has been a
-kludge. The numerical approach deals with the text and the cursor
+Each of our efforts thus far to maintain cursor position has been
+a kludge. The numerical approach deals with the text and the cursor
 as separate values which it tries to synchronize by means of ad hoc
 calculations. The textual approach incorporates the cursor into the text
 and massages the characters around the cursor. These are haphazard ways
@@ -667,7 +671,7 @@ position, we will operate on an object that simultaneously contains
 the text and the cursor position. For each operation that we perform,
 the object will update the text and the cursor. Thus, we never have to
 fiddle with the cursor ourselves. The text-with-cursor object takes care
-of maintaining it.
+of maintaining cursor position.
 
 What are the elementary operations that the text-with-cursor data type
 must offer so that we can perform any formatting operation? Hitherto
@@ -681,14 +685,14 @@ implemented using four elementary operations.
 - length
 
 The `read` operation reads one or more characters starting from a
-given position in the text. The `insert` operation inserts one or more
-characters at a given position. The `delete` operation deletes one or
-more characters starting from a given position. The `length` operation
-returns the length of the text so that we know what text positions
-are valid and can thus do things like traverse the text from left to
-right. In theory it would suffice to offer operations that read, insert,
-and delete one character at a time. We allow several characters at a
-time as a convenience.
+given position in the text. The `insert` operation inserts one or
+more characters at a given position. The `delete` operation deletes
+one or more characters starting from a given position. The `length`
+operation returns the length of the text so that we know what text
+positions are valid, letting us do things like traverse the text from
+left to right. In theory it would suffice to offer operations that read,
+insert, and delete one character at a time. We allow several characters
+at a time as a convenience.
 
 In addition to the text operations, we require a method to set the cursor
 position and another to read the cursor position. These allow us to move
@@ -775,8 +779,8 @@ in which there is a space character to the left and to the right of the
 cursor. The direction of traversal and deletion determines what happens
 in these cases. Going from right to left, deleting all but the rightmost
 space in each sequence of spaces, has the effect of pushing the cursor
-to the left end of the space sequence. This the behavior specified by
-the formatting operation. We noted earlier that this was an arbitrary
+to the left end of the space sequence. This is the behavior specified
+by the formatting operation. We noted earlier that this was an arbitrary
 choice in the specification. If the `trimify` formatting operation were
 defined with the opposite choice, decreeing that the cursor should be
 pushed to the right end of a space sequence, we would want to traverse
@@ -784,8 +788,8 @@ the text from left to right as we delete extraneous spaces.
 
 Thus, even though the `TextWithCursor` object relieves us of the
 bookkeeping duties of maintaining cursor position, we cannot be
-oblivious to the effects of text operations on the cursor. We have
-assumed that there is an abstract definition of each formatting operation
+oblivious to the effects of text operations on the cursor. Suppose we
+have formulated an abstract definition of each formatting operation
 that specifies the exact behavior of the cursor. In implementing the
 formatting operation, we must use the `delete` and `insert` operations
 in such a way that the underlying cursor movements will result in the
@@ -799,13 +803,69 @@ requires that we do additional work to implement a `TextWithCursor`
 equivalent for each string operation. In the particular case of our
 `commatize` and `stringify` implementations, we would have to write
 new versions of `str.replace`, `str.join`, `str.strip`, and `re.sub`
-that work with `TextWithCursor` instead of strings. All of these can be
-expressed in terms of the four elementary operations we described above.
+that work with `TextWithCursor` objects instead of plain strings. All
+of these can be expressed in terms of the four elementary operations we
+described above.
+
+After doing all this work, consider what would happen to the cursor. Would
+it move in the way we expect it to? That depends on what we expect. Take
+this crucial line in the `trimify` function:
+
+      s = re.sub('\s+', ' ', s)
+
+If our expectation is that the `re.sub` string operation is implemented
+by deleting the matching substring and then inserting the replacement
+string, and that the cursor is affected in exactly the way that we
+have defined for the elementary deletion and insertion operations on
+`TextWithCursor`, then the cursor will behave as we expect.
+
+In other words, we can use `TextWithCursor` as a drop-in replacement
+for strings as long as we say that the resulting cursor behavior is the
+correct behavior. This tautological proviso may be seen as a liability. It
+can also be viewed as an advantage because it gives us a comprehensive
+strategy to the question of cursor behavior. If we choose to abide by it,
+all ambiguities of cursor placement are resolved by fiat.
 
 
 ## The retrospective approach
 
-All of the approaches we have
+The numerical approach and textual approach require us to re-implement
+every formatting operation. The meta approach lets us preserve the
+formatting operations as they are, at the cost of implementing all string
+operations in an API for text-with-cursor objects. That would be a huge
+amount of work. We can contemplate an approach that makes no attempt to
+modify the formatting operations. Instead we treat formatting operations
+as a black box.
+
+Before formatting, we are in possession of the original text and the
+original cursor position. We feed the text into the black box of the
+formatting operation and get out of it the formatted text. Now we want
+to calculate a new cursor position. Without knowing or caring how the
+formatting operation works, we are seeking the most suitable cursor
+position in the formatted text. To do so, we compare the original text
+to the formatted text. Where should we place the cursor in the formatted
+text so that its position is most similar to the cursor's position in
+the original text?
+
+There is no clear-cut way to answer this question. One possibility that
+comes to mind is the notion of edit distance. Generally speaking, the
+edit distance from a string A to a string B is the least possible cost
+of transforming A into B by applying elementary string operations. If
+we think of the cursor as a special character in the text, what cursor
+position in the formatted text minimizes the edit distance from the
+original text?
+
+The answer remains vague because there are many possible measures of
+edit distance. Perhaps the best known is the Levenshtein distance, which
+stipulates three elementary string operations: inserting a character,
+deleting a character, or replacing (overwriting) a character. Each
+operation has unit cost per application. Thus, the Levenshtein distance
+is the minimal total number of insertions, deletions, and replacements
+necessary to transform string A into string B.
+
+
+possible measures of
+edit distance, perhaps the
 
 def levenshtein(s, t):
     n, m = len(s), len(t)
@@ -867,11 +927,8 @@ class RetrospectiveCursorFormatter(Formatter):
         get_distance = self.get_distance
         best_cost = get_distance(original, cursor, formatted, 0)
         best_pos = 0
-        #print(original[:cursor] + '^' + original[cursor:])
-        #print('  ^%s %d' % (formatted, best_cost))
         for pos in range(1, len(formatted) + 1):
             cost = get_distance(original, cursor, formatted, pos) 
-            #print('  %s^%s %f' % (formatted[:pos], formatted[pos:], cost))
             if cost < best_cost:
                 best_cost = cost
                 best_pos = pos
