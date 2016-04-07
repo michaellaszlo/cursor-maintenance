@@ -829,43 +829,34 @@ all ambiguities of cursor placement are resolved by fiat.
 
 ## The retrospective approach
 
-The numerical approach and textual approach require us to re-implement
-every formatting operation. The meta approach lets us preserve the
-formatting operations as they are, at the cost of implementing all string
-operations in an API for text-with-cursor objects. That would be a huge
-amount of work. We can contemplate an approach that makes no attempt to
-modify the formatting operations. Instead we treat formatting operations
-as a black box.
+The numerical approach and textual approach require us to write a new
+implementation for each formatting operation. The meta approach preserves
+the existing code for the formatting operations, at the cost of writing an
+equivalent text-with-cursor method for each string method. Can we avoid
+all of this work by staying in the realm of plain strings, yet keeping
+the formatting operations as they are? Consider how we might proceed if
+we carry out a formatting operation and try to find a reasonable cursor
+position afterward. We make no attempt to analyze the workings of the
+formatting operation. We treat it as a black box.
 
-Before formatting, we are in possession of the original text and the
-original cursor position. We feed the text into the black box of the
-formatting operation and get out of it the formatted text. Now we want
-to calculate a new cursor position. Without knowing or caring how the
-formatting operation works, we are seeking the most suitable cursor
-position in the formatted text. To do so, we compare the original text
-to the formatted text. Where should we place the cursor in the formatted
-text so that its position is most similar to the cursor's position in
-the original text?
+Before formatting, we have the original text and the original cursor
+position. We feed the text into the formatting operation, which emits
+the formatted text. Now we want to calculate a new cursor position. To
+do so, we compare the original text to the formatted text. Where should
+we place the cursor in the formatted text so that its position is most
+similar to the cursor's position in the original text?
 
-There is no clear-cut way to answer this question. One possibility that
-comes to mind is the notion of edit distance. Generally speaking, the
-edit distance from a string A to a string B is the least possible cost
-of transforming A into B by applying elementary string operations. If
-we think of the cursor as a special character in the text, what cursor
-position in the formatted text minimizes the edit distance from the
-original text?
+Among the various ways to answer this question is the notion of edit
+distance. Generally speaking, the edit distance from a string A to a
+string B is the cost of transforming A into B by applying elementary
+string operations. There are many possible measures of edit distance. One
+well-known measure is the Levenshtein distance, which stipulates three
+elementary string operations: inserting a character, deleting a character,
+or replacing (overwriting) a character. Each operation has unit cost
+per application. Thus, the Levenshtein distance is the minimum number
+of insertions, deletions, and replacements that transform string A into
+string B.
 
-The answer remains vague because there are many possible measures of
-edit distance. Perhaps the best known is the Levenshtein distance, which
-stipulates three elementary string operations: inserting a character,
-deleting a character, or replacing (overwriting) a character. Each
-operation has unit cost per application. Thus, the Levenshtein distance
-is the minimal total number of insertions, deletions, and replacements
-necessary to transform string A into string B.
-
-
-possible measures of
-edit distance, perhaps the
 
 def levenshtein(s, t):
     n, m = len(s), len(t)

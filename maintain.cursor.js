@@ -62,6 +62,7 @@ var MaintainCursor = (function () {
     // Incorporate the cursor character into the original string.
     s = original.substring(0, cursorPosition) + cursorChar +
         original.substring(cursorPosition);
+    print('original ' + s);
 
     // Consider every possible cursor position in the formatted string.
     bestCost = Math.max(n, m) + 1;
@@ -69,6 +70,7 @@ var MaintainCursor = (function () {
       t = formatted.substring(0, position) + cursorChar +
           formatted.substring(position);
       cost = editDistance(s, t);
+      print('  cost ' + cost + ': ' + t);
       if (cost < bestCost) {
         bestCost = cost;
         bestPosition = position;
@@ -144,7 +146,9 @@ var MaintainCursor = (function () {
       [ '$50.00', 6, '$50' ],
       [ '$51.00', 3, '$51' ],
       [ '$50.00', 3, '$50' ],
-      [ '11,11', 4, '1,111' ]
+      [ '11,11', 4, '1,111' ],
+      [ '1,4000', 3, '14,000' ],
+      [ '1300', 2, '1,300' ]
     ].forEach(function (tuple) {
       var original = tuple[0],
           cursorPosition = tuple[1],
