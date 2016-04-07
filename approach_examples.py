@@ -35,6 +35,8 @@ class Test:
             ('1,00', 2, '100', 1),
             ('1234', 1, '1,234', 1),
             ('1,0234', 3, '10,234', 2),
+            ('1,00000', 4, '100,000', 3),
+            ('1,00000', 5, '100,000', 5),
             ('10,00', 4, '1,000', 4)
         ],
         'trimify': [
@@ -452,12 +454,12 @@ class Utilities:
 
 
 if __name__ == '__main__':
-    #Test().display()
+    #Test().display('commatize')
     #Test().display(compact=True)
     #Test(Formatter()).run('commatize', with_cursor=False)
-    Test(NumericalCursorFormatter()).run()
+    #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
-    #Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
+    Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
     #Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
 

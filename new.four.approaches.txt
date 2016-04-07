@@ -829,33 +829,99 @@ all ambiguities of cursor placement are resolved by fiat.
 
 ## The retrospective approach
 
-The numerical approach and textual approach require us to write a new
-implementation for each formatting operation. The meta approach preserves
-the existing code for the formatting operations, at the cost of writing an
-equivalent text-with-cursor method for each string method. Can we avoid
-all of this work by staying in the realm of plain strings, yet keeping
-the formatting operations as they are? Consider how we might proceed if
-we carry out a formatting operation and try to find a reasonable cursor
-position afterward. We make no attempt to analyze the workings of the
-formatting operation. We treat it as a black box.
+The numerical approach and textual approach require us to write a
+new implementation for each formatting operation. The meta approach
+preserves the existing code for the formatting operations, at the
+cost of writing an equivalent text-with-cursor method for each string
+method. Can we avoid all of this work by staying in the realm of plain
+strings, yet keeping the formatting operations as they are? Consider how
+we might proceed if we make no attempt to analyze the inner workings of
+formatting operations. Instead, let us treat each formatting operation
+as a black box.
 
 Before formatting, we have the original text and the original cursor
-position. We feed the text into the formatting operation, which emits
-the formatted text. Now we want to calculate a new cursor position. To
-do so, we compare the original text to the formatted text. Where should
-we place the cursor in the formatted text so that its position is most
-similar to the cursor's position in the original text?
+position. We feed the text into a black box which emits formatted
+text. Now we want to calculate a new cursor position. To do so, we
+compare the original text to the formatted text. Where should we place
+the cursor in the formatted text so that its position is most similar
+to the cursor's position in the original text?
 
-Among the various ways to answer this question is the notion of edit
+We can answer this question by making use off the notion of edit
 distance. Generally speaking, the edit distance from a string A to a
 string B is the cost of transforming A into B by applying elementary
 string operations. There are many possible measures of edit distance. One
 well-known measure is the Levenshtein distance, which stipulates three
 elementary string operations: inserting a character, deleting a character,
 or replacing (overwriting) a character. Each operation has unit cost
-per application. Thus, the Levenshtein distance is the minimum number
-of insertions, deletions, and replacements that transform string A into
-string B.
+per application. Thus, the Levenshtein distance from string A to string
+B is the minimum number of insertions, deletions, and replacements that
+transform A into B.
+
+Suppose we address the cursor-maintenance problem by inserting a special
+character into the original text to mark the original cursor position,
+then inserting the special character into every possible position in the
+formatted text. The cursor position that results in the least Levenshtein
+distance is considered to be optimal.
+
+For example, take this original text:
+
+  13^00
+
+Applying *commatize* results in this formatted text:
+
+  1,300
+
+Here is the Levenshtein distance from 13^00 to the string obtained for
+each cursor position in the formatted text:
+
+  cost 3: ^1,300
+  cost 3: 1^,300
+  cost 2: 1,^300
+  cost 1: 1,3^00
+  cost 3: 1,30^0
+  cost 3: 1,300^
+
+We choose 1,3^00 because it yields the minimum Levenshtein distance. That
+is indeed the cursor position expected by the user.
+
+Using the Levenshtein distance in this way does not always result in a
+good cursor position.
+
+For this original text:
+
+  1,00^000
+
+The *commatize* operation emits this formatted text:
+
+  100,000
+
+Three different cursor positions result in the minimum Levenshtein
+distance of 2:
+
+  1^00,000
+  100^,000
+  100,^000
+
+It isn't clear how we would select `100^,000`, as our policy demands.
+
+If we break ties by choosing the median of the cursor positions, we
+would go wrong in other cases.
+
+For this formatting operation:
+
+  123,450^6  ->   1,234,506
+
+There are three cursor positions with the minimum Levenshtein distance of 3:
+
+  1,23^4,056
+  1,234,0^56
+  1,234,05^6
+
+Here it is the rightmost among the tied cursor positions that would be
+optimal for the user. There are other cases where the leftmost would be
+best. Hence, there is no consistent way to break ties.
+
+
 
 
 def levenshtein(s, t):
