@@ -62,7 +62,7 @@ var MaintainCursor = (function () {
     // Incorporate the cursor character into the original string.
     s = original.substring(0, cursorPosition) + cursorChar +
         original.substring(cursorPosition);
-    print('original ' + s);
+    message('original ' + s);
 
     // Consider every possible cursor position in the formatted string.
     bestCost = Math.max(n, m) + 1;
@@ -70,7 +70,7 @@ var MaintainCursor = (function () {
       t = formatted.substring(0, position) + cursorChar +
           formatted.substring(position);
       cost = editDistance(s, t);
-      print('  cost ' + cost + ': ' + t);
+      message('  cost ' + cost + ': ' + t);
       if (cost < bestCost) {
         bestCost = cost;
         bestPosition = position;
@@ -115,7 +115,13 @@ var MaintainCursor = (function () {
     return current[m];
   }
 
-  var message = (this.console ? this.console.log : this.print);
+  var message = (typeof console != 'undefined') ?
+    function () {
+      console.log.apply(console, arguments);
+    } :
+    function () {
+      print.apply(this, arguments);
+    };
 
   function test() {
     [ // Test Levenshtein distance computation.

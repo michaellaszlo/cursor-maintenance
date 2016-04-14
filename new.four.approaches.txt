@@ -935,15 +935,15 @@ we happen to prefer the second of the three positions. However, there
 are other cases with ties where the leftmost or the rightmost position
 would be preferred.
 
-Let's use the Levenshtein distance in a different manner. Take the
-original text and split it at the original cursor position, yielding
-two substrings. We'll call these the left part and the right part of
-the original text. The formatted text can be split likewise. At every
-possible cursor position in the formatted text, we compute the Levenshtein
-distance from the left part of the original text to the left part of the
-formatted text, and from the right part of the original text to the right
-part of the formatted text. The sum of these distances is the score that
-we want to minimize.
+We can use the Levenshtein distance in a different manner. Let's
+take the original text and split it at the original cursor position,
+yielding two substrings. We'll call these the left part and the right
+part of the original text. The formatted text can be split likewise. At
+every possible cursor position in the formatted text, we compute the
+Levenshtein distance from the left part of the original text to the left
+part of the formatted text, and from the right part of the original text
+to the right part of the formatted text. The sum of these distances is
+the score that we want to minimize.
 
   def split_levenshtein(s, s_cursor, t, t_cursor):
       cursor_char = choose_cursor_char(s + t)
