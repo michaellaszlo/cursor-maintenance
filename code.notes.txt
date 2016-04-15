@@ -1,0 +1,58 @@
+
+
+----
+Code that I've written so far
+
+1. simple web demo of retrospective approach with Levenshtein distance
+- format.number.js
+  - implements a primitive variant of commatize: input must match /^\d*$/
+- maintain.cursor.js
+  - uses Levenshtein by inserting a special character at the cursor position
+- test.maintain.js
+  - two-line command-line wrapper for maintain.cursor.js
+- demo.html
+  - provides a single web input; prints Levenshtein scores to console
+
+2. fancy web page to test a scoring formula for the retrospective approach
+- experiment.html
+    - implements no automatic formatting
+  - you manually set the original text and formatted text
+  - you set the original cursor position
+  - scores are calculated for every position in the formatted text
+  - the possible positions are listed together with the resulting scores
+  - hover on a row for a report of character counts split around the cursor
+  - I used this interface to work out the frequency-balancing formula
+
+3. command-line demonstration of four approaches
+- approach_examples.py
+- approach_examples.js
+
+
+---
+Code that I should write now
+
+1. a demo page that simultaneously implements every approach
+- three formatting operations: commatize, trimify, manual edit
+- eight cursor maintainers
+  - dumb: right end (move cursor to end of input)
+  - dumb: constant (keep cursor position constant as far as possible)
+  - numerical (ad hoc)
+  - textual
+  - meta
+  - retrospective: Levenshtein with textual cursor
+  - retrospective: split Levenshtein
+  - retrospective: balanced frequencies
+- score inspection for the retrospective approaches
+
+2. a demo page that shows how to implement cursor maintenance in real life
+  - fewer input boxes
+    - large, attractive styling
+    - mock layout for the whole page
+  - only four approaches
+    - numerical
+    - textual
+    - meta
+    - retrospective with balanced frequencies
+  - elaborate documentation in the code and on GitHub
+
+
