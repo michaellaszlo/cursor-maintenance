@@ -63,17 +63,17 @@ The *commatize* operation takes a string representing a whole number
 and inserts commas so that each group of three digits is separated by
 a comma, proceeding from right to left. For example:
 
-`"3141"` &rarrow; `"3,141"`
+`"3141"` &rarr; `"3,141"`
 
 Any incorrect commas are removed:
 
-`",3141,592,65"` &rarrow; `"314,159,265"`
+`",3141,592,65"` &rarr; `"314,159,265"`
 
 The *trimify* operation strips space characters from the beginning and
 end of a string, and condenses all other sequences of space characters
 into one space each. For example:
 
-`" Hello,   world.  Hi  there.  " &rarrow; `"Hello, world. Hi there."`
+`" Hello,   world.  Hi  there.  "` &rarr; `"Hello, world. Hi there."`
 
 Only the visible space character, `' '` (code 32), is considered by
 trimify, not other kinds of whitespace such as tab and newline characters.
