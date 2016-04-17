@@ -15,7 +15,7 @@ Code that I've written so far
 
 2. fancy web page to test a scoring formula for the retrospective approach
 - experiment.html
-    - implements no automatic formatting
+  - implements no automatic formatting
   - you manually set the original text and formatted text
   - you set the original cursor position
   - scores are calculated for every position in the formatted text
@@ -31,7 +31,7 @@ Code that I've written so far
 ---
 Code that I should write now
 
-1. a demo page that simultaneously implements every approach
+1. a page for experimentation, simultaneously implementing every approach
 - three formatting operations: commatize, trimify, manual edit
 - eight cursor maintainers
   - dumb: right end (move cursor to end of input)
