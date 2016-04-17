@@ -15,7 +15,7 @@ var CursorMaintenanceComparison = (function () {
         text.substring(cursor);
   }
 
-  function handleInput(input, operation) {
+  function enableInput(input, operation) {
     function react() {
       var originalText = input.value,
           originalCursor = input.selectionStart,
@@ -38,6 +38,9 @@ var CursorMaintenanceComparison = (function () {
     });
   }
 
+  function enableButton(button, operation, approach) {
+  }
+
   function make(tag, options) {
     var element = document.createElement(tag);
     [ 'className', 'id', 'innerHTML' ].forEach(function (property) {
@@ -56,7 +59,7 @@ var CursorMaintenanceComparison = (function () {
         rows = table.getElementsByTagName('tr'),
         inputRow = document.getElementById('inputs'),
         operations = [ 'commatize', 'trimify' ],
-        i, row, cells, cell, approach;
+        i, row, cells, approach;
     // Insert input elements at top of table.
     operations.forEach(function (operation) {
       inputs[operation] = make('input', { parent:
@@ -72,18 +75,28 @@ var CursorMaintenanceComparison = (function () {
         continue;
       }
       operations.forEach(function (operation) {
-        cell = make('td', { parent: row });
+        var button,
+            cell = make('td', { parent: row });
         outputs[operation][approach] = make('span',
             { parent: cell, className: 'output' });
         if (row.className.indexOf('retrospective') != -1) {
-          make('button', { innerHTML: 'scores', parent: cell });
+          button = make('button', { innerHTML: 'scores', parent: cell });
+          enableButton(button, operation, approach);
         }
       });
     }
     // Attach input handlers.
     operations.forEach(function (operation) {
-      handleInput(inputs[operation], operation);
+      enableInput(inputs[operation], operation);
     });
+    // Insert prefabricated data.
+    inputs.commatize.value = '12,3,45';
+    inputs.commatize.setSelectionRange(5, 5);
+    inputs.commatize.click();
+    inputs.trimify.value = '   The   quick  brown   fox   jumps  ';
+    inputs.trimify.setSelectionRange(7, 7);
+    inputs.trimify.click();
+    inputs.commatize.focus();
   }
 
   return {
