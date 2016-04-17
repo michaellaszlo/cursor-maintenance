@@ -21,8 +21,11 @@ table {
   border-collapse: collapse;
 }
 td {
-  border: 1px solid #ddd;
+  border: 1px solid #f2f2f2;
+  padding: 2px 5px;
+  text-align: left;
 }
 td.label {
   color: #666;
+  text-align: right;
 }
