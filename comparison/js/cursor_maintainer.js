@@ -365,4 +365,7 @@ var CursorMaintainer = (function () {
     return this.adjustCursor(original, cursor, formatter.trimify);
   };
 
+  return {
+    formatter: formatter
+  };
 })();
