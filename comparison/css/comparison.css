@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  color: #222;
+}
+
+#wrapper {
+  padding: 10px 20px;
+}
+
+input {
+  outline: none;
+}
+
+table {
+  border-collapse: collapse;
+}
+td {
+  border: 1px solid #ddd;
+}
+td.label {
+  color: #666;
+}
