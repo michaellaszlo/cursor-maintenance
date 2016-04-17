@@ -20,8 +20,18 @@ var CursorMaintenanceComparison = (function () {
       var originalText = input.value,
           originalCursor = input.selectionStart,
           formattedText = formatter[operation](originalText).text;
+      // Echo input. Show formatted text without cursor.
       setOutput(outputs[operation].original, originalText, originalCursor);
       setOutput(outputs[operation].formatted, formattedText);
+      // Show text formatted with cursor maintenance.
+      Object.keys(outputs[operation]).forEach(function (approach) {
+        var result;
+        if (!(approach in maintainer)) {
+          return;
+        }
+        result = maintainer[approach][operation](originalText, originalCursor);
+        setOutput(outputs[operation][approach], result.text, result.cursor);
+      });
     }
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
@@ -46,7 +56,7 @@ var CursorMaintenanceComparison = (function () {
         rows = table.getElementsByTagName('tr'),
         inputRow = document.getElementById('inputs'),
         operations = [ 'commatize', 'trimify' ],
-        i, row, cells, cell, kind;
+        i, row, cells, cell, approach;
     // Insert input elements at top of table.
     operations.forEach(function (operation) {
       inputs[operation] = make('input', { parent:
@@ -57,14 +67,13 @@ var CursorMaintenanceComparison = (function () {
     for (i = 0; i < rows.length; ++i) {
       row = rows[i];
       cells = row.getElementsByTagName('td');
-      kind = cells[0].innerHTML.replace(/\s+/g, '');
+      approach = cells[0].innerHTML.replace(/\s+/g, '');
       if (row.className.indexOf('outputs') == -1) {
         continue;
       }
-      console.log(kind);
       operations.forEach(function (operation) {
         cell = make('td', { parent: row });
-        outputs[operation][kind] = make('span',
+        outputs[operation][approach] = make('span',
             { parent: cell, className: 'output' });
         if (row.className.indexOf('retrospective') != -1) {
           make('button', { innerHTML: 'scores', parent: cell });

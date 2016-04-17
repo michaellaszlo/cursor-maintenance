@@ -366,6 +366,9 @@ var CursorMaintainer = (function () {
   };
 
   return {
-    formatter: formatter
+    formatter: formatter,
+    numerical: numericalCursorFormatter,
+    textual: textualCursorFormatter,
+    meta: metaCursorFormatter
   };
 })();
