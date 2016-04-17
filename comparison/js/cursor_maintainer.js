@@ -5,7 +5,7 @@ var CursorMaintainer = (function () {
       numericalCursorFormatter,
       textualCursorFormatter,
       metaCursorFormatter,
-      retrospectiveCursorFormatter,
+      retrospectiveCursorFormatters,
       test;
 
 
@@ -271,6 +271,13 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
+  function textualLevenshtein(s, sCursor, t, tCursor) {
+    var cursorChar = chooseCursorChar(s + t);
+    s = s.substring(0, sCursor) + cursorChar + s.substring(sCursor);
+    t = t.substring(0, tCursor) + cursorChar + t.substring(tCursor);
+    return levenshtein(s, t);
+  }
+
   function splitLevenshtein(s, sCursor, t, tCursor) {
     var cursorChar = chooseCursorChar(s + t),
         left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
@@ -334,21 +341,16 @@ var CursorMaintainer = (function () {
     return cost;
   }
 
-  retrospectiveCursorFormatter = {
-    getDistance: balanceFrequencies
-  };
+  retrospectiveCursorFormatters = {};
 
-  retrospectiveCursorFormatter.adjustCursor = function (original, cursor,
-      formatter) {
-    var formatted = formatter(original).text,
-        cursorChar = chooseCursorChar(original + formatted),
-        getDistance = this.getDistance,
-        bestCost = getDistance(original, cursor, formatted, 0),
+  function retrospect(original, cursor, operation, distance) {
+    var formatted = formatter[operation](original).text,
+        bestCost = distance(original, cursor, formatted, 0),
         bestPos = 0,
         cost,
         pos;
     for (pos = 1; pos <= formatted.length; ++pos) {
-      cost = getDistance(original, cursor, formatted, pos);
+      cost = distance(original, cursor, formatted, pos);
       if (cost < bestCost) {
         bestCost = cost;
         bestPos = pos;
@@ -357,18 +359,40 @@ var CursorMaintainer = (function () {
     return { text: formatted, cursor: bestPos };
   };
 
-  retrospectiveCursorFormatter.commatize = function (original, cursor) {
-    return this.adjustCursor(original, cursor, formatter.commatize);
+  retrospectiveCursorFormatters.textualLevenshtein = {
+    commatize: function (original, cursor) {
+      return retrospect(original, cursor, 'commatize', textualLevenshtein);
+    },
+    trimify: function (original, cursor) {
+      return retrospect(original, cursor, 'trimify', textualLevenshtein);
+    }
   };
 
-  retrospectiveCursorFormatter.trimify = function (original, cursor) {
-    return this.adjustCursor(original, cursor, formatter.trimify);
+  retrospectiveCursorFormatters.splitLevenshtein = {
+    commatize: function (original, cursor) {
+      return retrospect(original, cursor, 'commatize', splitLevenshtein);
+    },
+    trimify: function (original, cursor) {
+      return retrospect(original, cursor, 'trimify', splitLevenshtein);
+    }
+  };
+
+  retrospectiveCursorFormatters.balancefrequencies = {
+    commatize: function (original, cursor) {
+      return retrospect(original, cursor, 'commatize', balanceFrequencies);
+    },
+    trimify: function (original, cursor) {
+      return retrospect(original, cursor, 'trimify', balanceFrequencies);
+    }
   };
 
   return {
     formatter: formatter,
     numerical: numericalCursorFormatter,
     textual: textualCursorFormatter,
-    meta: metaCursorFormatter
+    meta: metaCursorFormatter,
+    textualLevenshtein: retrospectiveCursorFormatters.textualLevenshtein,
+    splitLevenshtein: retrospectiveCursorFormatters.splitLevenshtein,
+    balancefrequencies: retrospectiveCursorFormatters.balancefrequencies
   };
 })();
