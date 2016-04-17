@@ -4,13 +4,27 @@ var CursorMaintenanceComparison = (function () {
       inputs = {},
       outputs = {};
 
-  function handleInput(element, handler) {
+  function setOutput(element, text, cursor) {
+    // Note that the range test is false when cursor is null or undefined.
+    if (!(cursor >= 0 && cursor <= text.length)) {
+      element.innerHTML = text;
+      return;
+    }
+    element.innerHTML = '<span class="start"></span>' +
+        text.substring(0, cursor) + '<span class="cursor"></span>' +
+        text.substring(cursor);
+  }
+
+  function handleInput(input, operation) {
+    function react() {
+      var originalText = input.value,
+          originalCursor = input.selectionStart,
+          formattedText = formatter[operation](originalText).text;
+      setOutput(outputs[operation].original, originalText, originalCursor);
+      setOutput(outputs[operation].formatted, formattedText);
+    }
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
-      element['on' + eventName] = function () {
-        var text = element.value,
-            cursor = element.selectionStart;
-        handler(text, cursor);
-      };
+      input['on' + eventName] = react;
     });
   }
 
@@ -33,19 +47,13 @@ var CursorMaintenanceComparison = (function () {
         inputRow = document.getElementById('inputs'),
         operations = [ 'commatize', 'trimify' ],
         i, row, cells, cell, kind;
+    // Insert input elements at top of table.
     operations.forEach(function (operation) {
       inputs[operation] = make('input', { parent:
           make('td', { parent: inputRow }) });
+      outputs[operation] = {};
     });
-    handleInput(inputs.commatize, function (originalText, originalCursor) {
-      var formattedText = formatter.commatize(originalText).text;
-      console.log('commatize: "' + originalText + '", ' + originalCursor +
-          '  ->  "' + formattedText + '" ');
-    });
-    outputs = {
-      commatize: {},
-      trimify: {}
-    };
+    // Traverse rows and insert cells with output elements.
     for (i = 0; i < rows.length; ++i) {
       row = rows[i];
       cells = row.getElementsByTagName('td');
@@ -56,12 +64,17 @@ var CursorMaintenanceComparison = (function () {
       console.log(kind);
       operations.forEach(function (operation) {
         cell = make('td', { parent: row });
-        outputs[operation][kind] = make('span', { parent: cell });
+        outputs[operation][kind] = make('span',
+            { parent: cell, className: 'output' });
         if (row.className.indexOf('retrospective') != -1) {
           make('button', { innerHTML: 'scores', parent: cell });
         }
       });
     }
+    // Attach input handlers.
+    operations.forEach(function (operation) {
+      handleInput(inputs[operation], operation);
+    });
   }
 
   return {
