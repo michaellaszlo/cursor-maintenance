@@ -48,7 +48,7 @@ td.label {
   background: #f8f2d9;
   border-color: #f8f2d9;
 }
-.noCursor .output {
+.unmaintained .output {
   background: #e1ebe9;
   border-color: #e1ebe9;
 }
@@ -58,7 +58,7 @@ td.label {
 }
 td button {
   position: absolute;
-  right: 0;
+  right: 10px;
   bottom: 6px;
   font-family: sans-serif;
   font-size: 13px;
@@ -73,5 +73,11 @@ td button {
 td button:hover {
   background: #e4e4e4;
   color: #333;
-  border-color: #ccc
+  border-color: #bbb;
+}
+td button.active, td button.active:hover {
+  background: #d8d8d8;
+  color: #222;
+  border-color: #d8d8d8;
+  cursor: default;
 }

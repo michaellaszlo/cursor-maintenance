@@ -2,7 +2,9 @@ var CursorMaintenanceComparison = (function () {
   var maintainer = CursorMaintainer,
       formatter = maintainer.formatter,
       inputs = {},
-      outputs = {};
+      outputs = {},
+      activeButtons = {},
+      scores = {};
 
   function setOutput(element, text, cursor) {
     // Note that the range test is false when cursor is null or undefined.
@@ -32,13 +34,44 @@ var CursorMaintenanceComparison = (function () {
         result = maintainer[approach][operation](originalText, originalCursor);
         setOutput(outputs[operation][approach], result.text, result.cursor);
       });
+      if (activeButtons[operation]) {
+        activeButtons[operation].click();
+      }
     }
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
     });
   }
 
+  // List all cursor positions and scores for a retrospective approach.
   function enableButton(button, operation, approach) {
+    button.onclick = function () {
+      var input = inputs[operation],
+          text = input.value,
+          cursor = input.selectionStart,
+          result = maintainer[approach][operation](text, cursor),
+          container = scores[operation],
+          activeButton = activeButtons[operation],
+          parts = [],
+          i;
+      container.innerHTML = '';
+      for (i = 0; i < result.scores.length; ++i) {
+        //parts.push(i + ' ' + result.scores[i]);
+        make('span', { className: 'output', parent: container,
+            innerHTML: '<span class="start"></span>' +
+                result.text.substring(0, i) + '<span class="cursor"></span>' +
+                result.text.substring(i) });
+        make('span', { parent: container, className: 'score',
+            innerHTML: ' ' + result.scores[i] });
+        make('br', { parent: container });
+      }
+      if (activeButton && activeButton != button) {
+        activeButton.className =
+            activeButton.className.replace(/\s*active\s*/g, '');
+      }
+      activeButtons[operation] = button;
+      button.className += ' active';
+    };
   }
 
   function make(tag, options) {
@@ -58,13 +91,16 @@ var CursorMaintenanceComparison = (function () {
     var table = document.getElementById('comparisons'),
         rows = table.getElementsByTagName('tr'),
         inputRow = document.getElementById('inputs'),
+        scoreRow = document.getElementById('scores'),
         operations = [ 'commatize', 'trimify' ],
         i, row, cells, approach;
-    // Insert input elements at top of table.
+    // Insert input elements at top, score areas at bottom.
     operations.forEach(function (operation) {
       inputs[operation] = make('input', { parent:
           make('td', { parent: inputRow }) });
       outputs[operation] = {};
+      scores[operation] = make('div', { className: 'scores', parent:
+          make('td', { parent: scoreRow }) });
     });
     // Traverse rows and insert cells with output elements.
     for (i = 0; i < rows.length; ++i) {
@@ -76,12 +112,13 @@ var CursorMaintenanceComparison = (function () {
       }
       operations.forEach(function (operation) {
         var button,
-            cell = make('td', { parent: row });
-        outputs[operation][approach] = make('span',
-            { parent: cell, className: 'output' });
+            cell = make('td', { parent: row }),
+            output = outputs[operation][approach] = make('span',
+                { parent: cell, className: 'output' });
         if (row.className.indexOf('retrospective') != -1) {
           button = make('button', { innerHTML: 'scores', parent: cell });
           enableButton(button, operation, approach);
+          output.button = button;
         }
       });
     }
@@ -91,12 +128,14 @@ var CursorMaintenanceComparison = (function () {
     });
     // Insert prefabricated data.
     inputs.commatize.value = '12,3,45';
-    inputs.commatize.setSelectionRange(5, 5);
+    inputs.commatize.setSelectionRange(3, 3);
     inputs.commatize.click();
     inputs.trimify.value = '   The   quick  brown   fox   jumps  ';
     inputs.trimify.setSelectionRange(7, 7);
     inputs.trimify.click();
     inputs.commatize.focus();
+    outputs.commatize.splitLevenshtein.button.click();
+    outputs.trimify.splitLevenshtein.button.click();
   }
 
   return {

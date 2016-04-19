@@ -348,15 +348,17 @@ var CursorMaintainer = (function () {
         bestCost = distance(original, cursor, formatted, 0),
         bestPos = 0,
         cost,
-        pos;
+        pos,
+        scores = [ bestCost ];
     for (pos = 1; pos <= formatted.length; ++pos) {
       cost = distance(original, cursor, formatted, pos);
       if (cost < bestCost) {
         bestCost = cost;
         bestPos = pos;
       }
+      scores.push(cost);
     }
-    return { text: formatted, cursor: bestPos };
+    return { text: formatted, cursor: bestPos, scores: scores };
   };
 
   retrospectiveCursorFormatters.textualLevenshtein = {
