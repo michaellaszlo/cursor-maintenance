@@ -4,6 +4,7 @@ var CursorMaintenanceComparison = (function () {
       inputs = {},
       outputs = {},
       activeButtons = {},
+      activeInputMirror,
       scores = {};
 
   function setOutput(element, text, cursor) {
@@ -37,6 +38,12 @@ var CursorMaintenanceComparison = (function () {
       if (activeButtons[operation]) {
         activeButtons[operation].click();
       }
+      if (activeInputMirror) {
+        activeInputMirror.className =
+            activeInputMirror.className.replace(/\s*active\s*/g, '');
+      }
+      activeInputMirror = outputs[operation].original;
+      activeInputMirror.className += ' active';
     }
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
