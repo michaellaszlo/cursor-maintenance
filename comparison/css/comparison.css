@@ -36,6 +36,7 @@ td {
   padding: 8px 10px;
   text-align: left;
   position: relative;
+  vertical-align: top;
 }
 td.label {
   color: #666;
@@ -56,6 +57,7 @@ td.label {
   border: 1px solid #ad4246;
   margin: 0 -1px;
 }
+
 td button {
   position: absolute;
   right: 10px;
@@ -73,11 +75,19 @@ td button {
 td button:hover {
   background: #e4e4e4;
   color: #333;
-  border-color: #bbb;
+  border-color: #bb;
 }
 td button.active, td button.active:hover {
   background: #d8d8d8;
   color: #222;
   border-color: #d8d8d8;
   cursor: default;
+}
+
+.scoreItem {
+  margin-bottom: 10px;
+}
+.scoreItem .score {
+  margin-left: 4px;
+  color: #333;
 }

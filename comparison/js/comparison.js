@@ -51,19 +51,19 @@ var CursorMaintenanceComparison = (function () {
           cursor = input.selectionStart,
           result = maintainer[approach][operation](text, cursor),
           container = scores[operation],
+          item,
           activeButton = activeButtons[operation],
           parts = [],
           i;
       container.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
-        //parts.push(i + ' ' + result.scores[i]);
-        make('span', { className: 'output', parent: container,
+        item = make('div', { parent: container, className: 'scoreItem' });
+        make('span', { className: 'output', parent: item,
             innerHTML: '<span class="start"></span>' +
                 result.text.substring(0, i) + '<span class="cursor"></span>' +
                 result.text.substring(i) });
-        make('span', { parent: container, className: 'score',
+        make('span', { parent: item, className: 'score',
             innerHTML: ' ' + result.scores[i] });
-        make('br', { parent: container });
       }
       if (activeButton && activeButton != button) {
         activeButton.className =
@@ -99,7 +99,7 @@ var CursorMaintenanceComparison = (function () {
       inputs[operation] = make('input', { parent:
           make('td', { parent: inputRow }) });
       outputs[operation] = {};
-      scores[operation] = make('div', { className: 'scores', parent:
+      scores[operation] = make('div', { className: 'scoreList', parent:
           make('td', { parent: scoreRow }) });
     });
     // Traverse rows and insert cells with output elements.
