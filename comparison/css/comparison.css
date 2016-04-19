@@ -71,7 +71,7 @@ input {
   border-color: #bcd2d6;
 }
 .output.active .cursor {
-  animation: blinker 1.1s ease-in-out infinite;
+  animation: blinker 1.0s ease-out infinite;
 }
 @keyframes blinker {  
   50% { opacity: 0.0; }

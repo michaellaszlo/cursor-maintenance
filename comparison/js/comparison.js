@@ -45,6 +45,10 @@ var CursorMaintenanceComparison = (function () {
       activeInputMirror = outputs[operation].original;
       activeInputMirror.className += ' active';
     }
+    input.onblur = function () {
+      outputs[operation].original.className =
+          outputs[operation].original.className.replace(/\s*active\s*/g, '');
+    };
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
     });
@@ -141,6 +145,7 @@ var CursorMaintenanceComparison = (function () {
     });
     // Insert prefabricated data.
     inputs.commatize.value = '12,3,45';
+    inputs.commatize.value = '12,3,456789012345678';
     inputs.commatize.setSelectionRange(3, 3);
     inputs.commatize.click();
     inputs.trimify.value = '   The   quick  brown   fox   jumps  ';
