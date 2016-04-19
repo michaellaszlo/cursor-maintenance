@@ -99,8 +99,8 @@ var CursorMaintenanceComparison = (function () {
         i, row, cells, approach;
     // Insert input elements at top, score areas at bottom.
     operations.forEach(function (operation) {
-      inputs[operation] = make('input', { parent:
-          make('td', { parent: inputRow }) });
+      //inputs[operation] = make('input', { parent:
+      //    make('td', { parent: inputRow }) });
       outputs[operation] = {};
       scores[operation] = make('div', { className: 'scoreList', parent:
           make('td', { parent: scoreRow }) });
@@ -108,16 +108,19 @@ var CursorMaintenanceComparison = (function () {
     // Traverse rows and insert cells with output elements.
     for (i = 0; i < rows.length; ++i) {
       row = rows[i];
-      cells = row.getElementsByTagName('td');
-      approach = cells[0].innerHTML.replace(/\s+/g, '');
       if (row.className.indexOf('outputs') == -1) {
         continue;
       }
+      cells = row.getElementsByTagName('td');
+      approach = cells[0].innerHTML.replace(/\s+/g, '');
       operations.forEach(function (operation) {
         var button,
             cell = make('td', { parent: row }),
             output = outputs[operation][approach] = make('span',
                 { parent: cell, className: 'output' });
+        if (approach == 'original') {
+          inputs[operation] = make('input', { parent: cell });
+        }
         if (row.className.indexOf('retrospective') != -1) {
           button = make('button', { innerHTML: 'scores', parent: cell });
           enableButton(button, operation, approach);

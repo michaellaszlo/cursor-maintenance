@@ -13,18 +13,6 @@ body {
   padding: 10px 20px;
 }
 
-input {
-  outline: none;
-}
-input, .output {
-  font-family: monospace;
-  font-size: 16px;
-  letter-spacing: 1px;
-  padding: 2px;
-  border: 1px solid #708bb1;
-  width: 100%;
-}
-
 table {
   border-collapse: collapse;
   table-layout: fixed;
@@ -45,6 +33,24 @@ td.label {
   text-align: right;
   padding-left: 0;
   border-left: 0;
+}
+
+input, .output {
+  font-family: monospace;
+  font-size: 16px;
+  letter-spacing: 1px;
+  padding: 2px;
+  border: 1px solid transparent;
+  overflow: hidden;
+  width: 100%;
+}
+input {
+  outline: none;
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  background: transparent;
+  color: transparent;
 }
 
 .output {
@@ -70,7 +76,7 @@ td button {
   padding: 1px 3px 2px;
   background: #eee;
   color: #666;
-  border: 2px solid #ddd;
+  border: 2px solid #eee;
   border-radius: 3px;
   cursor: pointer;
   outline: none;
@@ -81,9 +87,9 @@ td button:hover {
   border-color: #c0be9e;
 }
 td button.active, td button.active:hover {
-  background: #e8e8de;
-  color: #222;
-  border-color: #e8e8de;
+  background: #c9c9c1;
+  color: #111;
+  border-color: #c9c9c1;
   cursor: default;
 }
 
@@ -91,8 +97,8 @@ td button.active, td button.active:hover {
   margin-bottom: 10px;
 }
 .scoreItem .output {
-  background: #e8e8de;
-  border-color: #e8e8de;
+  background: #deded5;
+  border-color: #deded5;
 }
 .scoreItem .score {
   margin-left: 4px;
