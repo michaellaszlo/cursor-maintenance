@@ -29,10 +29,12 @@ table {
   border-collapse: collapse;
   table-layout: fixed;
   width: 750px;
+  background: #fff;
 }
 td {
   overflow: hidden;
   border-bottom: 1px solid #f2f2f2;
+  border-left: 2px solid #e8e8e8;
   padding: 8px 10px;
   text-align: left;
   position: relative;
@@ -42,6 +44,7 @@ td.label {
   color: #666;
   text-align: right;
   padding-left: 0;
+  border-left: 0;
 }
 
 .output {
@@ -74,20 +77,31 @@ td button {
 }
 td button:hover {
   background: #e4e4e4;
-  color: #333;
-  border-color: #bb;
+  color: #222;
+  border-color: #c0be9e;
 }
 td button.active, td button.active:hover {
-  background: #d8d8d8;
+  background: #e8e8de;
   color: #222;
-  border-color: #d8d8d8;
+  border-color: #e8e8de;
   cursor: default;
 }
 
 .scoreItem {
   margin-bottom: 10px;
 }
+.scoreItem .output {
+  background: #e8e8de;
+  border-color: #e8e8de;
+}
 .scoreItem .score {
   margin-left: 4px;
-  color: #333;
+  color: #444;
+}
+.scoreItem.best .output {
+  background: #f8f2d9;
+  border-color: #f8f2d9;
+}
+.scoreItem.best .score {
+  color: #000;
 }

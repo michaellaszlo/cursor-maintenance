@@ -58,6 +58,9 @@ var CursorMaintenanceComparison = (function () {
       container.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
         item = make('div', { parent: container, className: 'scoreItem' });
+        if (i == result.cursor) {
+          item.className += ' best';
+        }
         make('span', { className: 'output', parent: item,
             innerHTML: '<span class="start"></span>' +
                 result.text.substring(0, i) + '<span class="cursor"></span>' +
