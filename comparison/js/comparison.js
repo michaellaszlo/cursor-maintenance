@@ -65,17 +65,18 @@ var CursorMaintenanceComparison = (function () {
           item,
           activeButton = activeButtons[operation],
           parts = [],
-          i;
+          i, output;
       container.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
         item = make('div', { parent: container, className: 'scoreItem' });
         if (i == result.cursor) {
           item.className += ' best';
         }
-        make('span', { className: 'output', parent: item,
+        output = make('span', { className: 'output', parent: item,
             innerHTML: '<span class="start"></span>' +
                 result.text.substring(0, i) + '<span class="cursor"></span>' +
                 result.text.substring(i) });
+        output.style.width = '250px';
         make('span', { parent: item, className: 'score',
             innerHTML: ' ' + result.scores[i] });
       }
@@ -98,6 +99,12 @@ var CursorMaintenanceComparison = (function () {
     if ('parent' in options) {
       options.parent.appendChild(element);
     }
+    if ('attributes' in options) {
+      options.attributes.forEach(function (attribute) {
+        element[attribute.name] = attribute.value;
+        console.log(attribute.name, attribute.value);
+      });
+    }
     return element;
   }
 
@@ -107,6 +114,7 @@ var CursorMaintenanceComparison = (function () {
         inputRow = document.getElementById('inputs'),
         scoreRow = document.getElementById('scores'),
         operations = [ 'commatize', 'trimify' ],
+        maxLengths = { commatize: 20, trimify: 60 },
         i, row, cells, approach;
     // Insert input elements at top, score areas at bottom.
     operations.forEach(function (operation) {
@@ -130,7 +138,9 @@ var CursorMaintenanceComparison = (function () {
             output = outputs[operation][approach] = make('span',
                 { parent: cell, className: 'output' });
         if (approach == 'original') {
-          inputs[operation] = make('input', { parent: cell });
+          inputs[operation] = make('input', { parent: cell,
+              attributes: [ { name: 'type', value: 'text' },
+              { name: 'maxLength', value: maxLengths[operation] } ] });
         }
         if (row.className.indexOf('retrospective') != -1) {
           button = make('button', { innerHTML: 'scores', parent: cell });
@@ -145,7 +155,6 @@ var CursorMaintenanceComparison = (function () {
     });
     // Insert prefabricated data.
     inputs.commatize.value = '12,3,45';
-    inputs.commatize.value = '12,3,456789012345678';
     inputs.commatize.setSelectionRange(3, 3);
     inputs.commatize.click();
     inputs.trimify.value = '   The   quick  brown   fox   jumps  ';
