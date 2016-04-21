@@ -16,7 +16,6 @@ body {
 table {
   border-collapse: collapse;
   table-layout: fixed;
-  width: 750px;
   background: #fff;
 }
 td {
@@ -42,7 +41,7 @@ input, .output {
   padding: 2px;
   border: 1px solid transparent;
   overflow: hidden;
-  width: 250px;
+  width: 100%;
 }
 input {
   outline: none;
@@ -78,12 +77,12 @@ input {
 }
 
 td button {
-  position: absolute;
-  right: 10px;
-  bottom: 6px;
+  position: relative;
+  bottom: 2px;
+  margin-left: 10px;
   font-family: sans-serif;
   font-size: 13px;
-  padding: 1px 3px 2px;
+  padding: 1px 3px 3px;
   background: #eee;
   color: #666;
   border: 2px solid #eee;

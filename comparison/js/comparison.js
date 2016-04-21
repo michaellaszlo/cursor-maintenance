@@ -1,6 +1,14 @@
 var CursorMaintenanceComparison = (function () {
   var maintainer = CursorMaintainer,
       formatter = maintainer.formatter,
+      inputAttributes = {
+        commatize: [ { name: 'maxLength', value: 15 } ],
+        trimify: [ { name: 'maxLength', value: 60 } ]
+      },
+      cellMinWidths = {
+        commatize: 200,
+        trimify: 600
+      },
       inputs = {},
       outputs = {},
       activeButtons = {},
@@ -102,7 +110,6 @@ var CursorMaintenanceComparison = (function () {
     if ('attributes' in options) {
       options.attributes.forEach(function (attribute) {
         element[attribute.name] = attribute.value;
-        console.log(attribute.name, attribute.value);
       });
     }
     return element;
@@ -114,17 +121,14 @@ var CursorMaintenanceComparison = (function () {
         inputRow = document.getElementById('inputs'),
         scoreRow = document.getElementById('scores'),
         operations = [ 'commatize', 'trimify' ],
-        maxLengths = { commatize: 20, trimify: 60 },
-        i, row, cells, approach;
-    // Insert input elements at top, score areas at bottom.
+        i, row, cells,
+        approach, attributes;
     operations.forEach(function (operation) {
-      //inputs[operation] = make('input', { parent:
-      //    make('td', { parent: inputRow }) });
       outputs[operation] = {};
       scores[operation] = make('div', { className: 'scoreList', parent:
           make('td', { parent: scoreRow }) });
     });
-    // Traverse rows and insert cells with output elements.
+    // Traverse rows, adding cells. Insert inputs at top, outputs everywhere.
     for (i = 0; i < rows.length; ++i) {
       row = rows[i];
       if (row.className.indexOf('outputs') == -1) {
@@ -138,9 +142,11 @@ var CursorMaintenanceComparison = (function () {
             output = outputs[operation][approach] = make('span',
                 { parent: cell, className: 'output' });
         if (approach == 'original') {
+          attributes = inputAttributes[operation];
+          attributes.push({ name: 'type', value: 'text' });
           inputs[operation] = make('input', { parent: cell,
-              attributes: [ { name: 'type', value: 'text' },
-              { name: 'maxLength', value: maxLengths[operation] } ] });
+              attributes: attributes });
+          cell.style.minWidth = cellMinWidths[operation] + 'px';
         }
         if (row.className.indexOf('retrospective') != -1) {
           button = make('button', { innerHTML: 'scores', parent: cell });
