@@ -146,6 +146,7 @@ var CursorMaintenanceComparison = (function () {
           attributes.push({ name: 'type', value: 'text' });
           inputs[operation] = make('input', { parent: cell,
               attributes: attributes });
+          output.className += ' original';
           cell.style.minWidth = cellMinWidths[operation] + 'px';
         }
         if (row.className.indexOf('retrospective') != -1) {
@@ -160,15 +161,14 @@ var CursorMaintenanceComparison = (function () {
       enableInput(inputs[operation], operation);
     });
     // Insert prefabricated data.
-    inputs.commatize.value = '12,3,45';
-    inputs.commatize.setSelectionRange(3, 3);
+    inputs.commatize.value = '129,00';
+    inputs.commatize.setSelectionRange(4, 4);
     inputs.commatize.click();
-    inputs.trimify.value = '   The   quick  brown   fox   jumps  ';
-    inputs.trimify.setSelectionRange(7, 7);
+    inputs.trimify.value = '    \'Twas   brillig,  and  ';
+    inputs.trimify.setSelectionRange(10, 10);
     inputs.trimify.click();
-    inputs.commatize.focus();
-    outputs.commatize.splitLevenshtein.button.click();
-    outputs.trimify.splitLevenshtein.button.click();
+    outputs.commatize.balancedfrequencies.button.click();
+    outputs.trimify.balancedfrequencies.button.click();
   }
 
   return {

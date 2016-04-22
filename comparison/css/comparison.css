@@ -65,9 +65,12 @@ input {
   border: 1px solid #ad4246;
   margin: 0 -1px;
 }
+.output.original {
+  border: 1px dotted #89a1b0;
+}
 .output.active {
   background: #d1e9ee;
-  border-color: #bcd2d6;
+  border: 1px solid #bcd2d6;
 }
 .output.active .cursor {
   animation: blinker 1.0s ease-out infinite;

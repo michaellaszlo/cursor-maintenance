@@ -326,7 +326,7 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
-  function balanceFrequencies(s, sCursor, t, tCursor) {
+  function balancedFrequencies(s, sCursor, t, tCursor) {
     var chars = getCommonChars(s, t),
         sCounts = leftRightCounts(s, sCursor, chars),
         tCounts = leftRightCounts(t, tCursor, chars),
@@ -379,12 +379,12 @@ var CursorMaintainer = (function () {
     }
   };
 
-  retrospectiveCursorFormatters.balancefrequencies = {
+  retrospectiveCursorFormatters.balancedfrequencies = {
     commatize: function (original, cursor) {
-      return retrospect(original, cursor, 'commatize', balanceFrequencies);
+      return retrospect(original, cursor, 'commatize', balancedFrequencies);
     },
     trimify: function (original, cursor) {
-      return retrospect(original, cursor, 'trimify', balanceFrequencies);
+      return retrospect(original, cursor, 'trimify', balancedFrequencies);
     }
   };
 
@@ -395,6 +395,6 @@ var CursorMaintainer = (function () {
     meta: metaCursorFormatter,
     textualLevenshtein: retrospectiveCursorFormatters.textualLevenshtein,
     splitLevenshtein: retrospectiveCursorFormatters.splitLevenshtein,
-    balancefrequencies: retrospectiveCursorFormatters.balancefrequencies
+    balancedfrequencies: retrospectiveCursorFormatters.balancedfrequencies
   };
 })();

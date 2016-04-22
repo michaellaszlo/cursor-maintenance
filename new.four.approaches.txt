@@ -32,17 +32,12 @@ and commas. We want the input field to automatically format the text
 by separating each group of three digits with a comma, proceeding from
 right to left.
 
-Here is a valid input that hasn't been formatted yet:
+Suppose the user is about to enter "129000", which will be automatically
+formatted to "129,000".
 
-  13500
-
-After formatting, it looks like this:
-
-  13,500
-
-Now let's consider the cursor. If the input field is initially empty and
-the user's first action is to paste in the string "129000", we denote
-the state of the input field as follows, with ^ representing the cursor:
+If the input field is initially empty and the user's first action is
+to paste in the whole text "129000", we denote the state of the input
+field as follows, with ^ representing the cursor:
 
   129000^
 
@@ -68,8 +63,8 @@ Now the user hits the backspace key:
 
 The text value "129,00" gets formatted to "12,900", and the input field
 is updated with the formatted text. Moving the cursor to the far right
-of the input field isn't such a hot idea this time, because it makes
-the cursor jump over two zeros:
+of the input field isn't a good idea this time, because it makes the
+cursor jump over two zeros:
 
   12,900^
 
@@ -94,9 +89,9 @@ This is cursor position 3:
 
   ant^
 
-Let's manage the cursor position by following a simple rule. If the
-cursor is at position i in the text before formatting, we will also put
-it at position i in the formatted text.
+Let's try to maintain the cursor position by following a simple rule. If
+the cursor is at position i in the text before formatting, we will also
+put it at position i in the formatted text.
 
 To repeat the previous example, the cursor is at position 4 immediately
 after the user backspaced over the leftmost zero:
@@ -134,17 +129,17 @@ that our simple rule doesn't work. Keeping the cursor position numerically
 constant doesn't always put the cursor where the user expects to see it.
 
 
-## What can we do?
+## The heart of the matter
 
 The problem of cursor maintenance exists because we have automatic
 formatting operations that are defined for text, not for text with a
 cursor. Text formatting is carried out independently of the cursor:
 it takes text as input and returns text as output. The cursor is an
-interface widget that we superimpose on the text. In the absence of
-automatic formatting, the cursor's movement is strictly determined by the
-user's actions. The trouble begins when we add automatic text formatting
-and we want to present the illusion that the user remains in control of
-the cursor.
+interface widget that we superimpose on the text. If the input field
+represents its contents exactly as entered, the cursor's movement is
+strictly determined by the user's actions. The trouble begins when we
+add automatic text formatting and we want to present the illusion that
+the user remains in control of the cursor.
 
 Let's be clear about the distinction between the user's edit actions and
 the input field's formatting operations. We have an interface that allows
@@ -162,10 +157,10 @@ after formatting is to pose a psychological question about user
 expectations. There is no hard and fast answer because there are cases
 where human observers disagree on cursor placement.
 
-Consider a formatting operation that trims space characters from each end
-of the text and reduces internal space sequences to one space each. The
-text manipulation is clearly defined, but it's not clear how it should
-affect the cursor.
+Consider a formatting operation that removes all space characters from the
+right end and left end of the text, and reduces space sequences elsewhere
+in the text to one space each. The text manipulation is clearly defined,
+but it's not clear how it should affect the cursor.
 
 Here is a piece of text prior to formatting, with the cursor surrounded
 by spaces:
@@ -250,9 +245,9 @@ Concatenate them at the cursor position:
 That was easy. Now for the bad news. This approach is unviable because,
 in general, it doesn't make sense to format the left and right parts
 separately. It is only guaranteed to work with formatting operations
-that consider one character at a time, such as capitalization.
+that process one character at a time, such as capitalization.
 
-Text with cursor, before capitalization:
+Text with a cursor, before capitalization:
 
   And the^ mome
 
@@ -663,21 +658,20 @@ decreases by the number of characters that are deleted to the left of it.
 TODO: provide examples
 
 If these are the essential facts of cursor maintenance, we can stop
-dancing around them. We can confront them squarely by implementing
+beating around the bush. We can confront them squarely by implementing
 the formatting operations on a new data type that reflects these
 facts. Instead of operating on a string that contains the text and
 separately manipulating an integer value that contains the cursor
 position, we will operate on an object that simultaneously contains
-the text and the cursor position. For each operation that we perform,
-the object will update the text and the cursor. Thus, we never have to
-fiddle with the cursor ourselves. The text-with-cursor object takes care
-of maintaining cursor position.
+the text and the cursor position. This object updates the text and the
+cursor position at the same time, relieving us of the burden of managing
+the cursor position directly.
 
 What are the elementary operations that the text-with-cursor data type
 must offer so that we can perform any formatting operation? Hitherto
 we have employed a variety of string operations, including substring
 replacement and regular-expression matching. All of these can be
-implemented using four elementary operations.
+implemented using four elementary operations:
 
 - read
 - insert
@@ -694,16 +688,15 @@ left to right. In theory it would suffice to offer operations that read,
 insert, and delete one character at a time. We allow several characters
 at a time as a convenience.
 
-In addition to the text operations, we require a method to set the cursor
-position and another to read the cursor position. These allow us to move
-the cursor in response to user input and to update the user interface
-after a formatting operation has been performed.
+In addition to supporting text operations, the object must make it
+possible to set and get the cursor position. This allows us to move the
+cursor in response to user input and to update the user interface after
+a formatting operation has been performed.
 
 The following Python class implements the text-with-cursor data type
-sufficiently for experimental purposes. The `begin` and `length`
-arguments are used without validation. There are no getter and setter
-methods for cursor position because Python lets us access the `cursor`
-property directly.
+for experimental purposes. The `begin` and `length` arguments are used
+without validation. There are no setter and getter methods for cursor
+position because Python lets us access the `cursor` property directly.
 
 class TextWithCursor:
 
@@ -861,8 +854,8 @@ it takes at least two elementary operations to transform "teh" into
 by two replacements. The Levenshtein distance is symmetrical: we can
 transform "the" back into "teh" in two operations.
 
-The following Python function computes the Levenshtein distance between
-two strings `s` and `t`. The running time is `O(nm)` where `n` and `m` are
+The following function computes the Levenshtein distance between two
+strings `s` and `t`. The running time is `O(nm)` where `n` and `m` are
 the lengths of `s` and `t`, respectively. This is asymptotically optimal.
 
   def levenshtein(s, t):
@@ -891,12 +884,11 @@ Levenshtein distance from the typed word. On that basis we would say that
 when the user types "calender", the intended word is more likely to be
 "calendar", with distance 1, than "lavender", with distance 2.
 
-We can put the Levenshtein distance to use in the cursor-maintenance
-problem by inserting a special character into the original text to
-mark the original cursor position. Likewise in the formatted text, we
-insert a special character at every possible position in the formatted
-text. Our aim is to use the cursor position that results in the smallest
-Levenshtein distance.
+We can use the Levenshtein distance in the cursor-maintenance problem by
+inserting a special character into the original text to mark the original
+cursor position. In the formatted text, likewise, we insert a special
+character at every possible position in the formatted text. Our aim is to
+use the cursor position that results in the smallest Levenshtein distance.
 
 For example, take the original text "1300" and apply *commatize* to
 obtain the formatted text "1,300". Suppose the cursor is originally at
@@ -916,7 +908,7 @@ possible position in "1,300":
   4                1,30^0  3
   5                1,300^  3
 
-The smallest Levenshtein distance occurs at position 3. That is, indeed,
+The smallest Levenshtein distance occurs at position 3. That is indeed
 where the user expects to see the cursor after the formatting operation.
 
 Other cases do not yield such favorable results. Consider this formatting
@@ -945,36 +937,14 @@ part of the formatted text, and from the right part of the original text
 to the right part of the formatted text. The sum of these distances is
 the score that we want to minimize.
 
-  def split_levenshtein(s, s_cursor, t, t_cursor):
-      cursor_char = choose_cursor_char(s + t)
-      left = levenshtein(s[:s_cursor], t[:t_cursor])
-      right = levenshtein(s[s_cursor:], t[t_cursor:])
-      return left + right
+Now we have two ways to apply the Levenshtein distance to the problem of
+cursor maintenance. We'll call the first formula `textual Levenshtein`
+because it uses a special character to represent the cursor in the text,
+and we'll call the second formula `split Levenshtein`. Either formula
+can be used in the service of retrospective cursor maintenance.
 
-
-def get_counts(s, chars):
-    counts = { ch: 0 for ch in chars }
-    for ch in s:
-        if ch in chars:
-            counts[ch] += 1
-    return counts
-
-def left_right_counts(s, cursor, chars):
-    count_left = get_counts(s[:cursor], chars)
-    count_right = get_counts(s[cursor:], chars)
-    return count_left, count_right
-
-def balance_frequencies(s, s_cursor, t, t_cursor):
-    chars = set(list(s)).intersection(set(list(t)))
-    s_count_left, s_count_right = left_right_counts(s, s_cursor, chars)
-    t_count_left, t_count_right = left_right_counts(t, t_cursor, chars)
-    cost = 0
-    for ch in chars:
-        a = 1.0 * s_count_left[ch] / (s_count_left[ch] + s_count_right[ch])
-        b = 1.0 * t_count_left[ch] / (t_count_left[ch] + t_count_right[ch])
-        cost += abs(a - b) ** 2
-    return cost
-
+The following class implements retrospective cursor maintenance with an
+arbitrary measure of string distance:
 
 class RetrospectiveCursorFormatter(Formatter):
 
@@ -1000,8 +970,162 @@ class RetrospectiveCursorFormatter(Formatter):
     def trimify(self, original, cursor):
         return self.adjust_cursor(original, cursor, Formatter.trimify)
 
+The constructor requires a function, `get_distance`, with four parameters:
 
-## Lessons learned
+- original text
+- original cursor position
+- formatted text
+- formatted cursor position
+
+The return value is a numerical score. The cursor with the lowest score
+is chosen. If the lowest score is achieved by several cursor positions,
+we take the leftmost among these.
+
+The following distance function, which calls the `levenshtein` function
+that we saw earlier, can be passed to the class constructor to implement
+the textual Levenshtein formula:
+
+  def textual_levenshtein(s, s_cursor, t, t_cursor):
+      cursor_char = choose_cursor_char(s + t)
+      original = s[:s_cursor] + cursor_char + s[s_cursor:]
+      formatted = t[:t_cursor] + cursor_char + t[t_cursor:]
+      return levenshtein(original, formatted)
+
+This distance function implements the split Levenshtein formula:
+
+  def split_levenshtein(s, s_cursor, t, t_cursor):
+      cursor_char = choose_cursor_char(s + t)
+      left = levenshtein(s[:s_cursor], t[:t_cursor])
+      right = levenshtein(s[s_cursor:], t[t_cursor:])
+      return left + right
+
+Let us revisit the example where textual Levenshtein failed:
+
+  1,00^000  ->  100,000
+
+With split Levenshtein, we have two cursor positions tied for the
+lowest score:
+
+  100^,000
+  100,^000
+
+The leftmost among these is the result produced by our exact
+(non-retrospective) cursor maintenance approaches. Both are superior to
+the leftmost optimum produced by textual Levenshtein.
+
+Have we solved the problem of cursor maintenance, then? Not
+quite. Several problems remain. First, the Levenshtein distance is
+costly to evaluate. The running time of `O(nm)` is quadratic when `m`
+is in `O(n)`, as we expect it to be. Quadratic running time makes it
+impractical to perform real-time cursor maintenance if the user is
+editing text that contains thousands of characters. Second, the split
+Levenshtein formula is far from perfect.
+
+Consider this simple case of commatizing:
+
+  129,^00  ->  12,900
+
+Split Levenshtein yields two cursor positions with the minimal score of 2:
+
+  12,^900
+  12,9^00
+
+The leftmost among these is wrong. The user would prefer the
+rightmost. Once again we have a problem with tied scores, and it isn't
+clear how we would systematically resolve them.
+
+The retrospective cursor approach remains appealing because it can be
+applied to any formatting operation without having to write additional
+code. It is possible to conceive of many scoring formulas that don't
+rely on the Levenshtein distance.
+
+One possibility is a formula that counts character frequencies on either
+side of the cursor. For each character that appears in both the original
+text and the formatted text, we divide the number of times it appears
+to the left of the cursor by the number of times it appears overall. We
+compute this ratio in the original text and in the formatted text, and
+take the absolute difference. The sum of the squares of the absolute
+differences in left-right ratio, computed over all common characters,
+is a measure of the overall variance in left-right balance of character
+frequencies. We speculate that a good cursor position is one that
+minimizes this variance.
+
+The distance function `balance_frequencies`, shown below together with
+its helper functions, implements this approach.
+
+def get_counts(s, chars):
+    counts = { ch: 0 for ch in chars }
+    for ch in s:
+        if ch in chars:
+            counts[ch] += 1
+    return counts
+
+def left_right_counts(s, cursor, chars):
+    count_left = get_counts(s[:cursor], chars)
+    count_right = get_counts(s[cursor:], chars)
+    return count_left, count_right
+
+def balance_frequencies(s, s_cursor, t, t_cursor):
+    chars = set(list(s)).intersection(set(list(t)))
+    s_count_left, s_count_right = left_right_counts(s, s_cursor, chars)
+    t_count_left, t_count_right = left_right_counts(t, t_cursor, chars)
+    cost = 0
+    for ch in chars:
+        a = 1.0 * s_count_left[ch] / (s_count_left[ch] + s_count_right[ch])
+        b = 1.0 * t_count_left[ch] / (t_count_left[ch] + t_count_right[ch])
+        cost += abs(a - b) ** 2
+    return cost
+
+Let's see how this distance function performs on the case that was
+problematic for the Levenshtein formulas.
+
+  129,^00  ->  12,900
+
+  ^12,900  4
+  1^2,900  3
+  12^,900  2
+  12,^900  1
+  12,9^00  0
+  12,90^0  0.25
+  12,900^  1
+
+The cursor position with the minimal score is the one that the user
+expects to see.
+
+The balanced-frequency formula doesn't always agree with the exact
+approaches to cursor maintenance, but it generally does better than the
+Levenshtein formulas. Further to its advantage, the running time of the
+balanced-frequency formula is `O(n + m)`, or linear time.
+
+
+
+## Conclusion
+
+
+The most prevalent solutions to the problem of cursor maintenance today
+are either to ignore it or to write ad hoc code for each formatting
+operation, which is what we call the numerical approach. We have shown
+that there are superior approaches. Which one is the best?
+
+The meta approach is the most theoretically sound because it modifies
+the cursor position in a precise and predictable manner whenever a
+text character is modified. However, it requires that we implement all
+formatting operations with a new set of text operations. Considering that
+formatting operations often use regular expressions, we would have to
+implement a sufficient variety of text operations to support a complete
+regular-expression library.
+
+The retrospective approach requires the least work because it treats the
+formatting operation as a black box. It can be applied to any formatting
+operation without writing additional code. The drawback is that its
+choice of cursor position is only approximate. The good news is that
+we have found a computationally efficient formula to evaluate cursor
+positions that usually produces good results.
+
+All of the cursor-maintenance approaches discussed in this article are
+implemented in a <a href="/comparison/">comparison page</a> that can be
+used to manually inspect the results of each approach on the commatize
+and trimify operations.
 
 
 Formatting operations are defined for text alone and don't tell us what
