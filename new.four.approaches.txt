@@ -12,10 +12,10 @@ what staying in place is supposed to mean. Even when the cursor's optimal
 position is clear to a human observer, it can be tricky to calculate
 automatically.
 
-The problem of maintaining cursor position arises in forms with input
+The problem of maintaining cursor position arises in web forms with input
 fields that check the format of the input text after each keystroke
-and reformat the text if the business logic deems it necessary. In many
-web implementations, the cursor is moved to the end of the input field
+and reformat the text if the business logic deems it necessary. In
+most implementations, the cursor is moved to the end of the input field
 whenever the text is reformatted. This results in a poor experience for
 a user who is trying to edit the input value. One keystroke can trigger
 a formatting operation that causes the cursor to be abruptly moved

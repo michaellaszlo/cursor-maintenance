@@ -1,9 +1,9 @@
 var CursorMaintenanceComparison = (function () {
   var maintainer = CursorMaintainer,
       formatter = maintainer.formatter,
-      inputAttributes = {
-        commatize: [ { name: 'maxLength', value: 15 } ],
-        trimify: [ { name: 'maxLength', value: 60 } ]
+      inputMaxLengths = {
+        commatize: 15,
+        trimify: 60
       },
       cellMinWidths = {
         commatize: 200,
@@ -99,19 +99,13 @@ var CursorMaintenanceComparison = (function () {
 
   function make(tag, options) {
     var element = document.createElement(tag);
-    [ 'className', 'id', 'innerHTML' ].forEach(function (property) {
-      if (property in options) {
-        element[property] = options[property];
-      }
-    });
     if ('parent' in options) {
       options.parent.appendChild(element);
+      delete options.parent;
     }
-    if ('attributes' in options) {
-      options.attributes.forEach(function (attribute) {
-        element[attribute.name] = attribute.value;
-      });
-    }
+    Object.keys(options).forEach(function (key) {
+      element[key] = options[key];
+    });
     return element;
   }
 
@@ -122,7 +116,7 @@ var CursorMaintenanceComparison = (function () {
         scoreRow = document.getElementById('scores'),
         operations = [ 'commatize', 'trimify' ],
         i, row, cells,
-        approach, attributes;
+        approach;
     operations.forEach(function (operation) {
       outputs[operation] = {};
       scores[operation] = make('div', { className: 'scoreList', parent:
@@ -142,10 +136,8 @@ var CursorMaintenanceComparison = (function () {
             output = outputs[operation][approach] = make('span',
                 { parent: cell, className: 'output' });
         if (approach == 'original') {
-          attributes = inputAttributes[operation];
-          attributes.push({ name: 'type', value: 'text' });
-          inputs[operation] = make('input', { parent: cell,
-              attributes: attributes });
+          inputs[operation] = make('input', { parent: cell, type: 'text',
+              maxLength: inputMaxLengths[operation] });
           output.className += ' original';
           cell.style.minWidth = cellMinWidths[operation] + 'px';
         }
