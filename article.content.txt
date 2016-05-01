@@ -1,0 +1,42 @@
+# Maintaining cursor position across formatting operations
+
+This article is for developers who are building text input widgets that
+process the user's input to show it in a standard format. If you want to
+do real-time formatting and update the text in the input element while
+the user is editing it, this article is especially for you.
+
+If you are well acquainted with the problem of maintaining cursor position
+and you want to get straight to the code, you can see a live demo and
+clone my GitHub repository. The documentation on GitHub tells you how
+to use the code. In this article, I analyze the problem and describe
+various approaches I explored in the search for a solution.
+
+
+## Here is the problem
+
+
+## This is why it's difficult
+
+
+## Some definitions
+
+
+## Approaches that don't work
+
+
+## The numerical approach
+
+
+## The textual approach
+
+
+## The meta approach
+
+
+## The retrospective approach
+
+
+## My recommendations
+
+
+
