@@ -1,21 +1,58 @@
 # Maintaining cursor position across formatting operations
 
 This article is for developers who are building text input widgets that
-process the user's input to show it in a standard format. If you want to
-do real-time formatting and update the text in the input element while
+process the user's input to show it in a standard format. If you want
+to do real-time formatting and update the text in the input field while
 the user is editing it, this article is especially for you.
 
 If you are well acquainted with the problem of maintaining cursor position
-and you want to get straight to the code, you can see a live demo and
-clone my GitHub repository. The documentation on GitHub tells you how
-to use the code. In this article, I analyze the problem and describe
-various approaches I explored in the search for a solution.
+and you want to get straight to my code, you can see a live demo and
+clone my GitHub repository. The documentation on GitHub tells you how to
+use the code in your own project. In this article, I analyze the problem
+and describe various approaches I explored in the search for a solution.
 
 
 ## Here is the problem
 
+Suppose you're coding an input field that requires the user to enter
+the population of a city. You want to format this number with commas
+separating groups of three digits.
+
+For example, if the user enters `112500`, the input field immediately
+changes it to `112,500`.
+
+The user has a cursor in the input field, which we'll represent with
+^. Here the cursor is at the right end of the input text:
+
+  112,500^
+
+There are seven characters to the left of the cursor, so we say that
+the cursor is at position 7.
+
+We have to update the cursor position after formatting the input. This
+is easy to do if we want to keep the cursor at the right end of the
+input field.
+
+Suppose the cursor enters a `0`:
+
+  112,5000^
+
+With the newly entered character, the cursor is at position 8. The input
+field immediately formats the text `112,5000` to `1,125,000`. Now there
+are nine characters, so we move the cursor to position 9:
+
+  1,125,000^
+
+So far, so good. We place the cursor at position `n` when the text
+contains `n` characters. The trouble begins when the user moves the
+cursor elsewhere in the text.
+
 
 ## This is why it's difficult
+
+separate domains
+most developers give up
+  cf. ATMs and Excel
 
 
 ## Some definitions
@@ -36,7 +73,7 @@ various approaches I explored in the search for a solution.
 ## The retrospective approach
 
 
-## My recommendations
+## Recommendations
 
 
 
