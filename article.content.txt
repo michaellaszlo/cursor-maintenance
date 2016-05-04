@@ -43,9 +43,31 @@ are nine characters, so we move the cursor to position 9:
 
   1,125,000^
 
-So far, so good. We place the cursor at position `n` when the text
-contains `n` characters. The trouble begins when the user moves the
+So far, so good. We're keeping the cursor at position `n` in a text field
+containing `n` characters. The trouble begins when the user places the
 cursor elsewhere in the text.
+
+Suppose the user moves the cursor to position 4:
+
+  1,12^5,000
+
+Now the user hits backspace, deleting the `2` and moving the cursor to
+position 3:
+
+  1,1^5,000
+
+The input field formats `1,15,000` to `115,000`. Where should we put
+the cursor? This is what happens if we keep it at position 3:
+
+  115^,000
+
+The cursor has jumped from the left side of the `5` to its right
+side. That is not what the user intended. The user expects to see this:
+
+  11^5,000
+
+This is obvious to a human observer. It's less obvious how to compute
+a cursor position that matches the user's expectations.
 
 
 ## This is why it's difficult
