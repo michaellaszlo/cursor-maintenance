@@ -14,9 +14,9 @@ and describe various approaches I explored in the search for a solution.
 
 ## Here is the problem
 
-Suppose you're coding an input field that requires the user to enter
-the population of a city. You want to format this number with commas
-separating groups of three digits.
+Suppose you're coding an input field that requires the user to enter the
+population of a city. The input field automatically formats this number
+with commas separating groups of three digits.
 
 For example, if the user enters `112500`, the input field immediately
 changes it to `112,500`.
@@ -29,23 +29,26 @@ The user has a cursor in the input field, which we'll represent with
 There are seven characters to the left of the cursor, so we say that
 the cursor is at position 7.
 
-We have to update the cursor position after formatting the input. This
-is easy to do if we want to keep the cursor at the right end of the
-input field.
+We have to update the cursor position after formatting the input. The
+cursor is currently at the right end of the input field, and we want to
+keep it there after formatting the text.
 
-Suppose the cursor enters a `0`:
+Suppose the user enters a `0`:
 
   112,5000^
 
-With the newly entered character, the cursor is at position 8. The input
-field immediately formats the text `112,5000` to `1,125,000`. Now there
-are nine characters, so we move the cursor to position 9:
+With the newly entered character, the cursor has moved to position 8. The
+input field immediately formats the text `112,5000` to `1,125,000`. Now
+there are nine characters, so we move the cursor to position 9:
 
   1,125,000^
 
-So far, so good. We're keeping the cursor at position `n` in a text field
-containing `n` characters. The trouble begins when the user places the
-cursor elsewhere in the text.
+The formula for maintaining the cursor at the right end of the input
+field is simple: when the text field contains `n` characters, we put
+the cursor at position `n`.
+
+Things get complicated when the user places the cursor elsewhere in
+the text.
 
 Suppose the user moves the cursor to position 4:
 
@@ -61,8 +64,9 @@ the cursor? This is what happens if we keep it at position 3:
 
   115^,000
 
-The cursor has jumped from the left side of the `5` to its right
-side. That is not what the user intended. The user expects to see this:
+The cursor has jumped across the `5` character, which is not what the
+user intended. The user expects the cursor to remain between the `1`
+and the `5`:
 
   11^5,000
 
@@ -72,9 +76,37 @@ a cursor position that matches the user's expectations.
 
 ## This is why it's difficult
 
+The root of the problem is that our text formatting does not involve the
+cursor. Although the cursor is visually displayed in the text, it is not
+logically part of the text. It is an interface element that assists the
+user with manual text editing by indicating a position in the text. The
+automatic text formatting that is performed by the input field operates on
+a string, which is a sequence of characters without any representation of
+the cursor position. After the text has been transformed by formatting,
+we have to place the cursor in a position that minimizes the risk of
+surprising the user.
+
+In a few cases, the answer is obvious. If the formatting operation
+leaves the text unchanged, we leave the cursor position unchanged. If
+the cursor is at the leftmost or rightmost position prior to formatting,
+we put it leftmost or rightmost respectively after formatting. In general
+we have to consider the characters 
+however, it isn't clear how we would proceed.
+
+
+
 separate domains
-most developers give up
-  cf. ATMs and Excel
+
+
+## The status quo
+
+Word
+Excel
+ATMs
+bank websites
+bank mobile apps
+
+software libraries?
 
 
 ## Some definitions
