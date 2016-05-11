@@ -76,43 +76,79 @@ a cursor position that matches the user's expectations.
 
 ## This is why it's difficult
 
-The root of the problem is that our text formatting does not involve the
-cursor. Although the cursor is visually displayed in the text, it is not
-logically part of the text. It is an interface element that assists the
-user with manual text editing by indicating a position in the text. The
-automatic text formatting that is performed by the input field operates on
-a string, which is a sequence of characters without any representation of
-the cursor position. After the text has been transformed by formatting,
-we have to place the cursor in a position that minimizes the risk of
-surprising the user.
+The root of the problem is that our text formatting does not involve
+the cursor. Although the cursor is visually displayed in the text,
+it is not logically part of the text. It is an interface element that
+assists the user with manual text editing by indicating a position in
+the text. The automatic text formatting that is performed by the input
+field operates on a string, which is a sequence of characters without
+any representation of the cursor. After the text has been transformed
+by formatting, we have to place the cursor in a position that minimizes
+the risk of surprising the user.
 
-In a few cases, the answer is obvious. If the formatting operation
-leaves the text unchanged, we leave the cursor position unchanged. If
-the cursor is at the leftmost or rightmost position prior to formatting,
-we put it leftmost or rightmost respectively after formatting. In general
-we have to consider the characters 
-however, it isn't clear how we would proceed.
+In a few cases, the answer is obvious. If the formatting operation leaves
+the text unchanged, we leave the cursor position unchanged. If the cursor
+is at the leftmost or rightmost position prior to formatting, we place
+it respectively leftmost or rightmost after formatting.
+
+In other cases, we have to examine the characters surrounding the cursor
+before the formatting operation. We want to place the cursor in a similar
+context after formatting. This is the key to minimizing user surprise.
+
+Sometimes there is more than one cursor position that could be considered
+optimal. Suppose the input field is in this state:
+
+  1,^500
+
+Now the user types a `2`:
+
+  1,2^500
+
+The text `1,2500` gets formatted to `12,500`. It seems reasonable to
+position the cursor like this:
+
+  12,^500
+
+The `2` and the comma are to the left of the cursor, as they were before
+the formatting operation.
+
+One can also argue that this cursor position makes sense:
+
+  12^,500
+
+Here the advantage is that if the user types another digit, let's say
+a `9`, it appears to the left of the comma and no further formatting
+is necessary:
+
+  129^,500
+
+Either choice is tenable. In developing the input field, what matters is
+not the particular choice we make in an ambiguous case but that we make
+that choice consistently. Users appreciate predictability. If we place
+the cursor to the left of the comma in a given formatting scenario,
+we should strive to do the same in all similar circumstances.
 
 
+# The status quo
 
-separate domains
+The problem of maintaining cursor position in a dynamically formatted
+input field presents so many subtle difficulties that most user interfaces
+don't attempt to do it.
+
+  ATMs
+  bank websites
+  bank mobile apps
+  Excel
+  Word
+  software libraries?
+
+is it a good idea to format text in the input field?
+  sometimes maybe not
+  but in most cases it probably is
+  sometimes it's inevitable (e.g., WYSIWYG document editor)
 
 
-## The status quo
-
-Word
-Excel
-ATMs
-bank websites
-bank mobile apps
-
-software libraries?
-
-
-## Some definitions
-
-
-## Approaches that don't work
+## A few definitions
 
 
 ## The numerical approach
