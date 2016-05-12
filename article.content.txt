@@ -122,33 +122,82 @@ is necessary:
 
   129^,500
 
-Either choice is tenable. In developing the input field, what matters is
-not the particular choice we make in an ambiguous case but that we make
-that choice consistently. Users appreciate predictability. If we place
-the cursor to the left of the comma in a given formatting scenario,
-we should strive to do the same in all similar circumstances.
+Either choice is justifiable. In developing the input field, what matters
+is not the particular choice we make in an ambiguous case but that we
+make that choice consistently. Users appreciate predictability. If we
+place the cursor on one side of the comma in a given formatting scenario,
+we should strive to put it on the same side in all similar circumstances.
 
 
 # The status quo
 
-The problem of maintaining cursor position in a dynamically formatted
-input field presents so many subtle difficulties that most user interfaces
-don't attempt to do it.
+The task of maintaining cursor position in a dynamically formatted input
+field contains so many subtle difficulties that major applications today
+sidestep the problem.
 
-  ATMs
-  bank websites
-  bank mobile apps
-  Excel
-  Word
-  software libraries?
+When you enter a dollar amount into an ATM, the figure may be dynamically
+formatted with commas, but you will certainly be limited to inserting
+and deleting digits at the rightmost position in the input field. Not
+even the most recent model of ATM with a high-resolution touchscreen
+will offer a movable cursor.
 
-is it a good idea to format text in the input field?
-  sometimes maybe not
-  but in most cases it probably is
-  sometimes it's inevitable (e.g., WYSIWYG document editor)
+Banking applications on the web and on mobile devices typically let you
+move a cursor around the input field as you're entering a dollar amount,
+but they don't format the value directly in the input field. Instead
+they'll display the formatted value in a separate, non-editable text
+field.
+
+[screenshot: PC Financial bill payment]
+
+It is prudent to show the user's raw input and the formatted dollar
+amount in separate fields in order to prevent ambiguity in a financial
+transaction. In less critical applications where users would be happy
+to accept a small degree of ambiguity in exchange for a more streamlined
+interface, developers are still wary of the cursor maintenance problem.
+
+Microsoft Excel and Google Sheets let you make a spreadsheet cell with
+automatic currency formatting, but you are restricted to editing a raw
+figure without commas. The formatted dollar amount only appears after
+you remove your cursor from the cell by hitting Enter or clicking on
+another cell.
+
+[screenshot: Google Sheets data entry]
+
+It would be faster and friendlier if you could insert your cursor directly
+into the formatted text and see new formatting applied instantly while
+you edit the text. Of course, you wouldn't want the cursor to jump to an
+unexpected location while you're editing. Ideally the input field should
+automagically format the text and maintain the cursor in a reasonable
+position.
+
+Other kinds of formatting would also benefit from intelligent
+cursor maintenance. Let's say you're editing a large document in
+a word processing application. There are currently two spaces after
+every period, and you want to execute a formatting operation that will
+reduce all of these to one space. However, you don't want to lose your
+place in the text. The document gets repaginated as the whitespace is
+reduced, and the line you are currently editing can easily end up on a
+different page after formatting. Ideally the application would reformat
+the document while keeping the cursor position constant with respect to
+the non-whitespace content.
+
+[image: hypothetical word processor doing space reduction]
+
+How can we develop input elements that maintain the cursor in a
+user-friendly position while applying various kinds of formatting? Is
+it necessary to break down the formatting case by case, or is there a
+general approach that works for all possible formatting operations?
+
+It turns out that there are several viable approaches. You can rewrite
+your formatting operations so as to move the cursor in a completely
+predictable fashion. Alternatively, you can keep your existing formatting
+operations and probabilistically calculate a similar context for the
+cursor after formatting.
 
 
 ## A few definitions
+
+
 
 
 ## The numerical approach
