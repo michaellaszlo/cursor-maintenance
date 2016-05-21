@@ -191,12 +191,40 @@ general approach that works for all possible formatting operations?
 It turns out that there are several viable approaches. You can rewrite
 your formatting operations so as to move the cursor in a completely
 predictable fashion. Alternatively, you can keep your existing formatting
-operations and probabilistically calculate a similar context for the
-cursor after formatting.
+operations and estimate a cursor position after formatting that places
+the cursor in a similar context to the one it occupied before.
 
 
 ## A few definitions
 
+In this article, I use "formatting operation" to mean a text-transforming
+process that is automatically applied to the content of the input field
+whenever its content is altered by the user. This is a potential point of
+confusion, so I want to be clear about the distinction between the user
+action and the formatting operation. Let's go through another example
+to make it explicit.
+
+Here is an input field containing the properly formatted text "12,900",
+with the cursor at position 4:
+
+  12,9^00
+
+The user moves the cursor to position 3:
+
+  12,^900
+
+The text is unchanged, so the formatting operation does not run.
+
+Now the user makes a keystroke that enters the character "5", leaving
+the input field in this state:
+
+  12,5^900
+
+The cursor is now at position 4 and the text is "12,5900". This is the
+result of the user action.
+
+The input field detects that the text has changed. It runs the formatting
+operation, which returns the text "125,900".
 
 
 
