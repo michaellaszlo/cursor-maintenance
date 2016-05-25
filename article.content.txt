@@ -64,9 +64,8 @@ the cursor? This is what happens if we keep it at position 3:
 
   115^,000
 
-The cursor has jumped across the `5` character, which is not what the
-user intended. The user expects the cursor to remain between the `1`
-and the `5`:
+The cursor has jumped across the `5` character, which surprises the
+user. The user expects the cursor to remain between the `1` and the `5`:
 
   11^5,000
 
@@ -76,15 +75,14 @@ a cursor position that matches the user's expectations.
 
 ## This is why it's difficult
 
-The root of the problem is that our text formatting does not involve
-the cursor. Although the cursor is visually displayed in the text,
-it is not logically part of the text. It is an interface element that
-assists the user with manual text editing by indicating a position in
-the text. The automatic text formatting that is performed by the input
-field operates on a string, which is a sequence of characters without
-any representation of the cursor. After the text has been transformed
-by formatting, we have to place the cursor in a position that minimizes
-the risk of surprising the user.
+The root of the problem is that our text formatting does not involve the
+cursor. Although the cursor is visually displayed in the text, it is not
+logically part of the text. It is an interface element that assists the
+user with manual text editing by indicating a position in the text. The
+automatic text formatting that is performed by the input field operates
+on a string, which is a sequence of characters without any representation
+of the cursor. After the text has been transformed by formatting, we
+have to place the cursor in a position that minimizes user surprise.
 
 In a few cases, the answer is obvious. If the formatting operation leaves
 the text unchanged, we leave the cursor position unchanged. If the cursor
@@ -198,13 +196,13 @@ the cursor in a similar context to the one it occupied before.
 ## A few definitions
 
 In this article, I use "formatting operation" to mean a text-transforming
-process that is automatically applied to the content of the input field
-whenever its content is altered by the user. This is a potential point of
-confusion, so I want to be clear about the distinction between the user
-action and the formatting operation. Let's go through another example
-to make it explicit.
+process that is automatically applied to a piece of text supplied by the
+user. Whenever the user modifies the content of an input field, we have
+a new piece of text to feed into the formatting operation. To clarify
+the distinction between the user action and the formatting operation,
+let's go through another example.
 
-Here is an input field containing the properly formatted text "12,900",
+Here is an input field containing the previously formatted text `12,900`,
 with the cursor at position 4:
 
   12,9^00
@@ -215,16 +213,75 @@ The user moves the cursor to position 3:
 
 The text is unchanged, so the formatting operation does not run.
 
-Now the user makes a keystroke that enters the character "5", leaving
+Now the user makes a keystroke that enters the character `5`, leaving
 the input field in this state:
 
   12,5^900
 
-The cursor is now at position 4 and the text is "12,5900". This is the
-result of the user action.
+The cursor is now at position 4. The text, as the result of a user
+action, is `12,5900`. This is the content of the input field prior to
+the formatting operation.
 
-The input field detects that the text has changed. It runs the formatting
-operation, which returns the text "125,900".
+The input field detects that the text has changed. It runs the
+formatting operation, which returns the text `125,900`. Now the input
+field must choose a cursor position. This is the problem that I call
+cursor maintenance.
+
+A problem instance consists of three input values:
+
+- the *original text* is the text in the input field before the formatting
+operation
+
+- the *original cursor position* is where the cursor is positioned in
+the input field before the formatting operation
+
+- the *formatted text* is the text returned by the formatting operation and
+substituted for the original text in the input field
+
+In the preceding example, the problem instance looks like this:
+
+- original text: `12,5900`
+
+- original cursor position: 4
+
+- formatted text: `125,900`
+
+To solve the problem, we must determine one output value:
+
+- the *formatted cursor position* is where we place the cursor in the
+input field after  the formatting operation
+
+We will agree that if the formatted text is identical to the original
+text, the formatted cursor position must be the same as the original
+cursor position. In the remaining cases, there is no fixed way of
+determining whether the problem has been solved correctly. This is a
+fuzzy problem in which our goal is to minimize user surprise.
+
+To put it another way, we are seeking to maximize the odds of meeting
+the user's expectations. Where would the user expect to see the cursor
+after the original text has been transformed into the formatted text?
+
+In the example above, position 3 seems to be a reasonable answer. This
+would be the effect of moving the cursor to position 3 after the
+formatting operation:
+
+  12,5^900  ->  125^,900
+
+Position 4 also seems to be a reasonable answer:
+
+  12,5^900  ->  125,^900
+
+It isn't clear whether 3 or 4 would be the formatted cursor position
+preferred by a majority of users. However, we can be confident that these
+are the two best answers. We want to avoid moving the cursor to other
+positions because they would be inconvenient for the user. We are also
+aiming for predictability. Although we don't know which of the two best
+answers would be preferred by a user, it's safe to say that all similar
+cases should be solved in a consistent manner.
+
+
+
+## Formatting operations and testing methods
 
 
 
