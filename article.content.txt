@@ -72,9 +72,6 @@ user. The user expects the cursor to remain between the `1` and the `5`:
 This is obvious to a human observer. It's less obvious how to compute
 a cursor position that matches the user's expectations.
 
-
-## This is why it's difficult
-
 The root of the problem is that our text formatting does not involve the
 cursor. Although the cursor is visually displayed in the text, it is not
 logically part of the text. It is an interface element that assists the
@@ -92,39 +89,6 @@ it respectively leftmost or rightmost after formatting.
 In other cases, we have to examine the characters surrounding the cursor
 before the formatting operation. We want to place the cursor in a similar
 context after formatting. This is the key to minimizing user surprise.
-
-Sometimes there is more than one cursor position that could be considered
-optimal. Suppose the input field is in this state:
-
-  1,^500
-
-Now the user types a `2`:
-
-  1,2^500
-
-The text `1,2500` gets formatted to `12,500`. It seems reasonable to
-position the cursor like this:
-
-  12,^500
-
-The `2` and the comma are to the left of the cursor, as they were before
-the formatting operation.
-
-One can also argue that this cursor position makes sense:
-
-  12^,500
-
-Here the advantage is that if the user types another digit, let's say
-a `9`, it appears to the left of the comma and no further formatting
-is necessary:
-
-  129^,500
-
-Either choice is justifiable. In developing the input field, what matters
-is not the particular choice we make in an ambiguous case but that we
-make that choice consistently. Users appreciate predictability. If we
-place the cursor on one side of the comma in a given formatting scenario,
-we should strive to put it on the same side in all similar circumstances.
 
 
 # The status quo
@@ -278,6 +242,12 @@ positions because they would be inconvenient for the user. We are also
 aiming for predictability. Although we don't know which of the two best
 answers would be preferred by a user, it's safe to say that all similar
 cases should be solved in a consistent manner.
+
+In developing the input field, what matters is not the particular choice
+we make in an ambiguous case but that we make that choice consistently. If
+we place the cursor on one side of the comma in a given formatting
+scenario, we should strive to put it on the same side in all similar
+circumstances.
 
 
 
