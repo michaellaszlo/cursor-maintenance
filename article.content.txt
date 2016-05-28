@@ -245,22 +245,43 @@ in one direction, we should make the same decision in all similar cases.
 
 ## Testing procedure
 
-In my investigation of cursor maintenance, I ran experiments with
-two formatting operations. One of them formats positive integers into
+In my investigation of cursor maintenance, I ran experiments using
+two formatting operations. The first formats positive integers into
 comma-separated three-digit groups, as seen in the examples above. I
-call this the `commatize` formatting operation and I define it with the
-following Python implementation.
+call this the `commatize` formatting operation. I define `commatize`
+with the following Python function.
 
 ```
-def commatize(s):             # s is a string of digits and commas.
+def commatize(s):             # s consists of digits and commas.
     s = s.replace(',', '')    # Remove all commas.
     start = len(s) % 3 or 3   # Begin with 1, 2, or 3 digits.
     groups = [ s[:start] ]    # Make the first group of digits.
     for i in range(start, len(s), 3):
         groups.append(s[i : i + 3])  # Add three-digit groups.
-    return ','.join(groups)   # Insert commas between the groups.
+    s = ','.join(groups)      # Insert commas between groups.
+    return s
 ```
 
+The other formatting operation, `trimify`, removes all space characters
+from the beginning and end of the text, and condenses sequences of spaces
+elsewhere in the text to one character each.
+
+For example, the input text
+
+  `  how much  wood  could  a   woodchuck  chuck  `
+
+is transformed by `trimify` into:
+
+  `how much wood could a woodchuck chuck`
+
+I define this formatting operation in Python as follows.
+
+```
+def trimify(s):     # s consists of spaces and non-space characters.
+    s = s.strip()   # Remove spaces from beginning and end.
+    s = re.sub('[ ]+', ' ', s)  # Condense other space sequences.
+    return s
+```
 
 
 ## The numerical approach
