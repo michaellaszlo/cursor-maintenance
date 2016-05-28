@@ -283,14 +283,23 @@ def trimify(s):     # s consists of spaces and non-space characters.
     return s
 ```
 
-I have written a command-line demonstration script,
+Some cursor-maintenance approaches require each formatting operation to
+be rewritten. To verify that the rewritten versions perform the same
+text transformation as the original version, I used automated testing
+on the command line as well as interactive testing with a web page.
+
+The automated testing is done by a Python script,
 [`approach_examples.py`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.py),
-in which these formatting operations are wrapped
-into a class. I also wrote a JavaScript command-line
-demonstration [`approach_example.js`](), which performs
-exactly the same computations as the Python script. My [GitHub
+and an equivalent JavaScript file
+[`approach_example.js`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.js).
+The [GitHub
 repository](https://github.com/michaellaszlo/maintaining-cursor-position)
-contains further documentation on the structure and usage of these files.
+contains detailed documentation on the structure and usage of these files.
+
+The test suite for each formatting operation contains complete instances
+of the cursor-maintenance problem together with model answers. This
+defines the standard against which I tested the fidelity of the text
+transformation and the accuracy of the cursor positioning.
 
 
 ## The numerical approach
