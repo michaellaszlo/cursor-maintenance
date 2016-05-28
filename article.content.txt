@@ -84,11 +84,10 @@ have to place the cursor in a position that minimizes user surprise.
 In a few cases, the answer is obvious. If the formatting operation leaves
 the text unchanged, we leave the cursor position unchanged. If the cursor
 is at the leftmost or rightmost position prior to formatting, we place
-it respectively leftmost or rightmost after formatting.
-
-In other cases, we have to examine the characters surrounding the cursor
-before the formatting operation. We want to place the cursor in a similar
-context after formatting. This is the key to minimizing user surprise.
+it respectively leftmost or rightmost after formatting. In other cases,
+we have to examine the characters surrounding the cursor before the
+formatting operation. We want to place the cursor in a similar context
+after formatting.
 
 
 # The status quo
@@ -127,8 +126,8 @@ another cell.
 
 It would be faster and friendlier if you could insert your cursor directly
 into the formatted text and see new formatting applied instantly while
-you edit the text. Of course, you wouldn't want the cursor to jump to an
-unexpected location while you're editing. Ideally the input field should
+you edit the text. Of course, you wouldn't want the cursor to jump to
+an unexpected location while you're editing. An ideal input field would
 automagically format the text and maintain the cursor in a reasonable
 position.
 
@@ -150,24 +149,24 @@ user-friendly position while applying various kinds of formatting? Is
 it necessary to break down the formatting case by case, or is there a
 general approach that works for all possible formatting operations?
 
-It turns out that there are several viable approaches. You can rewrite
-your formatting operations so as to move the cursor in a completely
-predictable fashion. Alternatively, you can keep your existing formatting
-operations and estimate a cursor position after formatting that places
-the cursor in a similar context to the one it occupied before.
+It turns out that there are viable strategies falling into two camps. You
+can write new formatting operations that move the cursor in lockstep
+with each step of formatting. Alternatively, you can use your existing
+formatting operations and move the cursor in such a way that the context
+it occupies after formatting resembles its context before formatting.
 
 
-## A few definitions
+## Formalities
 
-In this article, I use "formatting operation" to mean a text-transforming
-process that is automatically applied to a piece of text supplied by the
-user. Whenever the user modifies the content of an input field, we have
-a new piece of text to feed into the formatting operation. To clarify
-the distinction between the user action and the formatting operation,
-let's go through another example.
+In this article, I use the phrase *formatting operation* to mean a
+programmatic text-transforming process that is applied to a piece of
+text provided by the user. Whenever the user modifies the content of
+an input field, we have a new piece of text to pass to the formatting
+operation. To clarify the distinction between the user action and the
+formatting operation, let's go through another example.
 
-Here is an input field containing the previously formatted text `12,900`,
-with the cursor at position 4:
+Suppose our input field contains the text `12,900`, which is already
+formatted correctly. The cursor is currently at position 4:
 
   12,9^00
 
@@ -175,55 +174,56 @@ The user moves the cursor to position 3:
 
   12,^900
 
-The text is unchanged, so the formatting operation does not run.
+The text is unchanged, so there is no need for formatting.
 
 Now the user makes a keystroke that enters the character `5`, leaving
 the input field in this state:
 
   12,5^900
 
-The cursor is now at position 4. The text, as the result of a user
-action, is `12,5900`. This is the content of the input field prior to
-the formatting operation.
+The cursor is now at position 4. The user action has changed the text
+in the input field to `12,5900`.
 
-The input field detects that the text has changed. It runs the
-formatting operation, which returns the text `125,900`. Now the input
-field must choose a cursor position. This is the problem that I call
-cursor maintenance.
+The input field detects that it contains new text. It passes the text to
+the formatting operation, which returns `125,900`. This gets substituted
+into the input field.
+
+Now the input field must choose a cursor position. This is the problem
+that I call cursor maintenance.
 
 A problem instance consists of three input values:
 
-- the *original text* is the text in the input field before the formatting
-operation
+- the *user text* is the textual content of the input field before the
+formatting operation
 
-- the *original cursor position* is where the cursor is positioned in
-the input field before the formatting operation
+- the *user cursor position* is the location of the cursor in the input
+field before the formatting operation
 
-- the *formatted text* is the text returned by the formatting operation and
-substituted for the original text in the input field
+- the *formatted text* is the result of applying the formatting operation to
+the user text
 
-In the preceding example, the problem instance looks like this:
+In the preceding example, the problem instance is the following:
 
-- original text: `12,5900`
+- user text: `12,5900`
 
-- original cursor position: 4
+- user cursor position: 4
 
 - formatted text: `125,900`
 
 To solve the problem, we must determine one output value:
 
 - the *formatted cursor position* is where we place the cursor in the
-input field after  the formatting operation
+input field after the formatting operation
 
-We will agree that if the formatted text is identical to the original
-text, the formatted cursor position must be the same as the original
-cursor position. In the remaining cases, there is no fixed way of
-determining whether the problem has been solved correctly. This is a
-fuzzy problem in which our goal is to minimize user surprise.
+If the formatted text is identical to the user text, the formatted cursor
+position must be the same as the user cursor position. In the remaining
+cases, there is no definitive way to decide whether the problem has
+been solved correctly. This is a fuzzy problem. Our goal is to minimize
+user surprise.
 
-To put it another way, we are seeking to maximize the odds of meeting
+To put it another way, we are seeking to maximize our odds of meeting
 the user's expectations. Where would the user expect to see the cursor
-after the original text has been transformed into the formatted text?
+after the user text has been transformed into the formatted text?
 
 In the example above, position 3 seems to be a reasonable answer. This
 would be the effect of moving the cursor to position 3 after the
@@ -231,27 +231,35 @@ formatting operation:
 
   12,5^900  ->  125^,900
 
-Position 4 also seems to be a reasonable answer:
+Position 4 also seems reasonable:
 
   12,5^900  ->  125,^900
 
-It isn't clear whether 3 or 4 would be the formatted cursor position
-preferred by a majority of users. However, we can be confident that these
-are the two best answers. We want to avoid moving the cursor to other
-positions because they would be inconvenient for the user. We are also
-aiming for predictability. Although we don't know which of the two best
-answers would be preferred by a user, it's safe to say that all similar
-cases should be solved in a consistent manner.
-
-In developing the input field, what matters is not the particular choice
-we make in an ambiguous case but that we make that choice consistently. If
-we place the cursor on one side of the comma in a given formatting
-scenario, we should strive to put it on the same side in all similar
-circumstances.
+It isn't clear which of these formatted cursor positions would be
+preferred by a majority of users. However, these are clearly the two
+best answers. What matters is that we choose one of these rather than a
+cursor position that would be less convenient for the user. We also want
+to make the choice in a consistent manner. If we decide an ambiguous case
+in one direction, we should make the same decision in all similar cases.
 
 
+## Testing procedure
 
-## Formatting operations and testing methods
+In my investigation of cursor maintenance, I ran experiments with
+two formatting operations. One of them formats positive integers into
+comma-separated three-digit groups, as seen in the examples above. I
+call this the `commatize` formatting operation and I define it with the
+following Python implementation.
+
+```
+def commatize(s):             # s is a string of digits and commas.
+    s = s.replace(',', '')    # Remove all commas.
+    start = len(s) % 3 or 3   # Begin with 1, 2, or 3 digits.
+    groups = [ s[:start] ]    # Make the first group of digits.
+    for i in range(start, len(s), 3):
+        groups.append(s[i : i + 3])  # Add three-digit groups.
+    return ','.join(groups)   # Insert commas between the groups.
+```
 
 
 
