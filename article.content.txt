@@ -243,7 +243,7 @@ to make the choice in a consistent manner. If we decide an ambiguous
 case in one way, we should decide likewise in all similar cases.
 
 
-## Testing methodology
+## Sample formatting operations
 
 In my investigation of cursor maintenance, I ran experiments using
 two formatting operations. The first formats positive integers into
@@ -283,10 +283,13 @@ def trimify(s):     # s consists of spaces and non-space characters.
     return s
 ```
 
-Some methods of cursor maintenance involve rewriting your formatting
-operations. To verify that the rewritten version of a formatting operation
-performs the same text transformation as the original version, I ran
-automated tests on the command line.
+
+## Testing methodology
+
+Some cursor-maintenance involve rewriting your formatting operations. To
+verify that the rewritten version of a formatting operation performs
+the same text transformation as the original version, I ran automated
+tests on the command line.
 
 I wrote a Python script,
 [`approach_examples.py`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.py),
@@ -349,6 +352,15 @@ cursor to the right of the sole remaining space. I did not attempt to
 write a more elaborate test harness that looks for different patterns
 of consistency. Instead, I eyeballed the results of automated testing
 and followed up with interactive testing.
+
+I made a [web page](http://192.168.0.106/comparison/) that simultaneously
+displays the results of six approaches to cursor maintenance. The
+`commatize` and `trimify` formatting operations each have their own input
+field in which you set the user text and user cursor position. The cell
+immediately below the input field displays the formatted text. The cells
+further below display the formatted cursor positions computed by various
+strategies. Some involve numerical scores which you can view by clicking
+on the `scores` button next to the corresponding outputs.
 
 
 ## The numerical approach
