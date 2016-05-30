@@ -18,7 +18,7 @@ Suppose you're coding an input field that requires the user to enter the
 population of a city. The input field automatically formats this number
 with commas separating groups of three digits.
 
-For example, if the user enters `112500`, the input field immediately
+For example, if the user enters `112500`, the input field instantly
 changes it to `112,500`.
 
 The user has a cursor in the input field, which we'll represent with
@@ -150,7 +150,7 @@ it necessary to break down the formatting case by case, or is there a
 general approach that works for all possible formatting operations?
 
 It turns out that there are viable strategies falling into two camps. You
-can write new formatting operations that move the cursor in lockstep
+can write new formatting operations that move the cursor in tandem
 with each step of formatting. Alternatively, you can use your existing
 formatting operations and move the cursor in such a way that the context
 it occupies after formatting resembles its context before formatting.
@@ -239,17 +239,17 @@ It isn't clear which of these formatted cursor positions would be
 preferred by a majority of users. However, these are clearly the two
 best answers. What matters is that we choose one of these rather than a
 cursor position that would be less convenient for the user. We also want
-to make the choice in a consistent manner. If we decide an ambiguous case
-in one direction, we should make the same decision in all similar cases.
+to make the choice in a consistent manner. If we decide an ambiguous
+case in one way, we should decide likewise in all similar cases.
 
 
-## Testing procedure
+## Testing methodology
 
 In my investigation of cursor maintenance, I ran experiments using
 two formatting operations. The first formats positive integers into
-comma-separated three-digit groups, as seen in the examples above. I
-call this the `commatize` formatting operation. I define `commatize`
-with the following Python function.
+comma-separated three-digit groups, as seen in the examples above. I call
+this formatting operation `commatize`. I define it with the following
+Python function.
 
 ```
 def commatize(s):             # s consists of digits and commas.
@@ -283,23 +283,72 @@ def trimify(s):     # s consists of spaces and non-space characters.
     return s
 ```
 
-Some cursor-maintenance approaches require each formatting operation to
-be rewritten. To verify that the rewritten versions perform the same
-text transformation as the original version, I used automated testing
-on the command line as well as interactive testing with a web page.
+Some methods of cursor maintenance involve rewriting your formatting
+operations. To verify that the rewritten version of a formatting operation
+performs the same text transformation as the original version, I ran
+automated tests on the command line.
 
-The automated testing is done by a Python script,
+I wrote a Python script,
 [`approach_examples.py`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.py),
-and an equivalent JavaScript file
-[`approach_example.js`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.js).
-The [GitHub
-repository](https://github.com/michaellaszlo/maintaining-cursor-position)
-contains detailed documentation on the structure and usage of these files.
+and an equivalent JavaScript file,
+[`approach_example.js`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.js),
+to perform automated testing. The repository's
+[README](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/README.md)
+contains detailed documentation on using these files.
 
-The test suite for each formatting operation contains complete instances
-of the cursor-maintenance problem together with model answers. This
-defines the standard against which I tested the fidelity of the text
-transformation and the accuracy of the cursor positioning.
+In addition to verifying the text transformation, the automated
+tests helped me to assess the cursor positions computed by various
+strategies. Each case in the test suite contains four values,
+corresponding to the three inputs and one output of the cursor-maintenance
+problem.
+
+Consider this case in the `trimify` test suite:
+
+  ('  whirled    peas  now  ', 11, 'whirled peas now', 8)
+
+The first three values of the tuple constitute a problem instance. The
+fourth value is the answer. Before `trimify`, the cursor is at position
+11:
+
+  `  whirled  ^  peas  now  `
+
+After `trimify`, the cursor moves to position 8:
+
+  `whirled ^peas now`
+
+According to my automated test suite, that is the answer to this problem
+instance.
+
+Is it the optimal answer? Due to the fuzzy nature of the problem,
+it's hard to say. What we can say confidently is this: if the cursor
+is surrounded by spaces before `trimify`, the cursor should end up
+to the immediate left or right of the single space that remains after
+`trimify`. In my test suite, it's on the right. Here it's on the left,
+in position 7:
+
+  `whirled^ peas now`
+
+The user would be surprised by any answer other than position 7 or
+8. We always want to choose one of these two answers, and we want to do
+so consistently.
+
+What does consistency mean? In cases where the cursor is surrounded by
+spaces before we run `trimify`, we could do the following after `trimify`:
+
+- always move the cursor to the left of the single space that remains
+
+- always move the cursor to the right of the single space that remains
+
+- always move the cursor to whichever side is closer before `trimify`;
+in the event of a tie, always move the cursor to the left or to the right
+
+Any one of these would make a consistent pattern of cursor positioning.
+
+In my test suite, I made the arbitrary choice to always place the
+cursor to the right of the sole remaining space. I did not attempt to
+write a more elaborate test harness that looks for different patterns
+of consistency. Instead, I eyeballed the results of automated testing
+and followed up with interactive testing.
 
 
 ## The numerical approach
