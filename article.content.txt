@@ -365,6 +365,30 @@ on the `scores` button next to the corresponding outputs.
 
 ## The numerical approach
 
+If we know exactly how a formatting operation transforms the text,
+we may find it convenient to move the cursor by performing ad hoc
+calculations. Consider the effect of `commatize`: it inserts and deletes
+commas while leaving the digit characters as they are. Thus, the number
+of digit characters to the left of the cursor must be the same before
+and after the formatting operation. We can use this knowledge to write
+a new version of `commatize`:
+
+```
+def commatize(self, s, cursor):
+    """Position the cursor by counting digits to its left."""
+    left_digit_count = cursor - s[:cursor].count(',')
+    s = Formatter.commatize(self, s)[0]
+    if left_digit_count == 0:
+        return (s, 0)
+    for pos, ch in enumerate(s):
+        if ch != ',':
+            left_digit_count -= 1
+            if left_digit_count == 0:
+                break
+    cursor = pos + 1
+    return (s, cursor)
+```
+
 
 ## The textual approach
 

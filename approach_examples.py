@@ -154,7 +154,7 @@ class NumericalCursorFormatter(Formatter):
     """Moves the cursor with ad hoc rules for each formatting operation."""
 
     def commatize(self, s, cursor):
-        """Adjust the cursor by counting commas to its left."""
+        """Position the cursor by counting digits to its left."""
         left_digit_count = cursor - s[:cursor].count(',')
         s = Formatter.commatize(self, s)[0]
         if left_digit_count == 0:
