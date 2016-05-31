@@ -365,29 +365,38 @@ on the `scores` button next to the corresponding outputs.
 
 ## The numerical approach
 
-If we know exactly how a formatting operation transforms the text,
-we may find it convenient to move the cursor by performing ad hoc
-calculations. Consider the effect of `commatize`: it inserts and deletes
-commas while leaving the digit characters as they are. Thus, the number
-of digit characters to the left of the cursor must be the same before
-and after the formatting operation. We can use this knowledge to write
-a new version of `commatize`:
+If we know exactly how a formatting operation transforms the text, it may
+be convenient to use this knowledge to calculate the formatted cursor
+position. Consider the effect of `commatize`: it inserts and deletes
+commas while leaving the digit characters alone. It would be desirable
+to position the cursor in such a way that the number of digits to the
+left of the cursor remains constant across the formatting operation. We
+can use this idea to write a new version of `commatize`:
 
 ```
-def commatize(self, s, cursor):
-    """Position the cursor by counting digits to its left."""
+def commatize_with_cursor(s, cursor):
+    # Count the number of digit characters to the left of the cursor.
     left_digit_count = cursor - s[:cursor].count(',')
-    s = Formatter.commatize(self, s)[0]
+    # Use the original commatize function to transform the text.
+    s = commatize(s)
     if left_digit_count == 0:
         return (s, 0)
+    # Count digit characters until we reach the required number.
     for pos, ch in enumerate(s):
         if ch != ',':
             left_digit_count -= 1
             if left_digit_count == 0:
                 break
+    # The cursor goes to the right of the digit characters we counted off.
     cursor = pos + 1
     return (s, cursor)
 ```
+
+This new function calls the original `commatize` to transform the
+text. Unlike the original `commatize` function, it also performs cursor
+maintenance. It does so with a special rule that we derived from the
+particular qualities of the formatting operation.
+
 
 
 ## The textual approach
