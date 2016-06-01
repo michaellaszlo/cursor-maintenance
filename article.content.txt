@@ -43,8 +43,8 @@ there are nine characters, so we move the cursor to position 9:
 
   1,125,000^
 
-The formula for maintaining the cursor at the right end of the input
-field is simple: when the text field contains `n` characters, we put
+There is a concise formula for maintaining the cursor at the right end
+of the input field: when the text field contains `n` characters, we put
 the cursor at position `n`.
 
 Things get complicated when the user places the cursor elsewhere in
@@ -92,71 +92,63 @@ after formatting.
 
 # The status quo
 
-The task of maintaining cursor position in a dynamically formatted input
-field contains so many subtle difficulties that major applications today
-sidestep the problem.
+Think about the last time you used an automated teller machine (ATM). When
+you enter a dollar amount into an ATM, there is no movable cursor, not
+even on the most recent models with high-resolution touchscreens. You
+are limited to inserting and deleting digits at the right end of the
+input field.
 
-When you enter a dollar amount into an ATM, the figure may be dynamically
-formatted with commas, but you will certainly be limited to inserting
-and deleting digits at the rightmost position in the input field. Not
-even the most recent model of ATM with a high-resolution touchscreen
-will offer a movable cursor.
-
-Banking applications on the web and on mobile devices typically let you
-move a cursor around the input field as you're entering a dollar amount,
-but they don't format the value directly in the input field. Instead
-they'll display the formatted value in a separate, non-editable text
-field.
+Look at banking applications on the web and on mobile devices. Many
+will let you move a cursor around the input field when you're entering
+a dollar amount, but they don't format the value directly in the input
+field. Instead they'll display the formatted value in a separate,
+non-editable text field.
 
 [screenshot: PC Financial bill payment]
 
-It is prudent to show the user's raw input and the formatted dollar
-amount in separate fields in order to prevent ambiguity in a financial
-transaction. In less critical applications where users would be happy
-to accept a small degree of ambiguity in exchange for a more streamlined
-interface, developers are still wary of the cursor maintenance problem.
+Granted, accurate information is paramount in a financial
+transaction. Showing the user's raw input and the formatted dollar
+amount in separate fields serves to dispel ambiguity. The drawbacks are
+redundancy and complexity. In less critical applications, users would
+probably be happy to accept a small degree of ambiguity in exchange for
+a faster and friendlier interface.
 
-Microsoft Excel and Google Sheets let you make a spreadsheet cell with
-automatic currency formatting, but you are restricted to editing a raw
-figure without commas. The formatted dollar amount only appears after
-you remove your cursor from the cell by hitting Enter or clicking on
-another cell.
+Consider the clumsy interface for editing cells in Microsoft Excel
+and Google Sheets. You can make a spreadsheet cell that displays its
+value with currency formatting, but you can't edit the displayed value
+directly. You are restricted to editing an unformatted integer. The
+formatted dollar amount only appears after you remove your cursor from
+the cell by hitting Enter or clicking on another cell.
 
 [screenshot: Google Sheets data entry]
 
-It would be faster and friendlier if you could insert your cursor directly
-into the formatted text and see new formatting applied instantly while
-you edit the text. Of course, you wouldn't want the cursor to jump to
-an unexpected location while you're editing. An ideal input field would
-automagically format the text and maintain the cursor in a reasonable
-position.
+It would be more convenient to insert your cursor directly into the
+formatted text and see new formatting applied instantly while you
+edit the text. Of course, you wouldn't want the cursor to jump to an
+unexpected position in the text while you're editing it. An ideal input
+field would format the text and automagically maintain the cursor in a
+convenient position.
 
-Other kinds of formatting would also benefit from intelligent
-cursor maintenance. Let's say you're editing a large document in
-a word processing application. There are currently two spaces after
-every period, and you want to execute a formatting operation that will
-reduce all of these to one space. However, you don't want to lose your
-place in the text. The document gets repaginated as the whitespace is
-reduced, and the line you are currently editing can easily end up on a
-different page after formatting. Ideally the application would reformat
-the document while keeping the cursor position constant with respect to
-the non-whitespace content.
+Other kinds of formatting would also benefit from cursor
+maintenance. Let's say you're editing a large document in a word
+processing application. There are currently two spaces after every
+period, and you execute a formatting operation that reduces all of
+these to one space. The document gets repaginated as the whitespace
+is reduced, so the line you were editing ends up on a different page
+after formatting. You have to hunt through the text to find your place
+again. Ideally the application would reformat the document while keeping
+the cursor position constant with respect to the non-whitespace content.
 
 [image: hypothetical word processor doing space reduction]
 
 How can we develop input elements that maintain the cursor in a
-user-friendly position while applying various kinds of formatting? Is
-it necessary to break down the formatting case by case, or is there a
-general approach that works for all possible formatting operations?
-
-It turns out that there are viable strategies falling into two camps. You
-can write new formatting operations that move the cursor in tandem
-with each step of formatting. Alternatively, you can use your existing
-formatting operations and move the cursor in such a way that the context
-it occupies after formatting resembles its context before formatting.
+user-friendly position while applying various kinds of formatting? Should
+we break down the formatting case by case, or is there a general approach
+that works for all possible formatting operations? It turns out that
+there are viable strategies falling into both camps.
 
 
-## Formalities
+## Defining the problem
 
 In this article, I use the phrase *formatting operation* to mean a
 programmatic text-transforming process that is applied to a piece of
@@ -247,7 +239,7 @@ case in one way, we should decide likewise in all similar cases.
 
 In my investigation of cursor maintenance, I ran experiments using
 two formatting operations. The first formats positive integers into
-comma-separated three-digit groups, as seen in the examples above. I call
+comma-separated three-digit groups, as in the examples above. I call
 this formatting operation `commatize`. I define it with the following
 Python function.
 
@@ -305,7 +297,7 @@ strategies. Each case in the test suite contains four values,
 corresponding to the three inputs and one output of the cursor-maintenance
 problem.
 
-Consider this case in the `trimify` test suite:
+Here is a case in the `trimify` test suite:
 
   ('  whirled    peas  now  ', 11, 'whirled peas now', 8)
 
@@ -323,7 +315,7 @@ According to my automated test suite, that is the answer to this problem
 instance.
 
 Is it the optimal answer? Due to the fuzzy nature of the problem,
-it's hard to say. What we can say confidently is this: if the cursor
+it's hard to say. What we can say confidently is that if the cursor
 is surrounded by spaces before `trimify`, the cursor should end up
 to the immediate left or right of the single space that remains after
 `trimify`. In my test suite, it's on the right. Here it's on the left,
@@ -343,35 +335,37 @@ spaces before we run `trimify`, we could do the following after `trimify`:
 - always move the cursor to the right of the single space that remains
 
 - always move the cursor to whichever side is closer before `trimify`;
-in the event of a tie, always move the cursor to the left or to the right
+in the event of a tie, move the cursor always to the left or always to
+the right
 
 Any one of these would make a consistent pattern of cursor positioning.
 
 In my test suite, I made the arbitrary choice to always place the
 cursor to the right of the sole remaining space. I did not attempt to
-write a more elaborate test harness that looks for different patterns
-of consistency. Instead, I eyeballed the results of automated testing
-and followed up with interactive testing.
+write an intelligent test harness that looks for different patterns
+of consistency. Instead, I visually inspected the results of automated
+testing and followed up with interactive testing.
 
 I made a [web page](http://192.168.0.106/comparison/) that simultaneously
 displays the results of six approaches to cursor maintenance. The
-`commatize` and `trimify` formatting operations each have their own input
-field in which you set the user text and user cursor position. The cell
-immediately below the input field displays the formatted text. The cells
-further below display the formatted cursor positions computed by various
-strategies. Some involve numerical scores which you can view by clicking
-on the `scores` button next to the corresponding outputs.
+`commatize` and `trimify` formatting operations each have their own
+input field in which you set the user text and user cursor position. The
+cell immediately below the input field displays the formatted text. The
+cells further below display the formatted cursor positions computed by
+various strategies. Some involve numerical scores which you can view by
+clicking on the `scores` button next to the corresponding outputs. All
+of the approaches are explained below.
 
 
 ## The numerical approach
 
-If we know exactly how a formatting operation transforms the text, it may
-be convenient to use this knowledge to calculate the formatted cursor
-position. Consider the effect of `commatize`: it inserts and deletes
-commas while leaving the digit characters alone. It would be desirable
-to position the cursor in such a way that the number of digits to the
-left of the cursor remains constant across the formatting operation. We
-can use this idea to write a new version of `commatize`:
+If we know exactly how a formatting operation transforms the text, we may
+see a convenient way to calculate a new cursor position. Consider the
+effect of `commatize`: it inserts and deletes commas while leaving the
+digit characters alone. It would be desirable to position the cursor in
+such a way that the number of digits to the left of the cursor remains
+constant across the formatting operation. We can use this idea to write
+a new version of `commatize`:
 
 ```
 def commatize_with_cursor(s, cursor):
@@ -393,10 +387,23 @@ def commatize_with_cursor(s, cursor):
 ```
 
 This new function calls the original `commatize` to transform the
-text. Unlike the original `commatize` function, it also performs cursor
-maintenance. It does so with a special rule that we derived from the
-particular qualities of the formatting operation.
+text. Then it performs cursor maintenance by means of a calculation that
+we formulated for the particular qualities of `commatize`.
 
+We can also apply this ad hoc approach to `trimify`. Here we observe
+that the formatting operation only deletes space characters. We can
+calculate a new cursor position by counting the space characters that
+were deleted to the left of the original cursor and, if applicable,
+within the sequence of spaces extending to the immediate right of the
+cursor. This idea results in the following cursor-maintaining function.
+
+````
+def trimify_with_cursor(s, cursor):
+    left_trimmed = trimify(s[:cursor] + '|')
+    s = trimify(s)
+    cursor = min(len(s), len(left_trimmed) - 1)
+    return (s, cursor)
+```
 
 
 ## The textual approach
