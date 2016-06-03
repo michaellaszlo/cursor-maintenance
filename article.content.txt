@@ -357,7 +357,7 @@ clicking on the `scores` button next to the corresponding outputs. All
 of the approaches are explained below.
 
 
-## The numerical approach
+## The ad hoc approach
 
 If we know exactly how a formatting operation transforms the text, we may
 see a convenient way to calculate a new cursor position. Consider the
@@ -369,41 +369,67 @@ a new version of `commatize`:
 
 ```
 def commatize_with_cursor(s, cursor):
-    # Count the number of digit characters to the left of the cursor.
+    # Count the digit characters to the left of the cursor.
     left_digit_count = cursor - s[:cursor].count(',')
-    # Use the original commatize function to transform the text.
+    # Apply the original commatize function.
     s = commatize(s)
     if left_digit_count == 0:
         return (s, 0)
-    # Count digit characters until we reach the required number.
+    # Count off digit characters.
     for pos, ch in enumerate(s):
         if ch != ',':
             left_digit_count -= 1
             if left_digit_count == 0:
                 break
-    # The cursor goes to the right of the digit characters we counted off.
+    # Put the cursor to the right of the counted digts.
     cursor = pos + 1
     return (s, cursor)
 ```
 
-This new function calls the original `commatize` to transform the
-text. Then it performs cursor maintenance by means of a calculation that
-we formulated for the particular qualities of `commatize`.
+This function calls the original `commatize` to transform the text. It
+performs cursor maintenance with a calculation contrived for the
+particular qualities of `commatize`.
 
-We can also apply this ad hoc approach to `trimify`. Here we observe
-that the formatting operation only deletes space characters. We can
-calculate a new cursor position by counting the space characters that
-were deleted to the left of the original cursor and, if applicable,
-within the sequence of spaces extending to the immediate right of the
-cursor. This idea results in the following cursor-maintaining function.
+We can also come up with a special calculation for `trimify`. It stands
+to reason that the cursor should move to the left by one unit for each
+space character that gets deleted to the left of the cursor. But if the
+cursor isn't involved in the formatting operation, how do we know which
+characters get deleted to the left of it?
+
+We can't just look at `trimify(s[:cursor])` because the spaces to the
+immediate left of the cursor may nor may not appear in the formatted text.
+
+In this case, the space to the left of the cursor is preserved:
+
+  ` Hello, ^world.  ` -> `Hello, ^world.`
+
+In this case it is removed:
+
+  ` ^Hello, world.  ` -> `^Hello, world.`
+
+Sometimes all the spaces around the cursor vanish:
+
+  ` Hello, world. ^ ` -> `Hello, world.^`
+
+It turns out that we can handle the above cases, plus several other
+types of cases, as follows:
 
 ````
 def trimify_with_cursor(s, cursor):
+    # Split the string and guard the cursor's position with a non-space.
     left_trimmed = trimify(s[:cursor] + '|')
     s = trimify(s)
-    cursor = min(len(s), len(left_trimmed) - 1)
+    # The cursor moves to the right end of the trimified substring (minus
+    # the guard character) or to the right end of the formatted text.
+    cursor = min(len(left_trimmed) - 1, len(s))
     return (s, cursor)
 ```
+
+This trickery works. We have calculated reasonable cursor positions
+based on insights into each formatting operation. The trouble is
+that the calculations are non-obvious and the approach is not at all
+systematic. That is why I call it the ad hoc approach.
+
 
 
 ## The textual approach
