@@ -340,11 +340,12 @@ the right
 
 Any one of these would make a consistent pattern of cursor positioning.
 
-In my test suite, I made the arbitrary choice to always place the
-cursor to the right of the sole remaining space. I did not attempt to
-write an intelligent test harness that looks for different patterns
-of consistency. Instead, I visually inspected the results of automated
-testing and followed up with interactive testing.
+In my test suite, I made the arbitrary choice to always place the cursor
+to the right of the sole remaining space. This causes failed tests for
+an approach that consistently goes in the other direction. In theory
+one could make a smart test harness that looks for various patterns of
+consistency. I found it more expedient to visually inspect the results
+of automated testing and follow up with interactive testing.
 
 I made a [web page](http://192.168.0.106/comparison/) that simultaneously
 displays the results of six approaches to cursor maintenance. The
@@ -387,14 +388,14 @@ def commatize_with_cursor(s, cursor):
 ```
 
 This function calls the original `commatize` to transform the text. It
-performs cursor maintenance with a calculation contrived for the
-particular qualities of `commatize`.
+performs cursor maintenance with a calculation devised for the particular
+qualities of `commatize`.
 
 We can also come up with a special calculation for `trimify`. It stands
 to reason that the cursor should move to the left by one unit for each
-space character that gets deleted to the left of the cursor. But if the
-cursor isn't involved in the formatting operation, how do we know which
-characters get deleted to the left of it?
+space character that gets deleted to the left of the cursor. But if
+the cursor isn't involved in the formatting operation, how do we decide
+which characters get deleted to the left of it?
 
 We can't just look at `trimify(s[:cursor])` because the spaces to the
 immediate left of the cursor may nor may not appear in the formatted text.
@@ -411,28 +412,60 @@ Sometimes all the spaces around the cursor vanish:
 
   ` Hello, world. ^ ` -> `Hello, world.^`
 
-It turns out that we can handle the above cases, plus several other
-types of cases, as follows:
+It turns out that we can handle every case with the trick of appending
+a non-space character to `s[:cursor]` before trimifying it:
 
 ````
 def trimify_with_cursor(s, cursor):
     # Split the string and guard the cursor's position with a non-space.
     left_trimmed = trimify(s[:cursor] + '|')
     s = trimify(s)
-    # The cursor moves to the right end of the trimified substring (minus
-    # the guard character) or to the right end of the formatted text.
+    # The cursor moves to the right end of the trimified substring or the
+    # entire trimified text, whichever is shorter.
     cursor = min(len(left_trimmed) - 1, len(s))
     return (s, cursor)
 ```
 
-This trickery works. We have calculated reasonable cursor positions
-based on insights into each formatting operation. The trouble is
-that the calculations are non-obvious and the approach is not at all
-systematic. That is why I call it the ad hoc approach.
+This trickery works in the sense that it calculates reasonable
+cursor positions. The trouble is that it does so in a non-obvious
+manner. The ad hoc approach requires a thorough understanding of the
+text transformation. It may be difficult to find the necessary insights,
+and there is no guarantee that they will lead to a concise calculation.
 
 
+## The mock-cursor approach
 
-## The textual approach
+If the problem is that the text and the cursor are separate entities,
+perhaps we can solve it by incorporating the cursor into the text as a
+special character. Any character that is not already in the text can stand
+in for the cursor. Consider this state:
+
+  49^50,000
+
+We could represent the cursor with a caret, `^`, so that the text becomes:
+
+  49^50,000
+
+That is the first step in the mock-cursor approach. The next steps are:
+
+- apply the existing formatting operation to the text
+- clean up any formatting errors around the mock cursor
+- use the final position of the mock cursor as the formatted cursor position
+- remove the mock cursor from the text
+
+How effective is this approach? It depends on the formatting
+operation. With `commatize`, the mock cursor displaces every comma to
+the right of the cursor position. Fixing the errors becomes a laborious
+process. One way to do it is to chop up the text around the misplaced
+commas and glue them back together.
+
+
+similar idea: formatting the left and right sides separately
+
+these are variations on the ad hoc approach
+
+see NumericalCursorFormatter and TextualCursorFormatter
+
 
 
 ## The meta approach
