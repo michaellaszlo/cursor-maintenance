@@ -453,48 +453,49 @@ We can perform cursor maintenance as follows:
 - record the position of the mock cursor in the formatted text
 - remove the mock cursor from the text
 
-This approach hinges on rewriting the formatting operation to work around
-the cursor. In rewriting `commatize`, we must contend with the fact
-that the mock cursor displaces every comma to the right of the cursor
-position. Fixing this displacement is a laborious process. One way to
-do it is to chop up the text around the displaced commas and glue them
-back together.
+The crux is modifying the formatting operation to work around the
+cursor. In rewriting `commatize`, we must contend with the fact that the
+mock cursor displaces every comma to its right. Fixing this displacement
+is a laborious process. One way to do it is to chop up the text around
+the displaced commas and glue them back together.
 
 In my experiment, I chose to scan the characters of the text in reverse,
-placing the digit characters into an array and adding a comma after every
-third one. This is computationally more efficient than splitting and
-gluing substrings, but it requires a substantial amount of code. Either
-way, there is no benefit to using a mock cursor with `commatize`.
+placing the digit characters into an array and adding a comma after
+every third one. This is computationally more efficient than splitting
+and gluing substrings, but it requires more code and it does not benefit
+from the mock cursor.
 
-With `trimify`, the mock cursor causes much less trouble. After inserting
-the mock cursor into the text, we can run the original version of
-`trimify`. The resulting text can contain at most one extraneous space,
-always to the immediate left or right of the mock cursor.
+With `trimify`, the mock cursor causes less trouble. Applying the original
+version of `trimify` results in text containing at most one extraneous
+space, always to the immediate left or right of the mock cursor.
 
-It suffices to check three cases. If there is a space on each side of
-the mock cursor, we delete the one on the right:
+If there is a space on each side of the cursor, we delete the one on
+the right:
 
   `Hello, ^ world.`  ->  `Hello, ^world.`
 
-If the mock cursor is the first character in the text and there is a
-space to its right, we delete that space:
+If the mock cursor is the first character or the last character and
+there is a space next to it, we delete that space:
 
   `^ Hello, world.`  ->  `^Hello, world.`
 
-Similarly, if the mock cursor is the last character, we delete any space
-to its left:
-
   `Hello, world. ^`  ->  `Hello, world.^`
 
-These manipulations are concise and easy to understand.
+The mock cursor works well with `trimify` because it causes localized
+formatting errors that are easy to fix.
 
+Using a mock cursor does not simplify the problem of cursor maintenance
+in general. Although it may help with some formatting operations, it is
+not a systematic remedy. It only defers the problem, requiring ad hoc
+computations to fix the formatting errors caused by the mock cursor.
 
-similar idea: formatting the left and right sides separately
-
-these are variations on the ad hoc approach
-
-see NumericalCursorFormatter and TextualCursorFormatter
-
+Other cursor-maintenance gimmicks are similarly inadequate. For example,
+it may seem to be a good idea to split the text at the cursor position,
+independently format the left and right portions, then glue them back
+together and tidy up around the split. This is another idea that appears
+to introduce a helpful order but devolves into unspecified computations,
+possibly intricate and expensive ones. All such ideas are varieties of
+the ad hoc approach.
 
 
 ## The meta approach
