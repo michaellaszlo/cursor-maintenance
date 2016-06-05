@@ -358,7 +358,7 @@ clicking on the `scores` button next to the corresponding outputs. All
 of the approaches are explained below.
 
 
-## The ad hoc approach
+## An ad hoc approach
 
 If we know exactly how a formatting operation transforms the text, we may
 see a convenient way to calculate a new cursor position. Consider the
@@ -426,14 +426,15 @@ def trimify_with_cursor(s, cursor):
     return (s, cursor)
 ```
 
-This trickery works in the sense that it calculates reasonable
-cursor positions. The trouble is that it does so in a non-obvious
-manner. The ad hoc approach requires a thorough understanding of the
-text transformation. It may be difficult to find the necessary insights,
+This trickery works in the sense that it calculates reasonable cursor
+positions. The trouble is that it does so in a non-obvious manner.
+
+The ad hoc approach requires a thorough understanding of the text
+transformation. It may be difficult to find the necessary insights,
 and there is no guarantee that they will lead to a concise calculation.
 
 
-## The mock-cursor approach
+## The mock cursor
 
 If the problem is that the text and the cursor are separate entities,
 perhaps we can solve it by representing the cursor in the text with
@@ -448,7 +449,7 @@ The mock cursor could be a caret, `^`, so that the text becomes:
 
 We can perform cursor maintenance as follows:
 
-- insert a mock cursor at the user cursor position
+- insert the mock cursor at the user cursor position
 - apply a version of the formatting operation that accommodates the mock cursor
 - record the position of the mock cursor in the formatted text
 - remove the mock cursor from the text
@@ -499,6 +500,22 @@ the ad hoc approach.
 
 
 ## The meta approach
+
+A systematic approach to cursor maintenance requires that we specify
+what happens to the cursor as the text is transformed. The idea of
+representing the cursor with a special character was only a feint toward
+this principle because we still transformed the text with ordinary string
+operations that didn't track the the cursor position.
+
+To maintain the cursor exactly, we must transform the text with
+cursor-aware operations. I call this the meta approach because it entails
+operating on something beyond text. Instead of dealing with the text and
+the cursor as separate values, we operate on an object that represents
+text with a cursor.
+
+It suffices to define two operations on the text-with-cursor object:
+`insert` and `delete`. With these we can accomplish any text transform.
+
 
 
 ## The retrospective approach
