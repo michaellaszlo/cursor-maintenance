@@ -429,9 +429,10 @@ def trimify_with_cursor(s, cursor):
 This trickery works in the sense that it calculates reasonable cursor
 positions. The trouble is that it does so in a non-obvious manner.
 
-The ad hoc approach requires a thorough understanding of the text
-transformation. It may be difficult to find the necessary insights,
-and there is no guarantee that they will lead to a concise calculation.
+Ad hoc solutions to cursor maintenance rely on thoroughly understanding
+the formatting operation. It may be difficult to find the necessary
+insights, and there is no guarantee that they will lead to a concise
+calculation.
 
 
 ## The mock cursor
@@ -454,11 +455,11 @@ We can perform cursor maintenance as follows:
 - record the position of the mock cursor in the formatted text
 - remove the mock cursor from the text
 
-The crux is modifying the formatting operation to work around the
-cursor. In rewriting `commatize`, we must contend with the fact that the
-mock cursor displaces every comma to its right. Fixing this displacement
-is a laborious process. One way to do it is to chop up the text around
-the displaced commas and glue them back together.
+The nub of the matter is how to modify the formatting operation to work
+around the cursor. In rewriting `commatize`, we must contend with the
+fact that the mock cursor displaces every comma to its right. Fixing
+this displacement is a laborious process. One way to do it is to chop
+up the text around the displaced commas and glue them back together.
 
 In my experiment, I chose to scan the characters of the text in reverse,
 placing the digit characters into an array and adding a comma after
@@ -485,36 +486,55 @@ there is a space next to it, we delete that space:
 The mock cursor works well with `trimify` because it causes localized
 formatting errors that are easy to fix.
 
-Using a mock cursor does not simplify the problem of cursor maintenance
-in general. Although it may help with some formatting operations, it is
-not a systematic remedy. It only defers the problem, requiring ad hoc
-computations to fix the formatting errors caused by the mock cursor.
+Using a mock cursor fails to simplify the problem of cursor maintenance
+in general. Although it may help with some formatting operations, it
+is not a systematic remedy. It defers the problem, requiring ad hoc
+computations to correct formatting errors caused by the mock cursor.
 
-Other cursor-maintenance gimmicks are similarly inadequate. For example,
-it may seem to be a good idea to split the text at the cursor position,
-independently format the left and right portions, then glue them back
-together and tidy up around the split. This is another idea that appears
-to introduce a helpful order but devolves into unspecified computations,
-possibly intricate and expensive ones. All such ideas are varieties of
-the ad hoc approach.
+Many other cursor-maintenance gimmicks are well-disguised variations of
+the ad hoc approach. For example, it may seem useful to split the text at
+the cursor position, independently format the left and right portions,
+then glue them back together and tidy up around the split. This is
+another idea that superficially add rigor but devolves into unspecified
+computations.
 
 
 ## The meta approach
 
 A systematic approach to cursor maintenance requires that we specify
-what happens to the cursor as the text is transformed. The idea of
-representing the cursor with a special character was only a feint toward
-this principle because we still transformed the text with ordinary string
-operations that didn't track the the cursor position.
+what happens to the cursor as the text is transformed. Representing the
+cursor with a special character was only a feint toward this principle
+because we still transformed the text with ordinary string operations
+that didn't track the cursor position.
 
 To maintain the cursor exactly, we must transform the text with
-cursor-aware operations. I call this the meta approach because it entails
-operating on something beyond text. Instead of dealing with the text and
-the cursor as separate values, we operate on an object that represents
-text with a cursor.
+cursor-aware operations. I call this the meta approach because it involves
+operating on something greater than text. Instead of dealing with the
+text and the cursor as separate values, we operate on an object that
+represents text with a cursor.
 
-It suffices to define two operations on the text-with-cursor object:
-`insert` and `delete`. With these we can accomplish any text transform.
+It suffices to define two operations, `insert` and `delete`, on
+the text-with-cursor object. With these we can accomplish any text
+transformation.
+
+Consider the effect on the cursor of inserting a character into the
+text. If the character is inserted to the right of the cursor, the cursor
+position remains the same. If the character is inserted to the left of
+the cursor, the cursor position decreases by one. We can easily extend
+the calculation to inserting a string of characters.
+
+Suppose we have the text "ice" with the cursor at position 3:
+
+  `lemon^`
+
+Inserting "ade" at position 3 causes no change in cursor position:
+
+  `lemon^ade`
+
+Inserting "pink ", a string of 5 characters, at position 0 changes the
+cursor to 3 + 5 = 8:
+
+  `pink lemon^ade`
 
 
 
