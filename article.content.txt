@@ -513,15 +513,14 @@ operating on something greater than text. Instead of dealing with the
 text and the cursor as separate values, we operate on an object that
 represents text with a cursor.
 
-It suffices to define two operations, `insert` and `delete`, on
-the text-with-cursor object. With these we can accomplish any text
-transformation.
+Let us define operations that insert characters and delete characters
+from a text-with-cursor object.
 
 Consider the effect on the cursor of inserting a character into the
-text. If the character is inserted to the right of the cursor, the cursor
-position remains the same. If the character is inserted to the left of
-the cursor, the cursor position decreases by one. We can easily extend
-the calculation to inserting a string of characters.
+text. If the insertion is to the right of the cursor, the cursor
+position is unchanged. If the character is inserted to the left, the
+cursor position decreases by one. We can easily extend the calculation
+to inserting a string of characters.
 
 Suppose we have the text "ice" with the cursor at position 3:
 
@@ -536,6 +535,28 @@ cursor to 3 + 5 = 8:
 
   `pink lemon^ade`
 
+Now consider deletion. If a character is deleted to the right of the
+cursor, the cursor doesn't move. If a character is deleted to its
+left, the cursor position decreases by one. The calculation remains
+straightforward if we want to delete a span of characters lying strictly
+to the left or to the right of the cursor.
+
+When we delete a span of characters that includes the cursor, the cursor
+moves to the starting point of the deletion.
+
+Suppose we want to delete 10 characters starting from position 2 in this
+text-with-cursor object:
+
+  `pi.nk lemon^ad.e`
+
+The cursor is at position 8, which is between 2 and 2 + 10 =
+12. Therefore, the deletion moves the cursor to position 2:
+
+  `pi^e`
+
+These insertion and deletion operations suffice to transform any text
+`s` into any other text `t`. At the same time, they modify the cursor
+in a sensible, predictable fashion.
 
 
 ## The retrospective approach
