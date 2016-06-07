@@ -590,15 +590,33 @@ def commatize_with_cursor(s, cursor):
     return (t.text, t.cursor)
 ```
 
-I find that the idea of performing local operations on a text-with-cursor
-object lends clarity to the effort of cursor maintenance. However,
-it still calls for the reimplementation of formatting operations. The
-developer has to thoroughly understand each formatting operation and
-must remain conscious of the cursor displacement caused by each insertion
-and deletion.
+The notion of performing local operations on a text-with-cursor object
+lends clarity to the effort of cursor maintenance. However, it still
+calls for the reimplementation of formatting operations. The developer
+doing the reimplementation has to thoroughly understand each formatting
+operation and must remain conscious of the cursor displacement caused
+by each insertion and deletion.
 
 
 ## The retrospective approach
+
+Instead of peering into the inner workings of the formatting operation,
+let's restrict our attention to the three input values of the
+cursor-maintenance problem:
+
+- user text
+- user cursor position
+- formatted text
+
+Let's look at the cursor retrospectively. What was the user cursor's
+relationship to the user text? We want to describe the relationship
+with a quantitative measure that approximates a human perception of the
+cursor's place in the text. This would make it possible to compute the
+formatted cursor position by answering the following question:
+
+What cursor position is related to the formatted text in most nearly
+the same way that the user cursor position is related to the user text?
+
 
 
 ## Recommendations
