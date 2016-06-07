@@ -113,7 +113,7 @@ redundancy and complexity. In less critical applications, users would
 probably be happy to accept a small degree of ambiguity in exchange for
 a faster and friendlier interface.
 
-Consider the clumsy interface for editing cells in Microsoft Excel
+Consider the clunky interface for editing cells in Microsoft Excel
 and Google Sheets. You can make a spreadsheet cell that displays its
 value with currency formatting, but you can't edit the displayed value
 directly. You are restricted to editing an unformatted integer. The
@@ -144,8 +144,7 @@ the cursor position constant with respect to the non-whitespace content.
 How can we develop input elements that maintain the cursor in a
 user-friendly position while applying various kinds of formatting? Should
 we break down the formatting case by case, or is there a general approach
-that works for all possible formatting operations? It turns out that
-there are viable strategies falling into both camps.
+that works for all possible formatting operations?
 
 
 ## Defining the problem
@@ -341,32 +340,30 @@ the right
 Any one of these would make a consistent pattern of cursor positioning.
 
 In my test suite, I made the arbitrary choice to always place the cursor
-to the right of the sole remaining space. This causes failed tests for
-an approach that consistently goes in the other direction. In theory
-one could make a smart test harness that looks for various patterns of
-consistency. I found it more expedient to visually inspect the results
-of automated testing and follow up with interactive testing.
+to the right of the sole remaining space. In order to observe patterns
+of consistency, I followed up automated testing on the command line with
+web-based interactive testing.
 
-I made a [web page](http://192.168.0.106/comparison/) that simultaneously
-displays the results of six approaches to cursor maintenance. The
-`commatize` and `trimify` formatting operations each have their own
-input field in which you set the user text and user cursor position. The
-cell immediately below the input field displays the formatted text. The
-cells further below display the formatted cursor positions computed by
-various strategies. Some involve numerical scores which you can view by
-clicking on the `scores` button next to the corresponding outputs. All
-of the approaches are explained below.
+I made a [comparison page](http://192.168.0.106/comparison/) that
+simultaneously displays the results of six approaches to cursor
+maintenance. The `commatize` and `trimify` formatting operations each
+have their own input field in which you set the user text and user
+cursor position. The cell immediately below the input field displays
+the formatted text. The cells further below display the formatted cursor
+positions computed by various strategies. Some involve numerical scores
+which you can view by clicking on the `scores` button next to the
+corresponding outputs. All of the approaches are explained below.
 
 
-## An ad hoc approach
+## The ad hoc approach
 
-If we know exactly how a formatting operation transforms the text, we may
-see a convenient way to calculate a new cursor position. Consider the
-effect of `commatize`: it inserts and deletes commas while leaving the
-digit characters alone. It would be desirable to position the cursor in
-such a way that the number of digits to the left of the cursor remains
-constant across the formatting operation. We can use this idea to write
-a new version of `commatize`:
+If we know exactly how a formatting operation transforms the text, we
+may see a convenient way to calculate a new cursor position. Consider
+the effect of `commatize`: it inserts and deletes commas while leaving
+the digit characters alone. It would be desirable to position the cursor
+in such a way that the digits to the left of the cursor remain constant
+across the formatting operation. We can use this idea to write a new
+version of `commatize`:
 
 ```
 def commatize_with_cursor(s, cursor):
@@ -455,7 +452,7 @@ We can perform cursor maintenance as follows:
 - record the position of the mock cursor in the formatted text
 - remove the mock cursor from the text
 
-The nub of the matter is how to modify the formatting operation to work
+The burning question is how to modify the formatting operation to work
 around the cursor. In rewriting `commatize`, we must contend with the
 fact that the mock cursor displaces every comma to its right. Fixing
 this displacement is a laborious process. One way to do it is to chop
@@ -491,36 +488,33 @@ in general. Although it may help with some formatting operations, it
 is not a systematic remedy. It defers the problem, requiring ad hoc
 computations to correct formatting errors caused by the mock cursor.
 
-Many other cursor-maintenance gimmicks are well-disguised variations of
-the ad hoc approach. For example, it may seem useful to split the text at
-the cursor position, independently format the left and right portions,
-then glue them back together and tidy up around the split. This is
-another idea that superficially add rigor but devolves into unspecified
-computations.
+Many other cursor-maintenance gimmicks are variations of the ad
+hoc approach in disguise. For example, it may seem useful to split
+the text at the cursor position, independently format the left and
+right portions, then glue them back together and tidy up around the
+split. This is another idea that superficially adds rigor but devolves
+into unspecified computations.
 
 
 ## The meta approach
 
 A systematic approach to cursor maintenance requires that we specify
-what happens to the cursor as the text is transformed. Representing the
-cursor with a special character was only a feint toward this principle
+what happens to the cursor as the text is transformed. Representing
+the cursor with a special character was only a feint toward this idea
 because we still transformed the text with ordinary string operations
 that didn't track the cursor position.
 
 To maintain the cursor exactly, we must transform the text with
-cursor-aware operations. I call this the meta approach because it involves
-operating on something greater than text. Instead of dealing with the
-text and the cursor as separate values, we operate on an object that
-represents text with a cursor.
+cursor-aware operations. I call this the meta approach because it
+systematically manipulates more than text. We are now operating an object
+that represents text with a cursor. Let us define operations to insert
+and delete characters in a text-with-cursor object.
 
-Let us define operations that insert characters and delete characters
-from a text-with-cursor object.
-
-Consider the effect on the cursor of inserting a character into the
-text. If the insertion is to the right of the cursor, the cursor
-position is unchanged. If the character is inserted to the left, the
-cursor position decreases by one. We can easily extend the calculation
-to inserting a string of characters.
+Consider what should happen to the cursor when we insert a character
+into the text. If the character is inserted to the right of the cursor,
+the cursor position is unchanged. If the character is inserted to the
+left, the cursor position decreases by one. We can easily extend the
+calculation to inserting a string of characters.
 
 Suppose we have the text "ice" with the cursor at position 3:
 
@@ -556,7 +550,52 @@ The cursor is at position 8, which is between 2 and 2 + 10 =
 
 These insertion and deletion operations suffice to transform any text
 `s` into any other text `t`. At the same time, they modify the cursor
-in a sensible, predictable fashion.
+position in a predictable and reasonable manner.
+
+We can implement any formatting operation in terms of these two
+text-with-cursor operations. In theory we don't even have to rewrite our
+formatting operations. If we were to replace the basic string operations
+of a programming language with our text-with-cursor operations, every
+formatting operation in that language would automatically perform cursor
+maintenance.
+
+Have we found a foolproof method of cursor maintenance? Not at all. The
+hitch is that the sequence of insertions and deletions that make up a
+formatting operation can easily lead to inconvenient cursor displacement.
+
+For example, an implementation of `commatize` may very well start by
+initializing a new text-with-cursor object and appending characters one
+at a time as it scans the input text. The outcome is that the formatted
+cursor position is always at the right end of the text.
+
+The meta approach is only likely to result in user-friendly cursor
+positions if each formatting operation is implemented as a sequence of
+local changes to the input text.
+
+Here is my cursor-maintaining implementation of `commatize` using a
+`TextWithCursor` class that I wrote for this experiment:
+
+```
+def commatize_with_cursor(s, cursor):
+    t = TextWithCursor(s, cursor)
+    digit_count = 0
+    for pos in reversed(range(t.length())):
+        if t.read(pos) == ',':
+            t.delete(pos)
+        elif digit_count < 2:
+            digit_count += 1
+        elif pos > 0:
+            t.insert(pos, ',')
+            digit_count = 0
+    return (t.text, t.cursor)
+```
+
+I find that the idea of performing local operations on a text-with-cursor
+object lends clarity to the effort of cursor maintenance. However,
+it still calls for the reimplementation of formatting operations. The
+developer has to thoroughly understand each formatting operation and
+must remain conscious of the cursor displacement caused by each insertion
+and deletion.
 
 
 ## The retrospective approach
