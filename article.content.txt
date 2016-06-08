@@ -600,22 +600,21 @@ by each insertion and deletion.
 
 ## The retrospective approach
 
-Instead of peering into the inner workings of the formatting operation,
-let's restrict our attention to the three input values of the
-cursor-maintenance problem:
+Instead of peering into the inner workings of formatting operation, let's
+restrict our attention to the three input values of the cursor-maintenance
+problem:
 
 - user text
 - user cursor position
 - formatted text
 
-Let's look at the cursor retrospectively. What was the user cursor's
-relationship to the user text? We want to describe the relationship
-with a quantitative measure that approximates a human perception of the
-cursor's place in the text. This would make it possible to compute the
-formatted cursor position by answering the following question:
+We can compute a formatted cursor position by answering this question:
 
-What cursor position is related to the formatted text in most nearly
-the same way that the user cursor position is related to the user text?
+What position in the formatted text resembles the user cursor position
+in the user text?
+
+By resemblance, we mean some quantitative measure that correlates with
+human perception of the cursor's place in the text.
 
 
 
