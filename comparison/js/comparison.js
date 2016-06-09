@@ -32,8 +32,8 @@ var CursorMaintenanceComparison = (function () {
           originalCursor = input.selectionStart,
           formattedText = formatter[operation](originalText).text;
       // Echo input. Show formatted text without cursor.
-      setOutput(outputs[operation].original, originalText, originalCursor);
-      setOutput(outputs[operation].formatted, formattedText);
+      setOutput(outputs[operation].usertext, originalText, originalCursor);
+      setOutput(outputs[operation].formattedtext, formattedText);
       // Show text formatted with cursor maintenance.
       Object.keys(outputs[operation]).forEach(function (approach) {
         var result;
@@ -50,12 +50,12 @@ var CursorMaintenanceComparison = (function () {
         activeInputMirror.className =
             activeInputMirror.className.replace(/\s*active\s*/g, '');
       }
-      activeInputMirror = outputs[operation].original;
+      activeInputMirror = outputs[operation].usertext;
       activeInputMirror.className += ' active';
     }
     input.onblur = function () {
-      outputs[operation].original.className =
-          outputs[operation].original.className.replace(/\s*active\s*/g, '');
+      outputs[operation].usertext.className =
+          outputs[operation].usertext.className.replace(/\s*active\s*/g, '');
     };
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
@@ -135,7 +135,7 @@ var CursorMaintenanceComparison = (function () {
             cell = make('td', { parent: row }),
             output = outputs[operation][approach] = make('span',
                 { parent: cell, className: 'output' });
-        if (approach == 'original') {
+        if (approach == 'usertext') {
           inputs[operation] = make('input', { parent: cell, type: 'text',
               maxLength: inputMaxLengths[operation] });
           output.className += ' original';
@@ -159,8 +159,8 @@ var CursorMaintenanceComparison = (function () {
     inputs.trimify.value = '    \'Twas   brillig,  and  ';
     inputs.trimify.setSelectionRange(10, 10);
     inputs.trimify.click();
-    outputs.commatize.balancedfrequencies.button.click();
-    outputs.trimify.balancedfrequencies.button.click();
+    outputs.commatize.frequencyvector.button.click();
+    outputs.trimify.frequencyvector.button.click();
   }
 
   return {

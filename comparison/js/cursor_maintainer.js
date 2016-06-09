@@ -390,11 +390,10 @@ var CursorMaintainer = (function () {
 
   return {
     formatter: formatter,
-    numerical: numericalCursorFormatter,
-    textual: textualCursorFormatter,
+    adhoc: numericalCursorFormatter,
+    textcursor: textualCursorFormatter,
     meta: metaCursorFormatter,
-    textualLevenshtein: retrospectiveCursorFormatters.textualLevenshtein,
     splitLevenshtein: retrospectiveCursorFormatters.splitLevenshtein,
-    balancedfrequencies: retrospectiveCursorFormatters.balancedfrequencies
+    frequencyvector: retrospectiveCursorFormatters.balancedfrequencies
   };
 })();
