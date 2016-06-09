@@ -600,21 +600,35 @@ by each insertion and deletion.
 
 ## The retrospective approach
 
-Instead of peering into the inner workings of formatting operation, let's
-restrict our attention to the three input values of the cursor-maintenance
-problem:
+So far we have attempted to do cursor maintenance by peering into
+the inner workings of formatting operations. Let's see what we can
+accomplish by restricting our attention to the three input values of
+the cursor-maintenance problem:
 
 - user text
 - user cursor position
 - formatted text
 
-We can compute a formatted cursor position by answering this question:
+To compute a formatted cursor position, let's try to answer this question:
 
 What position in the formatted text resembles the user cursor position
 in the user text?
 
-By resemblance, we mean some quantitative measure that correlates with
-human perception of the cursor's place in the text.
+The resemblance should be some quantitative measure that correlates
+with human perception of the cursor's place in the text. I call this
+the retrospective approach because it seeks a cursor position in the
+new text by looking back at the cursor in the old text.
+
+One idea for measuring the cursor-text relationship rests on the
+observation that the cursor splits the text into left and right parts. We
+can argue that the left part of the old text should be similar to the
+left part of the new text, and likewise for the right parts.
+
+The similarity of two strings can be expressed by their edit distance,
+which measures the number of elementary operations required to transform
+one string into another. One such measure is the Levenshtein distance,
+in which each elementary operation is the insertion, deletion, or
+replacement of one character.
 
 
 
