@@ -617,7 +617,7 @@ in the user text?
 The resemblance should be some quantitative measure that correlates
 with human perception of the cursor's place in the text. I call this
 the retrospective approach because it seeks a cursor position in the
-new text by looking back at the cursor in the old text.
+formatted text by looking back at the cursor in the user text.
 
 One idea for measuring the cursor-text relationship rests on the
 observation that the cursor splits the text into left and right parts. We
@@ -630,6 +630,52 @@ one string into another. One such measure is the Levenshtein distance,
 in which each elementary operation is the insertion, deletion, or
 replacement of one character.
 
+Suppose the Levenshtein distance is implemented with a function called
+`levenshtein`, as in my experimental code. Given user text `s` and
+user cursor position `p`, we can assign a score to each position `q`
+in the formatted text `t` by computing the following sum and choosing
+positions that achieve the lowest scores:
+
+  levenshtein(s[:p], t[:q]) + levenshtein(s[p:], t[q:])
+
+I call that the split Levenshtein formula. In my informal testing, it
+works fairly well. It usually agrees with the meticulously constructed
+ad hoc functions and the text-with-cursor function even though, unlike
+those other approaches, it is oblivious to the details of each formatting
+operation.
+
+The weakness of split Levenshtein is that it often computes tied
+scores. For example, given the user text and cursor
+
+  14^,00
+
+with the formatted text
+
+  1,400
+
+the following scores are computed for each formatted cursor position:
+
+  ^1,400 4
+  1^,400 2
+  1,^400 2
+  1,4^00 2
+  1,40^0 4
+  1,400^ 6
+
+Whenever there is a tie, I arbitrarily choose the leftmost of the
+lowest-scoring positions. In many cases, such as the one shown here,
+this turns out to be a poor choice. Here the rightmost among the tied
+positions is best. In other cases, the average of the tied positions is
+visually optimal. I couldn't find a simple tie-breaking strategy that
+worked consistently.
+
+Another drawback is the computational cost. It takes `O(n^2)` time
+to compute the Levenshtein distance for a pair of strings of length
+`O(n)`. There are `n` possible cursor positions, so the overall cost is
+`O(n^3)`. Although cubic time isn't a burden for small input fields, it
+becomes problematic for document-wide formatting. If the text contains
+`10^3` characters, which is about two hundred English words, applying
+split Levenshtein takes time on the order of `10^9`.
 
 
 ## Recommendations
