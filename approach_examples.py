@@ -42,7 +42,8 @@ class Test:
             ('10,00', 1, '1,000', 1),
             ('10,00', 2, '1,000', 3),
             ('10,00', 3, '1,000', 3),
-            ('10,00', 4, '1,000', 4)
+            ('10,00', 4, '1,000', 4),
+            ('129,00', 3, '12,900', 4)
         ],
         'trimify': [
             ('  hello  ', 8, 'hello', 5),
@@ -465,6 +466,6 @@ if __name__ == '__main__':
     #Test(NumericalCursorFormatter()).run()
     #Test(TextualCursorFormatter()).run()
     #Test(MetaCursorFormatter()).run()
-    Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
-    #Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
+    #Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
+    Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
 

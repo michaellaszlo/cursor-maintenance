@@ -598,7 +598,7 @@ operation and must remain conscious of the cursor displacement caused
 by each insertion and deletion.
 
 
-## The retrospective approach
+## Retrospective approach with edit distance
 
 So far we have attempted to do cursor maintenance by peering into
 the inner workings of formatting operations. Let's see what we can
@@ -620,28 +620,28 @@ the retrospective approach because it seeks a cursor position in the
 formatted text by looking back at the cursor in the user text.
 
 One idea for measuring the cursor-text relationship rests on the
-observation that the cursor splits the text into left and right parts. We
-can argue that the left part of the old text should be similar to the
-left part of the new text, and likewise for the right parts.
+observation that the cursor splits the text into left and right parts. It
+can be argued that the left part of the old text should be similar to
+the left part of the new text, and the old right part should be similar
+to the new right part.
 
 The similarity of two strings can be expressed by their edit distance,
 which measures the number of elementary operations required to transform
 one string into another. One such measure is the Levenshtein distance,
 in which each elementary operation is the insertion, deletion, or
-replacement of one character.
+replacement of a character.
 
 Suppose the Levenshtein distance is implemented with a function called
-`levenshtein`, as in my experimental code. Given user text `s` and
+`levenshtein`, as in my experimental code. Given the user text `s` and
 user cursor position `p`, we can assign a score to each position `q`
 in the formatted text `t` by computing the following sum and choosing
 positions that achieve the lowest scores:
 
   levenshtein(s[:p], t[:q]) + levenshtein(s[p:], t[q:])
 
-I call that the split Levenshtein formula. In my informal testing, it
-works fairly well. It usually agrees with the meticulously constructed
-ad hoc functions and the text-with-cursor function even though, unlike
-those other approaches, it is oblivious to the details of each formatting
+I call that the split Levenshtein formula. In my informal testing,
+it works fairly well. It usually agrees with the results of the ad hoc
+approaches even though it is oblivious to the details of each formatting
 operation.
 
 The weakness of split Levenshtein is that it often computes tied
@@ -663,22 +663,27 @@ the following scores are computed for each formatted cursor position:
   1,400^ 6
 
 Whenever there is a tie, I arbitrarily choose the leftmost of the
-lowest-scoring positions. In many cases, such as the one shown here,
-this turns out to be a poor choice. Here the rightmost among the tied
-positions is best. In other cases, the average of the tied positions is
-visually optimal. I couldn't find a simple tie-breaking strategy that
-worked consistently.
+lowest-scoring positions. In many cases, such as the one shown here, this
+turns out to be a poor choice. Here the rightmost among the tied positions
+is best. In other cases, the average of the tied positions is visually
+optimal. There is no simple tie-breaking strategy that works consistently.
 
 Another drawback is the computational cost. It takes `O(n^2)` time
 to compute the Levenshtein distance for a pair of strings of length
 `O(n)`. There are `n` possible cursor positions, so the overall cost is
-`O(n^3)`. Although cubic time isn't a burden for small input fields, it
-becomes problematic for document-wide formatting. If the text contains
-`10^3` characters, which is about two hundred English words, applying
-split Levenshtein takes time on the order of `10^9`.
+`O(n^3)` to solve one instance of the cursor-maintenance problem. Although
+cubic time isn't a burden for small input fields, it becomes problematic
+for document-scale formatting. If the text contains `10^3` characters,
+which is about two hundred English words, using split Levenshtein for
+cursor maintenance takes time on the order of `10^9` computational steps.
 
 
-## Recommendations
+## Retrospective approach with character frequencies
+
+
+
+
+## Summary
 
 
 
