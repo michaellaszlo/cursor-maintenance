@@ -680,7 +680,12 @@ cursor maintenance takes time on the order of `10^9` computational steps.
 
 ## Retrospective approach with character frequencies
 
-
+Given the user text `s` and formatted text `t`, consider the set of
+characters `C` that occur in both `s` and `t`. Given the user cursor `p`
+in `s`, count the number of times each character `c` in `C` appears to the
+left of `p` and to the right of `p`. Call these frequencies `count_left(s,
+p, c)` and `count_right(s, p, c)`. Similarly, count the left and right
+character frequencies for every possible position `q` in `t`.
 
 
 ## Summary
