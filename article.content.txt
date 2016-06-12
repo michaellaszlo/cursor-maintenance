@@ -687,6 +687,20 @@ left of `p` and to the right of `p`. Call these frequencies `count_left(s,
 p, c)` and `count_right(s, p, c)`. Similarly, count the left and right
 character frequencies for every possible position `q` in `t`.
 
+We can evaluate each position `q` in `t` by computing a score from the
+respective frequencies of each character `c` in `C`. In my experiments,
+I used a formula that uses the ratio
+
+  a  =  count_left(s, p, c) / ( count_left(s, p, c) + count_right(s, p, c) )
+
+and the ratio
+
+  b  =  count_left(t, q, c) / ( count_left(t, q, c) + count_right(t, q, c) )
+
+to compute the score:
+
+  cost  =  abs(a - b) ^ 2 
+
 
 ## Summary
 
