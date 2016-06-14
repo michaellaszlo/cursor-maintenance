@@ -691,8 +691,8 @@ the state
 we can observe that the character `l` occurs twice to the left of the
 cursor and once to its right.
 
-Let's define a pair of character-frequency functions, `count_left` and
-`count_right`, that each take a string, a position, and a character. In
+Let's define a pair of character-frequency functions, `left` and
+`right`, that each take a string, a position, and a character. In
 the situation above, with
 
   s = `  Hello,  world.  `
@@ -701,35 +701,47 @@ the situation above, with
 
 we have:
 
-  count_left(s, p, 'l') = 2
+  left(s, p, 'l') = 2
 
-  count_right(s, p, 'l') = 1
+  right(s, p, 'l') = 1
 
+Suppose the text `s` is transformed into `t` by a formatting
+operation. If there is a position `q` in `t` such that
 
+  left(t, q, 'l') = 2
 
-Given the user text `s` and formatted text `t`, consider the set of
-characters `C` that occur in both `s` and `t`. Given the user cursor `p`
-in `s`, count the number of times each character `c` in `C` appears to the
-left of `p` and to the right of `p`. Call these frequencies `count_left(s,
-p, c)` and `count_right(s, p, c)`. Similarly, count the left and right
-character frequencies for every possible position `q` in `t`.
+  right(t, q, 'l') = 1
 
-We can evaluate each position `q` in `t` by computing a score from the
-respective frequencies of each character `c` in `C`. In my experiments,
-I used a formula that uses the ratio
+we can say that `q` is a good cursor position with respect to the
+character `l`. But there may be several such cursor positions, or none
+at all.
 
-  a  =  count_left(s, p, c) / ( count_left(s, p, c) + count_right(s, p, c) )
+Then there are the left-right frequencies of other characters that
+appear in both `s` and `t`. How do we achieve a balance among the
+various characters?
 
-and the ratio
+I propose that we compute the ratio
 
-  b  =  count_left(t, q, c) / ( count_left(t, q, c) + count_right(t, q, c) )
+  a = left(s, p, c) / (left(s, p, c) + right(s, p, c))
 
-to compute the score:
+for each character `c` that occurs in both `s` and `t`. Likewise,
+we compute
 
-  cost  =  abs(a - b) ^ 2 
+  b = left(t, q, c) / (left(t, q, c) + right(t, q, c))
+
+for each position `q` in `t`.
+
+Then we take the square of the absolute difference:
+
+  cost(q, c) = abs(a - b) ** 2
+
+The score of position `q` is the sum of the values `cost(q, c)` over all
+characters `c` that occur in both `s` and `t`. We choose the position that
+achieves the minimum score. If there are several, we choose the leftmost.
+
 
 
 ## Summary
 
 
-
+ve
