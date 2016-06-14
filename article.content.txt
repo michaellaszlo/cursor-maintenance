@@ -670,15 +670,42 @@ optimal. There is no simple tie-breaking strategy that works consistently.
 
 Another drawback is the computational cost. It takes `O(n^2)` time
 to compute the Levenshtein distance for a pair of strings of length
-`O(n)`. There are `n` possible cursor positions, so the overall cost is
-`O(n^3)` to solve one instance of the cursor-maintenance problem. Although
-cubic time isn't a burden for small input fields, it becomes problematic
-for document-scale formatting. If the text contains `10^3` characters,
-which is about two hundred English words, using split Levenshtein for
-cursor maintenance takes time on the order of `10^9` computational steps.
+`O(n)`. There are `n` possible cursor positions, so it costs `O(n^3)`
+to solve one instance of the cursor-maintenance problem.
+
+Although cubic time isn't a burden for small input fields, it becomes
+problematic for document-scale formatting. If the text contains `10^3`
+characters, which is about two hundred English words, using split
+Levenshtein for cursor maintenance takes time on the order of `10^9`
+computational steps.
 
 
 ## Retrospective approach with character frequencies
+
+Another way to retroactively evaluate cursor positions is to count
+character frequencies on each side of the cursor. For example, in
+the state
+
+  `  Hello, ^ world.  `
+
+we can observe that the character `l` occurs twice to the left of the
+cursor and once to its right.
+
+Let's define a pair of character-frequency functions, `count_left` and
+`count_right`, that each take a string, a position, and a character. In
+the situation above, with
+
+  s = `  Hello,  world.  `
+
+  p = 10
+
+we have:
+
+  count_left(s, p, 'l') = 2
+
+  count_right(s, p, 'l') = 1
+
+
 
 Given the user text `s` and formatted text `t`, consider the set of
 characters `C` that occur in both `s` and `t`. Given the user cursor `p`
