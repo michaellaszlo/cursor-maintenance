@@ -785,15 +785,24 @@ you understand the formatting operation completely and you see exactly
 how to calculate formatted cursor positions. Otherwise, I recommend that
 you employ one of the other approaches.
 
-mock cursor requires ad hoc computation; only use it if you are sure
-that you can fix any formatting error caused by the mock cursor; may be
-a good solution for document-scale formatting
+The mock cursor is a trick that lets you format most of the text as usual,
+followed by an ad hoc clean-up around the cursor position. It is a good
+trick if the formatting errors caused by the mock cursor are localized
+and you see a good way to fix the local formatting errors. This may be
+an attractive solution when you are formatting a large-scale document.
 
-meta approach is very accurate if you meticulously reimplement each
-formatting operation with local operations on a text-with-cursor object
+The meta approach causes minimal cursor displacement if you reimplement
+each formatting operation with local operations on a text-with-cursor
+object. This is the best approach, I feel, if you have the leisure to
+meticulously reimplement the formatting operations.
 
-retrospective approaches are suitable if you want to do minimal work
-and can tolerate occasionally misplaced cursors
+When development time and computational resources are in short
+supply, I recommend the retrospective approach with balanced character
+frequencies. It requires minimal work to implement and it runs in linear
+time. However, you must be aware that it is liable to compute surprising
+cursor positions. You must consider the application and ask yourself
+whether your users will tolerate odd cursor movements.
+
 
 here is my experimental comparison page
 
