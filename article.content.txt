@@ -614,20 +614,20 @@ To compute a formatted cursor position, let's try to answer this question:
 What position in the formatted text resembles the user cursor position
 in the user text?
 
-The resemblance should be some quantitative measure that correlates
-with human perception of the cursor's place in the text. I call this
-the retrospective approach because it seeks a cursor position in the
-formatted text by looking back at the cursor in the user text.
+To make it computationally feasible, the resemblance should be a
+quantitative measure that somehow agrees with human perception of the
+cursor's place in the text. I call this the retrospective approach
+because it chooses a cursor position in the formatted text by looking
+back at the cursor in the user text.
 
-One idea for measuring the cursor-text relationship rests on the
-observation that the cursor splits the text into left and right parts. It
-can be argued that the left part of the old text should be similar to
-the left part of the new text, and the old right part should be similar
-to the new right part.
+One idea for measuring resemblance begins with the observation that the
+cursor splits the text into left and right parts. It can be argued that
+the left part of the old text should be similar to the left part of the
+new text, and the old right part should be similar to the new right part.
 
 The similarity of two strings can be expressed by their edit distance,
-which measures the number of elementary operations required to transform
-one string into another. One such measure is the Levenshtein distance,
+which is the number of elementary operations required to transform one
+string into another. One such measure is the Levenshtein distance,
 in which each elementary operation is the insertion, deletion, or
 replacement of a character.
 
@@ -683,8 +683,9 @@ computational steps.
 ## Retrospective approach with character frequencies
 
 Another way to retroactively evaluate cursor positions is to count
-character frequencies on each side of the cursor. For example, in
-the state
+character frequencies on each side of the cursor.
+
+For example, in the state
 
   `  Hello, ^ world.  `
 
@@ -713,11 +714,10 @@ the text `t`. If there is a position `q` in `t` such that
   right(t, q, 'l') = 1
 
 we can say that `q` is a good choice of formatted cursor position with
-respect to the character `l`.
-
-But there may be several such cursor positions, or there may be none.
-Then there are the left-right frequencies of characters other than
-`l`. How do we achieve a balance among the various characters?
+respect to the character `l`. There may be several such cursor positions,
+or there may be none. Then there are the left-right frequencies of
+characters other than `l`. How do we achieve a balance among the various
+characters?
 
 I propose that we compute the ratio
 
@@ -744,20 +744,43 @@ impression. In order to quantify the accuracy of each approach, I would
 have to assemble a significant corpus of problem instances along with
 a gold standard for judging formatted cursor positions.
 
-What I can state with certainty is that the character-frequency formula
-is advantageous in terms of computational cost. Given a fixed set of
-characters in a text of size `n`, we can count the `left` frequencies
-at every position with a single scan in `O(n)` time.
+The character-frequency formula is advantageous in terms of computational
+cost. Given a fixed set of characters in a text of size `n`, we can count
+the `left` frequencies at every position with one scan in `O(n)` time.
 
 The value of `left` at position `n` gives us the value of `right` at
 position `0`. Furthermore, this value is the sum of `left` and `right`
-at every position. With a second scan through the `left` frequencies, we
-can compute the remaining values of `right` in `O(n)` time. This means
-that the cost of computing the left-right ratios for every possible
-cursor position is within a constant factor of the length of the text.
+at every position. With a second scan through the `left` frequencies,
+we can compute the remaining values of `right` in `O(n)` time. This
+means that the cost of computing the left-right ratios for all cursor
+positions is within a constant factor of the length of the text.
 
 
 ## Summary
 
+As I look back on my experiments, I have to say that I haven't found a
+silver bullet for the problem of cursor maintenance. The most accurate
+approaches rely on a thorough understanding of the formatting operations
+and take the most code to implement. The one-size-fits-all approaches
+can be added to an input field with little effort, but will occasionally
+move the cursor to surprising positions. You must choose your approach
+based on what resources are at your disposal and what you hope to achieve.
 
-ve
+Can you avoid cursor maintenance altogether? In my opinion, if you have
+an input field with a movable cursor and if you format the input in
+real time after each user action, you must try to find a user-friendly
+cursor position in the formatted text. Failing to do so degrades the
+user experience significantly. If you do not want to attempt cursor
+maintenance, I recommend that you avoid real-time input formatting. It
+would be better to redesign the interface by, for example, showing
+the unformatted input in an editable field and the formatted text in a
+separate, non-editable area.
+
+If you do want to perform real-time formatting with cursor maintenance,
+I advise against the ad hoc approach. It can be tempting to calculate
+cursor positions without a systematic approach, but doing so exposes you
+to a wide range of logical errors. An ad hoc computation is suitable if
+you completely understand the formatting operation and you see exactly
+how to calculate formatted cursor positions. Otherwise, I recommend that
+you employ one of the other approaches.
+
