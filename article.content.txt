@@ -759,28 +759,50 @@ positions is within a constant factor of the length of the text.
 ## Summary
 
 As I look back on my experiments, I have to say that I haven't found a
-silver bullet for the problem of cursor maintenance. The most accurate
-approaches rely on a thorough understanding of the formatting operations
-and take the most code to implement. The one-size-fits-all approaches
-can be added to an input field with little effort, but will occasionally
-move the cursor to surprising positions. You must choose your approach
-based on what resources are at your disposal and what you hope to achieve.
+fully satisfying approach to the problem of cursor maintenance. The most
+accurate solutions depend on a thorough understanding of the formatting
+operations and require the most code to implement. The one-size-fits-all
+solutions can be added to an input field with little effort, but will
+occasionally move the cursor to surprising positions. You must choose
+your approach based on what resources are at your disposal and what you
+hope to achieve.
 
 Can you avoid cursor maintenance altogether? In my opinion, if you have
-an input field with a movable cursor and if you format the input in
-real time after each user action, you must try to find a user-friendly
+an input field with a movable cursor and if the field formats its contents
+in real time after each user action, you must try to find a user-friendly
 cursor position in the formatted text. Failing to do so degrades the
 user experience significantly. If you do not want to attempt cursor
 maintenance, I recommend that you avoid real-time input formatting. It
-would be better to redesign the interface by, for example, showing
-the unformatted input in an editable field and the formatted text in a
-separate, non-editable area.
+would be better to redesign the interface by, for example, displaying
+an unformatted input field separately from a formatted, non-editable
+text area.
 
 If you do want to perform real-time formatting with cursor maintenance,
 I advise against the ad hoc approach. It can be tempting to calculate
 cursor positions without a systematic approach, but doing so exposes you
 to a wide range of logical errors. An ad hoc computation is suitable if
-you completely understand the formatting operation and you see exactly
+you understand the formatting operation completely and you see exactly
 how to calculate formatted cursor positions. Otherwise, I recommend that
 you employ one of the other approaches.
+
+mock cursor requires ad hoc computation; only use it if you are sure
+that you can fix any formatting error caused by the mock cursor; may be
+a good solution for document-scale formatting
+
+meta approach is very accurate if you meticulously reimplement each
+formatting operation with local operations on a text-with-cursor object
+
+retrospective approaches are suitable if you want to do minimal work
+and can tolerate occasionally misplaced cursors
+
+here is my experimental comparison page
+
+here is a polished demo of the meta approach and the retrospective
+frequency-balancing approach
+
+go ahead and plug your own formatting operation into the
+frequency-balancing approach
+
+check out all of my code, both experimental and production-ready,
+on GitHub
 
