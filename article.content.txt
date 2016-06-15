@@ -758,60 +758,58 @@ positions is within a constant factor of the length of the text.
 
 ## Summary
 
-As I look back on my experiments, I have to say that I haven't found a
-fully satisfying approach to the problem of cursor maintenance. The most
-accurate solutions depend on a thorough understanding of the formatting
-operations and require the most code to implement. The one-size-fits-all
-solutions can be added to an input field with little effort, but will
-occasionally move the cursor to surprising positions. You must choose
-your approach based on what resources are at your disposal and what you
-hope to achieve.
+I haven't found a fully satisfying approach to the problem of
+cursor maintenance. The most accurate solutions depend on a thorough
+understanding of the formatting operations and require the most code to
+implement. The one-size-fits-all solutions can be added to an input field
+with little effort, but will occasionally move the cursor to surprising
+positions. You must choose your approach based on what resources are at
+your disposal and what you hope to achieve.
 
-Can you avoid cursor maintenance altogether? In my opinion, if you have
-an input field with a movable cursor and if the field formats its contents
-in real time after each user action, you must try to find a user-friendly
-cursor position in the formatted text. Failing to do so degrades the
-user experience significantly. If you do not want to attempt cursor
-maintenance, I recommend that you avoid real-time input formatting. It
-would be better to redesign the interface by, for example, displaying
-an unformatted input field separately from a formatted, non-editable
-text area.
+Can you avoid cursor maintenance altogether? If you have an input field
+with a movable cursor and if the field formats its contents in real time
+after each user action, you should try to find a user-friendly cursor
+position in the formatted text. In my opinion, failing to do so degrades
+the user experience to an unacceptable degree. If you do not want to
+attempt cursor maintenance, I recommend that you avoid real-time input
+formatting. It would be better to redesign the interface by, for example,
+keeping the unformatted text in the input field while displaying the
+formatted text in a non-editable text area.
 
 If you do want to perform real-time formatting with cursor maintenance,
 I advise against the ad hoc approach. It can be tempting to calculate
 cursor positions without a systematic approach, but doing so exposes you
-to a wide range of logical errors. An ad hoc computation is suitable if
-you understand the formatting operation completely and you see exactly
-how to calculate formatted cursor positions. Otherwise, I recommend that
-you employ one of the other approaches.
+to a wide range of logical errors. An ad hoc computation is suitable
+only if you understand the formatting operation completely and you
+see exactly how to calculate formatted cursor positions. Otherwise,
+I recommend that you employ one of the other approaches.
 
 The mock cursor is a trick that lets you format most of the text as usual,
 followed by an ad hoc clean-up around the cursor position. It is a good
 trick if the formatting errors caused by the mock cursor are localized
 and you see a good way to fix the local formatting errors. This may be
-an attractive solution when you are formatting a large-scale document.
+an attractive solution to formatting a large document.
 
 The meta approach causes minimal cursor displacement if you reimplement
 each formatting operation with local operations on a text-with-cursor
 object. This is the best approach, I feel, if you have the leisure to
 meticulously reimplement the formatting operations.
 
-When development time and computational resources are in short
-supply, I recommend the retrospective approach with balanced character
+When development time and computational resources are in short supply,
+you may want to apply the retrospective approach with balanced character
 frequencies. It requires minimal work to implement and it runs in linear
 time. However, you must be aware that it is liable to compute surprising
-cursor positions. You must consider the application and ask yourself
+cursor positions. You have to consider the application and ask yourself
 whether your users will tolerate odd cursor movements.
 
+My [approach-comparison page]() shows the kinds of discrepancies you
+can expect. I made that page for experimental purposes.
 
-here is my experimental comparison page
+I made a more polished [demonstration page]() that shows two approaches
+in action. The meta approach is used for `commatize` and the retrospective
+frequency-balancing approach is used for `trimify`.
 
-here is a polished demo of the meta approach and the retrospective
-frequency-balancing approach
-
-go ahead and plug your own formatting operation into the
-frequency-balancing approach
-
-check out all of my code, both experimental and production-ready,
-on GitHub
+If you want to see how well the retrospective approach works for your
+own formatting operation, go ahead and [replace `trimify`]() with any
+function that takes a string argument and returns a string result.
 
