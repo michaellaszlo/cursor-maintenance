@@ -9,16 +9,20 @@
   padding: 0;
 }
 body {
+  font-family: Roboto, sans-serif;
+  font-size: 24px;
 }
 #wrapper {
   text-align: center;
 }
-#numberInput {
-  margin-top: 150px;
+.label {
+  margin-top: 30px;
+  border: 1px dotted #ccc;
+}
+input {
+  margin-top: 10px;
   width: 200px;
   text-align: center;
-  font-family: Roboto, sans-serif;
-  font-size: 24px;
   padding: 5px 10px;
   border: 2px solid #888;
   border-radius: 5px;
@@ -74,7 +78,11 @@ window.onload = function () {
 <body>
 <div id="wrapper">
 
+<div class="label"> population </div>
 <input id="numberInput">
+
+<div class="label"> description </div>
+<input id="textInput">
 
 </div>
 </body>
