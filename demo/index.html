@@ -1,89 +1,52 @@
 <!DOCTYPE html>
 <head>
+
 <meta charset="utf-8">
+
 <link rel="stylesheet" type="text/css"
  href="https://fonts.googleapis.com/css?family=Roboto">
-<style>
-* {
-  margin: 0;
-  padding: 0;
-}
-body {
-  font-family: Roboto, sans-serif;
-  font-size: 24px;
-}
-#wrapper {
-  text-align: center;
-}
-.label {
-  margin-top: 30px;
-  border: 1px dotted #ccc;
-}
-input {
-  margin-top: 10px;
-  width: 200px;
-  text-align: center;
-  padding: 5px 10px;
-  border: 2px solid #888;
-  border-radius: 5px;
-  outline: none;
-}
-</style>
-<script src="maintain.cursor.js"></script>
-<script src="format.number.js"></script>
-<script>
 
-// Format a non-negative integer with no zero padding.
-function format(s) {
-  // Delete non-digits.
-  s = s.replace(/\D/g, '');
-  // Delete zero padding.
-  s = s.replace(/^0+/, '0');
-  if (s.charAt(0) == '0' && s.length > 1) {
-    s = s.substring(1);
-  }
-  // Insert commas to separate groups of three digits.
-  s = FormatNumber.groupDigits(s);
-  return s;
-}
+<title> Cursor maintenance </title>
 
-function updateInput() {
-  var oldPosition,
-      newPosition;
-      original = this.value,
-      formatted = format(this.value);
-  if (formatted === original) {
-    return;
-  }
-  oldPosition = this.selectionStart;
-  newPosition = MaintainCursor.findNewPosition(
-      original, oldPosition, formatted);
-  this.value = formatted;
-  this.setSelectionRange(newPosition, newPosition);
-}
-
-window.onload = function () {
-  var numberInput = document.getElementById('numberInput'),
-      handler = updateInput.bind(numberInput);
-  [ 'change', 'keydown', 'click' ].forEach(function (eventName) {
-    numberInput['on' + eventName] = function () {
-      // Set zero timeout to add our handler to the end of the event queue.
-      setTimeout(handler, 0);
-    };
-  });
-  numberInput.focus();
-};
-</script>
 </head>
 <body>
+
 <div id="wrapper">
 
-<div class="label"> population </div>
-<input id="numberInput">
 
-<div class="label"> description </div>
-<input id="textInput">
+<h1> Cursor maintenance </h1>
 
-</div>
+
+<h2> Meta </h2>
+
+
+<h3> commatize </h3>
+
+<input>
+
+
+<h3> trimify </h3>
+
+<textarea class="text"></textarea>
+
+
+<h2> Retrospective </h2>
+
+<h3> formatting operation </h3>
+
+<textarea class="code"></textarea>
+
+
+<h3> input field </h3>
+
+<textarea class="text"></textarea>
+
+
+
+<h2> Notes </h2>
+
+
+
+</div><!--end wrapper -->
 </body>
 </html>
