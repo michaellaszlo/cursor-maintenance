@@ -19,3 +19,30 @@ h1, h2, h3 {
 p {
   margin: 10px 0;
 }
+
+input, textarea {
+  font-size: 16px;
+  outline: none;
+  border: 2px solid #aaa;
+  border-radius: 3px;
+  padding: 4px 6px;
+}
+
+input:focus, textarea:focus {
+  border: 2px solid #666;
+  background: #ffe;
+}
+
+input {
+  width: 50%;
+  max-width: 300px;
+}
+
+textarea {
+  width: 100%;
+  max-width: 600px;
+  height: 100px;
+}
+textarea.code {
+  font-family: monospace;
+}

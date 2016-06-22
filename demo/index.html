@@ -3,6 +3,8 @@
 
 <meta charset="utf-8">
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <link rel="stylesheet" type="text/css"
  href="https://fonts.googleapis.com/css?family=Roboto">
 
@@ -47,26 +49,32 @@
 
 <h2> Notes </h2>
 
-<p> This page demonstrates two solutions to the problem of cursor
-maintenance, which is explored in a <a href="">detailed article</a>. </p>
+<p> This page demonstrates two approaches to cursor maintenance. The
+problem is discussed in a <a href="">detailed article</a>. </p>
 
-<p> For additional code and documentation, please see the <a
+<p> Additional code and technical documents are available in a <a
 href="">source repository</a>. </p>
 
-<p> The meta approach entails rewriting a formatting operation so
-that instead of operating on text, it operates on a text-with-cursor
-object. The object updates the cursor in a predictable manner for each
-elementary text operation. </p>
 
-<p> The <em>commatize</em> formatting operation is only applicable to
-a string of digits and commas. The input field strips out all other
-input before applying <em>commatize</em>. The formatted text displays a
-non-negative integer with commas separating each three-digit group from
-right to left. </p>
+<h3> Meta </h3>
+
+<p> The meta approach entails reimplementing a formatting operation
+by applying highly localized text operations to a text-with-cursor
+object. This object moves the cursor in a predictable manner after each
+local text operation. </p>
+
+<p> The <em>commatize</em> formatting operation is only applicable
+to a string of digits and commas. The input field strips out all other
+characters before applying <em>commatize</em>. The formatted text displays
+a non-negative integer with commas separating each three-digit group
+from right to left. </p>
 
 <p> The <em>trimify</em> formatting operation is applicable to any
 text. It removes whitespace from the beginning and end of the text,
 and condenses all other whitespace sequences to one character each. </p>
+
+
+<h3> Retrospective </h3>
 
 
 </div><!--end wrapper -->
