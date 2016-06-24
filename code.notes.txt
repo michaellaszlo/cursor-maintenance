@@ -50,3 +50,11 @@ a demo page that shows how to implement cursor maintenance in real life
   - elaborate documentation in the code and on GitHub
 
 
+---
+Getting the cursor position
+
+http://stackoverflow.com/questions/263743/
+
+http://stackoverflow.com/questions/235411/
+
+

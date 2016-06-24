@@ -1,20 +1,20 @@
 var CursorMaintainer = (function () {
   'use strict';
 
-  var formatter,
-      numericalCursorFormatter,
-      textualCursorFormatter,
-      metaCursorFormatter,
-      retrospectiveCursorFormatters;
+  var format,
+      adHoc,
+      mockCursor,
+      meta,
+      retro;
 
 
-  /* formatter implements the operations specified by the Test object
+  /* format implements the operations specified by the Test object
      without altering the cursor position. */
-  formatter = {};
+  format = {};
 
   /* commatize takes a string of digits and commas. It adjusts commas so
      that they separate the digits into groups of three. */
-  formatter.commatize = function (s, cursor) {
+  format.commatize = function (s, cursor) {
     var start,
         groups,
         i;
@@ -30,7 +30,7 @@ var CursorMaintainer = (function () {
 
   /* trimify removes spaces from the beginning and end of the string, and
      reduces each internal whitespace sequence to a single space. */
-  formatter.trimify = function (s, cursor) {
+  format.trimify = function (s, cursor) {
     s = s.replace(/^\s+|\s+$/g, '');
     s = s.replace(/\s+/g, ' ');
     return { text: s, cursor: cursor };
@@ -71,12 +71,12 @@ var CursorMaintainer = (function () {
   }
 
 
-  numericalCursorFormatter = {};
+  adHoc = {};
 
-  numericalCursorFormatter.commatize = function (s, cursor) {
+  adHoc.commatize = function (s, cursor) {
     var pos, ch,
         leftDigitCount = cursor - count(s.substring(0, cursor), ',');
-    s = formatter.commatize(s).text;
+    s = format.commatize(s).text;
     if (leftDigitCount == 0) {
       return { text: s, cursor: 0 };
     }
@@ -92,17 +92,17 @@ var CursorMaintainer = (function () {
     return { text: s, cursor: cursor };
   };
 
-  numericalCursorFormatter.trimify = function (s, cursor) {
-    var leftTrimmed = formatter.trimify(s.substring(0, cursor) + '|').text;
-    s = formatter.trimify(s).text;
+  adHoc.trimify = function (s, cursor) {
+    var leftTrimmed = format.trimify(s.substring(0, cursor) + '|').text;
+    s = format.trimify(s).text;
     cursor = Math.min(s.length, leftTrimmed.length - 1);
     return { text: s, cursor: cursor };
   };
 
 
-  textualCursorFormatter = {};
+  mockCursor = {};
 
-  textualCursorFormatter.commatize = function (s, cursor) {
+  mockCursor.commatize = function (s, cursor) {
     var cursorChar = chooseCursorChar(s),
         groups = [],
         groupChars = [],
@@ -131,10 +131,10 @@ var CursorMaintainer = (function () {
     return { text: s, cursor: cursor };
   };
 
-  textualCursorFormatter.trimify = function (s, cursor) {
+  mockCursor.trimify = function (s, cursor) {
     var cursorChar = chooseCursorChar(s);
     s = s.substring(0, cursor) + cursorChar + s.substring(cursor);
-    s = formatter.trimify(s).text;
+    s = format.trimify(s).text;
     s = s.replace(' ' + cursorChar + ' ', ' ' + cursorChar);
     if (s.charAt(0) == cursorChar) {
       s = s.replace(cursorChar + ' ', cursorChar);
@@ -187,9 +187,9 @@ var CursorMaintainer = (function () {
   };
 
 
-  metaCursorFormatter = {};
+  meta = {};
 
-  metaCursorFormatter.commatize = function (s, cursor) {
+  meta.commatize = function (s, cursor) {
     var t = new TextWithCursor(s, cursor),
         digitCount = 0,
         pos;
@@ -206,7 +206,7 @@ var CursorMaintainer = (function () {
     return t;
   };
 
-  metaCursorFormatter.trimify = function (s, cursor) {
+  meta.trimify = function (s, cursor) {
     var t = new TextWithCursor(s, cursor),
         spaceCount = 0,
         pos;
@@ -331,10 +331,10 @@ var CursorMaintainer = (function () {
     return cost;
   }
 
-  retrospectiveCursorFormatters = {};
+  retro = {};
 
   function retrospect(original, cursor, operation, distance) {
-    var formatted = formatter[operation](original).text,
+    var formatted = format[operation](original).text,
         bestCost = distance(original, cursor, formatted, 0),
         bestPos = 0,
         cost,
@@ -351,7 +351,7 @@ var CursorMaintainer = (function () {
     return { text: formatted, cursor: bestPos, scores: scores };
   };
 
-  retrospectiveCursorFormatters.textualLevenshtein = {
+  retro.textualLevenshtein = {
     commatize: function (original, cursor) {
       return retrospect(original, cursor, 'commatize', textualLevenshtein);
     },
@@ -360,7 +360,7 @@ var CursorMaintainer = (function () {
     }
   };
 
-  retrospectiveCursorFormatters.splitLevenshtein = {
+  retro.splitLevenshtein = {
     commatize: function (original, cursor) {
       return retrospect(original, cursor, 'commatize', splitLevenshtein);
     },
@@ -369,7 +369,7 @@ var CursorMaintainer = (function () {
     }
   };
 
-  retrospectiveCursorFormatters.balancedfrequencies = {
+  retro.balancedfrequencies = {
     commatize: function (original, cursor) {
       return retrospect(original, cursor, 'commatize', balancedFrequencies);
     },
@@ -379,11 +379,9 @@ var CursorMaintainer = (function () {
   };
 
   return {
-    formatter: formatter,
-    adhoc: numericalCursorFormatter,
-    textcursor: textualCursorFormatter,
-    meta: metaCursorFormatter,
-    splitLevenshtein: retrospectiveCursorFormatters.splitLevenshtein,
-    frequencyvector: retrospectiveCursorFormatters.balancedfrequencies
+    format: format,
+    adHoc: adHoc,
+    textcursor: mockCursor,
+    meta: meta
   };
 })();

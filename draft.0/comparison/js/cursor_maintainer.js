@@ -5,7 +5,17 @@ var CursorMaintainer = (function () {
       numericalCursorFormatter,
       textualCursorFormatter,
       metaCursorFormatter,
-      retrospectiveCursorFormatters;
+      retrospectiveCursorFormatters,
+      test;
+
+
+  function TestCase(originalText, originalCursor,
+      expectedText, expectedCursor) {
+    return {
+      original: { text: originalText, cursor: originalCursor },
+      expected: { text: expectedText, cursor: expectedCursor }
+    };
+  };
 
 
   /* formatter implements the operations specified by the Test object
@@ -380,10 +390,11 @@ var CursorMaintainer = (function () {
 
   return {
     formatter: formatter,
-    adhoc: numericalCursorFormatter,
-    textcursor: textualCursorFormatter,
+    numerical: numericalCursorFormatter,
+    textual: textualCursorFormatter,
     meta: metaCursorFormatter,
+    textualLevenshtein: retrospectiveCursorFormatters.textualLevenshtein,
     splitLevenshtein: retrospectiveCursorFormatters.splitLevenshtein,
-    frequencyvector: retrospectiveCursorFormatters.balancedfrequencies
+    balancedfrequencies: retrospectiveCursorFormatters.balancedfrequencies
   };
 })();
