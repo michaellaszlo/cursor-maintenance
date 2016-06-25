@@ -28,10 +28,10 @@ var CursorMaintainer = (function () {
     return { text: s, cursor: cursor };
   };
 
-  /* trimify removes spaces from the beginning and end of the string, and
-     reduces each internal whitespace sequence to a single space. */
+  /* trimify removes all whitespace from the beginning of the string and
+     reduces other whitespace sequences to a single space each. */
   format.trimify = function (s, cursor) {
-    s = s.replace(/^\s+|\s+$/g, '');
+    s = s.replace(/^\s+/, '');
     s = s.replace(/\s+/g, ' ');
     return { text: s, cursor: cursor };
   };
@@ -138,8 +138,6 @@ var CursorMaintainer = (function () {
     s = s.replace(' ' + cursorChar + ' ', ' ' + cursorChar);
     if (s.charAt(0) == cursorChar) {
       s = s.replace(cursorChar + ' ', cursorChar);
-    } else if (s.charAt(s.length - 1) == cursorChar) {
-      s = s.replace(' ' + cursorChar, cursorChar);
     }
     cursor = s.indexOf(cursorChar);
     s = s.replace(cursorChar, '');
@@ -219,11 +217,9 @@ var CursorMaintainer = (function () {
         t.delete(pos + 1);
       }
     }
-    [ t.length() - 1, 0 ].forEach(function (pos) {
-      if (t.read(pos) == ' ') {
-        t.delete(pos);
-      }
-    });
+    if (t.read(0) == ' ') {
+      t.delete(pos);
+    }
     return t;
   };
 
@@ -381,7 +377,7 @@ var CursorMaintainer = (function () {
   return {
     format: format,
     adHoc: adHoc,
-    textcursor: mockCursor,
+    mockCursor: mockCursor,
     meta: meta
   };
 })();
