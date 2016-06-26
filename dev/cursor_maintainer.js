@@ -5,7 +5,7 @@ var CursorMaintainer = (function () {
       adHoc,
       mockCursor,
       meta,
-      retro;
+      retrospective;
 
 
   //--- Plain formatting operations: no alteration of the cursor position.
@@ -223,7 +223,7 @@ var CursorMaintainer = (function () {
 
 
   //--- Retrospective: compare the old text and cursor to the new text.
-  retro = {};
+  retrospective = {};
 
   function levenshtein(s, t) {
     var n = s.length,
@@ -340,12 +340,12 @@ var CursorMaintainer = (function () {
     };
   }
 
-  retro.splitLevenshtein = {
+  retrospective.splitLevenshtein = {
     commatize: makeRetrospective(splitLevenshtein, format.commatize),
     trimify: makeRetrospective(splitLevenshtein, format.trimify)
   };
 
-  retro.balancedFrequencies = {
+  retrospective.balancedFrequencies = {
     commatize: makeRetrospective(balancedFrequencies, format.commatize),
     trimify: makeRetrospective(balancedFrequencies, format.trimify)
   };
@@ -356,6 +356,7 @@ var CursorMaintainer = (function () {
     adHoc: adHoc,
     mockCursor: mockCursor,
     meta: meta,
-    retro: retro
+    splitLevenshtein: retrospective.splitLevenshtein,
+    balancedFrequencies: retrospective.balancedFrequencies
   };
 })();

@@ -1,6 +1,5 @@
 var CursorMaintenanceComparison = (function () {
-  var maintainer = CursorMaintainer,
-      formatter = maintainer.formatter,
+  var CM = CursorMaintainer,
       inputMaxLengths = {
         commatize: 15,
         trimify: 60
@@ -30,17 +29,20 @@ var CursorMaintenanceComparison = (function () {
     function react() {
       var originalText = input.value,
           originalCursor = input.selectionStart,
-          formattedText = formatter[operation](originalText).text;
+          formattedText = CM.format[operation](originalText).text,
+          maintainer;
       // Echo input. Show formatted text without cursor.
-      setOutput(outputs[operation].usertext, originalText, originalCursor);
-      setOutput(outputs[operation].formattedtext, formattedText);
+      setOutput(outputs[operation].userText, originalText, originalCursor);
+      setOutput(outputs[operation].formattedText, formattedText);
       // Show text formatted with cursor maintenance.
       Object.keys(outputs[operation]).forEach(function (approach) {
         var result;
-        if (!(approach in maintainer)) {
+        if (approach in CM) {
+          maintainer = CM[approach][operation];
+        } else {
           return;
         }
-        result = maintainer[approach][operation](originalText, originalCursor);
+        result = maintainer(originalText, originalCursor);
         setOutput(outputs[operation][approach], result.text, result.cursor);
       });
       if (activeButtons[operation]) {
@@ -50,12 +52,12 @@ var CursorMaintenanceComparison = (function () {
         activeInputMirror.className =
             activeInputMirror.className.replace(/\s*active\s*/g, '');
       }
-      activeInputMirror = outputs[operation].usertext;
+      activeInputMirror = outputs[operation].userText;
       activeInputMirror.className += ' active';
     }
     input.onblur = function () {
-      outputs[operation].usertext.className =
-          outputs[operation].usertext.className.replace(/\s*active\s*/g, '');
+      outputs[operation].userText.className =
+          outputs[operation].userText.className.replace(/\s*active\s*/g, '');
     };
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
@@ -63,12 +65,12 @@ var CursorMaintenanceComparison = (function () {
   }
 
   // List all cursor positions and scores for a retrospective approach.
-  function enableButton(button, operation, approach) {
+  function enableScoreButton(button, operation, approach) {
     button.onclick = function () {
       var input = inputs[operation],
           text = input.value,
           cursor = input.selectionStart,
-          result = maintainer[approach][operation](text, cursor),
+          result = CM[approach][operation](text, cursor),
           container = scores[operation],
           item,
           activeButton = activeButtons[operation],
@@ -109,6 +111,18 @@ var CursorMaintenanceComparison = (function () {
     return element;
   }
 
+  function makeApproachName(s, isRetrospective) {
+    var parts = s.replace(/^\s+|\s+$/g, '').split(/\s+/),
+        i, name;
+    for (i = 1; i < parts.length; ++i) {
+      parts[i] = parts[i].charAt(0).toUpperCase() + parts[i].substring(1);
+    }
+    name = parts.join('');
+    //if (isRetrospective) {
+    //  name = 'retro
+    return name;
+  }
+
   function load() {
     var table = document.getElementById('comparisons'),
         rows = table.getElementsByTagName('tr'),
@@ -116,7 +130,7 @@ var CursorMaintenanceComparison = (function () {
         scoreRow = document.getElementById('scores'),
         operations = [ 'commatize', 'trimify' ],
         i, row, cells,
-        approach;
+        approach, isRetrospective;
     operations.forEach(function (operation) {
       outputs[operation] = {};
       scores[operation] = make('div', { className: 'scoreList', parent:
@@ -129,21 +143,22 @@ var CursorMaintenanceComparison = (function () {
         continue;
       }
       cells = row.getElementsByTagName('td');
-      approach = cells[0].innerHTML.replace(/\s+/g, '');
+      isRetrospective = (row.className.indexOf('retrospective') != -1);
+      approach = makeApproachName(cells[0].innerHTML, isRetrospective);
       operations.forEach(function (operation) {
         var button,
             cell = make('td', { parent: row }),
             output = outputs[operation][approach] = make('span',
                 { parent: cell, className: 'output' });
-        if (approach == 'usertext') {
+        if (approach == 'userText') {
           inputs[operation] = make('input', { parent: cell, type: 'text',
               maxLength: inputMaxLengths[operation] });
           output.className += ' original';
           cell.style.minWidth = cellMinWidths[operation] + 'px';
         }
-        if (row.className.indexOf('retrospective') != -1) {
+        if (isRetrospective) {
           button = make('button', { innerHTML: 'scores', parent: cell });
-          enableButton(button, operation, approach);
+          enableScoreButton(button, operation, approach);
           output.button = button;
         }
       });
@@ -159,8 +174,8 @@ var CursorMaintenanceComparison = (function () {
     inputs.trimify.value = '    \'Twas   brillig,  and  ';
     inputs.trimify.setSelectionRange(10, 10);
     inputs.trimify.click();
-    outputs.commatize.frequencyvector.button.click();
-    outputs.trimify.frequencyvector.button.click();
+    outputs.commatize.balancedFrequencies.button.click();
+    outputs.trimify.balancedFrequencies.button.click();
   }
 
   return {

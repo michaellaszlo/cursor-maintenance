@@ -31,9 +31,9 @@ var CursorMaintenanceDemo = (function () {
 
   function load() {
     setFormatter(document.getElementById('commatizeInput'),
-        CursorMaintainer.retro.splitLevenshtein.commatize, commatizeValidator);
+        CursorMaintainer.meta.commatize, commatizeValidator);
     setFormatter(document.getElementById('trimifyInput'),
-        CursorMaintainer.retro.balancedFrequencies.trimify);
+        CursorMaintainer.meta.trimify);
   }
 
   return {
