@@ -258,13 +258,6 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  function cursorLevenshtein(s, sCursor, t, tCursor) {
-    var cursorChar = chooseCursorChar(s + t);
-    s = s.substring(0, sCursor) + cursorChar + s.substring(sCursor);
-    t = t.substring(0, tCursor) + cursorChar + t.substring(tCursor);
-    return levenshtein(s, t);
-  }
-
   function splitLevenshtein(s, sCursor, t, tCursor) {
     var cursorChar = chooseCursorChar(s + t),
         left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
@@ -346,11 +339,6 @@ var CursorMaintainer = (function () {
       return { text: formatted, cursor: bestPos, scores: scores };
     };
   }
-
-  retro.cursorLevenshtein = {
-    commatize: makeRetrospective(cursorLevenshtein, format.commatize),
-    trimify: makeRetrospective(cursorLevenshtein, format.trimify)
-  };
 
   retro.splitLevenshtein = {
     commatize: makeRetrospective(splitLevenshtein, format.commatize),
