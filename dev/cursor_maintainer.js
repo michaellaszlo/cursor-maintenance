@@ -8,8 +8,7 @@ var CursorMaintainer = (function () {
       retro;
 
 
-  /* format implements the operations specified by the Test object
-     without altering the cursor position. */
+  //--- Plain formatting operations: no alteration of the cursor position.
   format = {};
 
   /* commatize takes a string of digits and commas. It adjusts commas so
@@ -37,8 +36,11 @@ var CursorMaintainer = (function () {
   };
 
 
-  // Utilities.
+  //--- Ad hoc: idiosyncratic cursor calculations.
+  adHoc = {};
 
+  /* count returns the number of occurrences (possibly overlapping) of the
+     string sub in the string s. */
   function count(s, sub) {
     var count = 0,
         searchedTo = -1;
@@ -47,31 +49,6 @@ var CursorMaintainer = (function () {
     }
     return count;
   }
-
-  function chooseCursorChar(s) {
-    var usedChars = {},
-        seekChars = '|^_#',
-        i, ch, code;
-    for (i = 0; i < s.length; ++i) {
-      usedChars[s.charAt(i)] = true;
-    }
-    for (i = 0; i < seekChars.length; ++i) {
-      ch = seekChars.charAt(i);
-      if (!(ch in usedChars)) {
-        return ch;
-      }
-    }
-    for (code = 32; code < 127; ++code) {
-      ch = String.fromCharCode(code);
-      if (!(ch in usedChars)) {
-        return ch;
-      }
-    }
-    return null;
-  }
-
-
-  adHoc = {};
 
   adHoc.commatize = function (s, cursor) {
     var pos, ch,
@@ -100,7 +77,32 @@ var CursorMaintainer = (function () {
   };
 
 
+  //--- Mock cursor: incorporate the cursor into the text, format, fix.
   mockCursor = {};
+
+  /* chooseCursorChar tests a set of favored characters, then all printable
+     ASCII characters, until it finds one that does not occur in the text. */
+  function chooseCursorChar(s) {
+    var usedChars = {},
+        seekChars = '|^_#',
+        i, ch, code;
+    for (i = 0; i < s.length; ++i) {
+      usedChars[s.charAt(i)] = true;
+    }
+    for (i = 0; i < seekChars.length; ++i) {
+      ch = seekChars.charAt(i);
+      if (!(ch in usedChars)) {
+        return ch;
+      }
+    }
+    for (code = 32; code < 127; ++code) {
+      ch = String.fromCharCode(code);
+      if (!(ch in usedChars)) {
+        return ch;
+      }
+    }
+    return null;
+  }
 
   mockCursor.commatize = function (s, cursor) {
     var cursorChar = chooseCursorChar(s),
@@ -145,6 +147,9 @@ var CursorMaintainer = (function () {
   };
 
 
+  //--- Meta: local operations on a text-with-cursor object.
+  meta = {};
+
   function TextWithCursor(text, cursor) {
     this.text = text || '';
     this.cursor = cursor || 0;
@@ -179,13 +184,6 @@ var CursorMaintainer = (function () {
   TextWithCursor.prototype.length = function () {
     return this.text.length;
   };
-
-  TextWithCursor.prototype.append = function (subtext) {
-    this.insert(this.length(), subtext);
-  };
-
-
-  meta = {};
 
   meta.commatize = function (s, cursor) {
     var t = new TextWithCursor(s, cursor),
@@ -224,6 +222,9 @@ var CursorMaintainer = (function () {
   };
 
 
+  //--- Retrospective: compare the old text and cursor to the new text.
+  retro = {};
+
   function levenshtein(s, t) {
     var n = s.length,
         m = t.length,
@@ -257,7 +258,7 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  function textualLevenshtein(s, sCursor, t, tCursor) {
+  function cursorLevenshtein(s, sCursor, t, tCursor) {
     var cursorChar = chooseCursorChar(s + t);
     s = s.substring(0, sCursor) + cursorChar + s.substring(sCursor);
     t = t.substring(0, tCursor) + cursorChar + t.substring(tCursor);
@@ -270,7 +271,6 @@ var CursorMaintainer = (function () {
         right = levenshtein(s.substring(sCursor), t.substring(tCursor));
     return left + right;
   }
-
 
   function getCounts(s, chars) {
     var counts = {},
@@ -327,57 +327,47 @@ var CursorMaintainer = (function () {
     return cost;
   }
 
-  retro = {};
-
-  function retrospect(original, cursor, operation, distance) {
-    var formatted = format[operation](original).text,
-        bestCost = distance(original, cursor, formatted, 0),
-        bestPos = 0,
-        cost,
-        pos,
-        scores = [ bestCost ];
-    for (pos = 1; pos <= formatted.length; ++pos) {
-      cost = distance(original, cursor, formatted, pos);
-      if (cost < bestCost) {
-        bestCost = cost;
-        bestPos = pos;
+  function makeRetrospective(costFunction, plainFormatter) {
+    return function (original, cursor) {
+      var formatted = plainFormatter(original).text,
+          bestCost = costFunction(original, cursor, formatted, 0),
+          bestPos = 0,
+          cost,
+          pos,
+          scores = [ bestCost ];
+      for (pos = 1; pos <= formatted.length; ++pos) {
+        cost = costFunction(original, cursor, formatted, pos);
+        if (cost < bestCost) {
+          bestCost = cost;
+          bestPos = pos;
+        }
+        scores.push(cost);
       }
-      scores.push(cost);
-    }
-    return { text: formatted, cursor: bestPos, scores: scores };
-  };
+      return { text: formatted, cursor: bestPos, scores: scores };
+    };
+  }
 
-  retro.textualLevenshtein = {
-    commatize: function (original, cursor) {
-      return retrospect(original, cursor, 'commatize', textualLevenshtein);
-    },
-    trimify: function (original, cursor) {
-      return retrospect(original, cursor, 'trimify', textualLevenshtein);
-    }
+  retro.cursorLevenshtein = {
+    commatize: makeRetrospective(cursorLevenshtein, format.commatize),
+    trimify: makeRetrospective(cursorLevenshtein, format.trimify)
   };
 
   retro.splitLevenshtein = {
-    commatize: function (original, cursor) {
-      return retrospect(original, cursor, 'commatize', splitLevenshtein);
-    },
-    trimify: function (original, cursor) {
-      return retrospect(original, cursor, 'trimify', splitLevenshtein);
-    }
+    commatize: makeRetrospective(splitLevenshtein, format.commatize),
+    trimify: makeRetrospective(splitLevenshtein, format.trimify)
   };
 
-  retro.balancedfrequencies = {
-    commatize: function (original, cursor) {
-      return retrospect(original, cursor, 'commatize', balancedFrequencies);
-    },
-    trimify: function (original, cursor) {
-      return retrospect(original, cursor, 'trimify', balancedFrequencies);
-    }
+  retro.balancedFrequencies = {
+    commatize: makeRetrospective(balancedFrequencies, format.commatize),
+    trimify: makeRetrospective(balancedFrequencies, format.trimify)
   };
+
 
   return {
     format: format,
     adHoc: adHoc,
     mockCursor: mockCursor,
-    meta: meta
+    meta: meta,
+    retro: retro
   };
 })();

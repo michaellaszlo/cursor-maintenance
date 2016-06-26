@@ -1,0 +1,60 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+h1, h2, h3 {
+  margin: 20px 0 10px;
+}
+h1 {
+  color: #555;
+}
+h2 {
+  color: #444;
+}
+h3 {
+  color: #333;
+}
+
+#wrapper {
+  margin: 20px;
+}
+
+p {
+  margin: 10px 0;
+}
+
+input, textarea {
+  font-size: 16px;
+  outline: none;
+  border: 2px solid #aaa;
+  border-radius: 3px;
+  padding: 4px 6px;
+  background: #fbfbfb;
+  color: #666;
+}
+
+input:focus, textarea:focus {
+  border: 2px solid #666;
+  background: #fff;
+  color: #333;
+}
+
+input {
+  width: 50%;
+  max-width: 300px;
+}
+
+textarea {
+  width: 100%;
+  max-width: 600px;
+  height: 100px;
+}
+textarea.code {
+  font-family: monospace;
+}
