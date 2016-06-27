@@ -195,11 +195,11 @@ var CursorMaintainer = (function () {
     for (pos = t.length() - 1; pos >= 0; --pos) {
       if (t.read(pos) == ',') {
         t.delete(pos);
-      } else if (digitCount < 2) {
+      } else if (digitCount == 3) {
+        t.insert(pos + 1, ',');
+        digitCount = 1;
+      } else {
         ++digitCount;
-      } else if (pos > 0) {
-        t.insert(pos, ',');
-        digitCount = 0;
       }
     }
     return t;
