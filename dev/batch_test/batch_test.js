@@ -10,7 +10,7 @@ var BatchTestCursorMaintenance = (function () {
     CM = CursorMaintainer;
 
     test = new Test(CM.format);
-    test.run();
+    test.run(null, false);
     //(new Test()).display('commatize', false);
   }
 
@@ -45,15 +45,15 @@ var BatchTestCursorMaintenance = (function () {
         new TestCase('10,00', 4, '1,000', 4)
       ],
       trimify: [
-        new TestCase('  hello  ', 8, 'hello', 5),
-        new TestCase('  hello  ', 1, 'hello', 0),
+        new TestCase('  hello  ', 8, 'hello ', 5),
+        new TestCase('  hello  ', 1, 'hello ', 0),
         new TestCase('Hello,  friends.', 7, 'Hello, friends.', 7),
         new TestCase('Hello,  friends.', 8, 'Hello, friends.', 7),
-        new TestCase('  whirled    peas  now  ', 9, 'whirled peas now', 7),
-        new TestCase('  whirled    peas  now  ', 10, 'whirled peas now', 8),
-        new TestCase('  whirled    peas  now  ', 11, 'whirled peas now', 8),
-        new TestCase('  whirled    peas  now  ', 12, 'whirled peas now', 8),
-        new TestCase('  whirled    peas  now  ', 13, 'whirled peas now', 8),
+        new TestCase('  whirled    peas  now  ', 9, 'whirled peas now ', 7),
+        new TestCase('  whirled    peas  now  ', 10, 'whirled peas now ', 8),
+        new TestCase('  whirled    peas  now  ', 11, 'whirled peas now ', 8),
+        new TestCase('  whirled    peas  now  ', 12, 'whirled peas now ', 8),
+        new TestCase('  whirled    peas  now  ', 13, 'whirled peas now ', 8),
         new TestCase('     ', 3, '', 0)
       ]
     };
@@ -136,7 +136,7 @@ var BatchTestCursorMaintenance = (function () {
         received = operation(original.text, original.cursor);
         if (received.text != expected.text || (withCursor &&
             received.cursor != expected.cursor)) {
-          print('failed');
+          print('failed', withCursor);
           showText('original', original.text, original.cursor);
           showText('expected', expected.text, expected.cursor);
           showText('received', received.text, received.cursor);
