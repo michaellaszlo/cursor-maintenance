@@ -9,8 +9,12 @@ var BatchTestCursorMaintenance = (function () {
     load('../cursor_maintainer.js');
     CM = CursorMaintainer;
 
-    test = new Test(CM.format);
-    test.run(null, false);
+    [ 'adHoc', 'mockCursor', 'meta'//, 'splitLevenshtein', 'balancedFrequencies'
+    ].forEach(function (approach) {
+      print('-----', approach);
+      test = new Test(CM[approach]);
+      test.run('commatize');
+    });
     //(new Test()).display('commatize', false);
   }
 
@@ -42,10 +46,14 @@ var BatchTestCursorMaintenance = (function () {
         new TestCase('1,00', 2, '100', 1),
         new TestCase('1234', 1, '1,234', 1),
         new TestCase('1,0234', 3, '10,234', 2),
-        new TestCase('10,00', 4, '1,000', 4)
+        new TestCase('10,00', 4, '1,000', 4),
+        new TestCase('900', 0, '900', 0),
+        new TestCase(',900', 1, '900', 0),
+        new TestCase('123,900', 0, '123,900', 0),
+        new TestCase(',123,900', 0, '123,900', 0),
       ],
       trimify: [
-        new TestCase('  hello  ', 8, 'hello ', 5),
+        new TestCase('  hello  ', 8, 'hello ', 6),
         new TestCase('  hello  ', 1, 'hello ', 0),
         new TestCase('Hello,  friends.', 7, 'Hello, friends.', 7),
         new TestCase('Hello,  friends.', 8, 'Hello, friends.', 7),

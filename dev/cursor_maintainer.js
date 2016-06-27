@@ -128,6 +128,9 @@ var CursorMaintainer = (function () {
       groups.push(groupChars.reverse().join(''));
     }
     s = groups.reverse().join(',');
+    if (s.charAt(0) == cursorChar && s.charAt(1) == ',') {
+      s = cursorChar + s.substring(2);
+    }
     cursor = s.indexOf(cursorChar);
     s = s.replace(cursorChar, '');
     return { text: s, cursor: cursor };

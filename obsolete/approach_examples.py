@@ -43,7 +43,11 @@ class Test:
             ('10,00', 2, '1,000', 3),
             ('10,00', 3, '1,000', 3),
             ('10,00', 4, '1,000', 4),
-            ('129,00', 3, '12,900', 4)
+            ('129,00', 3, '12,900', 4),
+            ('900', 0, '900', 0),
+            (',900', 1, '900', 0),
+            ('123,900', 0, '123,900', 0),
+            (',123,900', 0, '123,900', 0)
         ],
         'trimify': [
             ('  hello  ', 8, 'hello', 5),
@@ -464,8 +468,8 @@ if __name__ == '__main__':
     #Test().display(compact=True)
     #Test(Formatter()).run('commatize', with_cursor=False)
     #Test(NumericalCursorFormatter()).run()
-    #Test(TextualCursorFormatter()).run()
+    Test(TextualCursorFormatter()).run('commatize')
     #Test(MetaCursorFormatter()).run()
     #Test(RetrospectiveCursorFormatter(Distance.split_levenshtein)).run()
-    Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
+    #Test(RetrospectiveCursorFormatter(Distance.balance_frequencies)).run()
 
