@@ -258,7 +258,7 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  function splitLevenshtein(s, sCursor, t, tCursor) {
+  function costSplitLevenshtein(s, sCursor, t, tCursor) {
     var cursorChar = chooseCursorChar(s + t),
         left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
         right = levenshtein(s.substring(sCursor), t.substring(tCursor));
@@ -305,7 +305,7 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
-  function balancedFrequencies(s, sCursor, t, tCursor) {
+  function costBalancedFrequencies(s, sCursor, t, tCursor) {
     var chars = getCommonChars(s, t),
         sCounts = leftRightCounts(s, sCursor, chars),
         tCounts = leftRightCounts(t, tCursor, chars),
@@ -341,13 +341,13 @@ var CursorMaintainer = (function () {
   }
 
   retrospective.splitLevenshtein = {
-    commatize: makeRetrospective(splitLevenshtein, format.commatize),
-    trimify: makeRetrospective(splitLevenshtein, format.trimify)
+    commatize: makeRetrospective(costSplitLevenshtein, format.commatize),
+    trimify: makeRetrospective(costSplitLevenshtein, format.trimify)
   };
 
   retrospective.balancedFrequencies = {
-    commatize: makeRetrospective(balancedFrequencies, format.commatize),
-    trimify: makeRetrospective(balancedFrequencies, format.trimify)
+    commatize: makeRetrospective(costBalancedFrequencies, format.commatize),
+    trimify: makeRetrospective(costBalancedFrequencies, format.trimify)
   };
 
 
