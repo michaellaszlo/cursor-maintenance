@@ -3,6 +3,7 @@ var BatchTestCursorMaintenance = (function () {
 
   var CM,
       test;
+  main();
 
   function main() {
     // Assuming d8 environment.
@@ -13,7 +14,7 @@ var BatchTestCursorMaintenance = (function () {
     ].forEach(function (approach) {
       print('-----', approach);
       test = new Test(CM[approach]);
-      test.run('commatize');
+      test.run('trimify');
     });
     //(new Test()).display('commatize', false);
   }
@@ -62,7 +63,24 @@ var BatchTestCursorMaintenance = (function () {
         new TestCase('  whirled    peas  now  ', 11, 'whirled peas now ', 8),
         new TestCase('  whirled    peas  now  ', 12, 'whirled peas now ', 8),
         new TestCase('  whirled    peas  now  ', 13, 'whirled peas now ', 8),
-        new TestCase('     ', 3, '', 0)
+        new TestCase('     ', 3, '', 0),
+        new TestCase(' th', 3, 'th', 2),
+        new TestCase('the', 3, 'the', 3),
+        new TestCase('the ', 4, 'the ', 4),
+        new TestCase('the  ', 5, 'the ', 4),
+        new TestCase('the   ', 6, 'the ', 4),
+        new TestCase('the q', 5, 'the q', 5),
+        new TestCase('the q ', 6, 'the q ', 6),
+        new TestCase('the q  ', 7, 'the q ', 6),
+        new TestCase('the q   ', 7, 'the q ', 6),
+        new TestCase('the q   ', 8, 'the q ', 6),
+        new TestCase('the q    ', 7, 'the q ', 6),
+        new TestCase(' the q', 6, 'the q', 5),
+        new TestCase(' the q ', 7, 'the q ', 6),
+        new TestCase(' the q  ', 8, 'the q ', 6),
+        new TestCase(' the q   ', 8, 'the q ', 6),
+        new TestCase(' the q   ', 9, 'the q ', 6),
+        new TestCase(' the q    ', 8, 'the q ', 6),
       ]
     };
 
@@ -163,5 +181,4 @@ var BatchTestCursorMaintenance = (function () {
     };
   }  // end Test
 
-  main();
 })();
