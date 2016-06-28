@@ -219,7 +219,7 @@ var CursorMaintainer = (function () {
       }
     }
     if (t.read(0) == ' ') {
-      t.delete(pos);
+      t.delete(0);
     }
     return t;
   };
