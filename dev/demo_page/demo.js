@@ -7,6 +7,7 @@ var CursorMaintenanceDemo = (function () {
   function setFormatter(input, format, validate) {
     var eventNames = [ 'change', 'keydown', 'keyup', 'click' ],
         previous = { text: '', cursor: 0 },
+        toggleBox = document.createElement('div'),
         i;
     function respond() {
       var text = input.value,
@@ -27,6 +28,8 @@ var CursorMaintenanceDemo = (function () {
     for (i = 0; i < eventNames.length; ++i) {
       input.addEventListener(eventNames[i], respond);
     }
+    toggleBox.innerHTML = '<span class="toggle active">formatting on</span>';
+    input.parentNode.insertBefore(toggleBox, input);
   }
 
   function load() {
