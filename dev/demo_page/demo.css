@@ -51,9 +51,19 @@ input {
 }
 
 .toggle {
-
+  margin: -10px 0 5px;
+  font-size: 14px;
+  color: #aaa;
+  cursor: pointer;
 }
 .toggle.active {
+  color: #555;
+}
+.toggle .icon {
+  font-size: 23px;
+  margin-right: 2px;
+  position: relative;
+  top: 2px;
 }
 
 textarea {
