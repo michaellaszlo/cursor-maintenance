@@ -73,4 +73,6 @@ textarea {
 }
 textarea.code {
   font-family: monospace;
+  font-size: 15px;
+  height: 240px;
 }

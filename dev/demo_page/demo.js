@@ -14,7 +14,7 @@ var CursorMaintenanceDemo = (function () {
     input.setSelectionRange(position, position);
   }
 
-  function setFormatter(input, format, validate) {
+  function setMaintainer(input, format, validate) {
     var saved = { text: '', cursor: 0 },
         formatted,
         toggleBox;
@@ -48,6 +48,10 @@ var CursorMaintenanceDemo = (function () {
       input.value = saved.text = formatted.text;
       setCursorPosition(input, saved.cursor = formatted.cursor);
     }
+    // Listen for events that can change the input value.
+    [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
+      input.addEventListener(eventName, processInput);
+    });
     // Add an element that allows the user to toggle formatting on and off.
     input.status = { formatting: false };
     toggleBox = document.createElement('div');
@@ -57,31 +61,67 @@ var CursorMaintenanceDemo = (function () {
         input.status.formatting = true;
         this.className += ' active';
         toggleBox.innerHTML = messages.formatting.on;
-        input.focus();
         processInput();
       } else {
         input.status.formatting = false;
         this.className = this.className.replace(/\s*active\s*/, ' ');
         toggleBox.innerHTML = messages.formatting.off;
       }
+      input.focus();
     };
     toggleBox.click();
     input.parentNode.insertBefore(toggleBox, input);
-    // Listen for events that can change the input value.
-    [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
-      input.addEventListener(eventName, processInput);
-    });
   }
 
   function commatizeValidator(text) {
     return /^[0-9,]*$/.test(text);
   }
 
+  function makeFlexibleMaintainer(codeBox) {
+    var code = '',
+        format = null,
+        error,
+        formatted;
+    return function (text, cursor) {
+      if (code !== codeBox.value) {
+        code = codeBox.value;
+        try {
+          format = eval('(' + code + ')');
+        } catch (error) {
+          console.log('failed to evaluate code:', error);
+        }
+      }
+      if (typeof format === 'function') {
+        console.log(format(text));
+      }
+      return { text: text, cursor: cursor };
+    };
+  }
+
   function load() {
-    setFormatter(document.getElementById('commatizeInput'),
+    setMaintainer(document.getElementById('commatizeInput'),
         CursorMaintainer.meta.commatize, commatizeValidator);
-    setFormatter(document.getElementById('trimifyInput'),
+    setMaintainer(document.getElementById('trimifyInput'),
         CursorMaintainer.meta.trimify);
+    setMaintainer(document.getElementById('flexibleInput'),
+        makeFlexibleMaintainer(document.getElementById('flexibleCode')));
+    document.getElementById('flexibleCode').value = "function (s) {\n" +
+        "  var decimalPos;\n" +
+        "  s = s.replace(/[^0-9.]/g, '');\n" +
+        "  s = s.replace(/^0+/, '');\n" +
+        "  if (s.length == 0 || s.charAt(0) == '.') {\n" +
+        "    s = '0' + s;\n" +
+        "  }\n" +
+        "  decimalPos = s.indexOf('.');\n" +
+        "  if (decimalPos == -1) {\n" +
+        "    s += '.00';\n" +
+        "  } else {\n" +
+        "    s = s.replace(/[.]/g, '') + '00';\n" +
+        "    s = s.substring(0, decimalPos) + '.' +\n" +
+        "        s.substring(decimalPos, decimalPos + 2);\n" +
+        "  }\n" +
+        "  return '$' + s;\n" +
+        "}";
   }
 
   return {

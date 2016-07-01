@@ -359,7 +359,8 @@ var CursorMaintainer = (function () {
     adHoc: adHoc,
     mockCursor: mockCursor,
     meta: meta,
-    splitLevenshtein: retrospective.splitLevenshtein,
-    balancedFrequencies: retrospective.balancedFrequencies
+    splitLevenshtein: retrospective.splitLevenshtein,        // Short names for
+    balancedFrequencies: retrospective.balancedFrequencies,  // convenience.
+    retrospective: retrospective  // Exposes all retrospective functionality.
   };
 })();
