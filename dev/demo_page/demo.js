@@ -15,7 +15,7 @@ var CursorMaintenanceDemo = (function () {
   }
 
   function setMaintainer(input, format, validate) {
-    var saved = { text: '', cursor: 0 },
+    var saved = { text: null, cursor: 0 },
         formatted,
         toggleBox;
     function processInput() {
@@ -79,49 +79,76 @@ var CursorMaintenanceDemo = (function () {
 
   function makeFlexibleMaintainer(codeBox) {
     var code = '',
-        format = null,
+        plainFormatter,
         error,
-        formatted;
+        defaultResult,
+        result,
+        costFunction = CursorMaintainer.costBalancedFrequencies,
+        makeRetrospective = CursorMaintainer.makeRetrospective,
+        maintainer = null;
+    function wrappedFormatter(text, cursor) {
+      return { text: plainFormatter(text), cursor: cursor };
+    }
     return function (text, cursor) {
       if (code !== codeBox.value) {
         code = codeBox.value;
         try {
-          format = eval('(' + code + ')');
+          plainFormatter = eval('(' + code + ')');
         } catch (error) {
-          console.log('failed to evaluate code:', error);
+          console.log('error in evaluating code: ' + error);
+        }
+        maintainer = null;
+        if (typeof plainFormatter === 'function') {
+          maintainer = makeRetrospective(costFunction, wrappedFormatter);
         }
       }
-      if (typeof format === 'function') {
-        console.log(format(text));
+      defaultResult = { text: text, cursor: cursor };
+      if (maintainer === null) {
+        return defaultResult;
       }
-      return { text: text, cursor: cursor };
+      try {
+        result = maintainer(text, cursor);
+      } catch (error) {
+        console.log('error in applying format: ' + error);
+        return defaultResult;
+      }
+      return result;
     };
   }
 
   function load() {
+
+    // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
         CursorMaintainer.meta.commatize, commatizeValidator);
+
+    // Meta version of trimify. No input validation.
     setMaintainer(document.getElementById('trimifyInput'),
         CursorMaintainer.meta.trimify);
+
+    // Retrospective approach with balanced frequencies applied to a
+    //  user-supplied formatting function. No input validation.
     setMaintainer(document.getElementById('flexibleInput'),
         makeFlexibleMaintainer(document.getElementById('flexibleCode')));
+
     document.getElementById('flexibleCode').value = "function (s) {\n" +
         "  var decimalPos;\n" +
         "  s = s.replace(/[^0-9.]/g, '');\n" +
-        "  s = s.replace(/^0+/, '');\n" +
-        "  if (s.length == 0 || s.charAt(0) == '.') {\n" +
-        "    s = '0' + s;\n" +
+        "  s = s.replace(/^0+/, '0');\n" +
+        "  if (s.length >= 2 && s.charAt(0) == '0' && s.charAt(1) != '.') {\n" +
+        "    s = s.substring(1);\n" +
         "  }\n" +
         "  decimalPos = s.indexOf('.');\n" +
-        "  if (decimalPos == -1) {\n" +
-        "    s += '.00';\n" +
-        "  } else {\n" +
-        "    s = s.replace(/[.]/g, '') + '00';\n" +
+        "  if (decimalPos != -1) {\n" +
+        "    s = s.replace(/[.]/g, '');\n" +
         "    s = s.substring(0, decimalPos) + '.' +\n" +
-        "        s.substring(decimalPos, decimalPos + 2);\n" +
+        "        s.substring(decimalPos);\n" +
         "  }\n" +
         "  return '$' + s;\n" +
         "}";
+    document.getElementById('flexibleInput').click();
+    document.getElementById('flexibleInput').blur();
+
   }
 
   return {
