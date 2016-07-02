@@ -1,4 +1,5 @@
 function (s) {
+  // Comma-separated dollar amount with unlimited cent precision.
   var decimalPos, whole, fraction, start, groups, i;
   s = s.replace(/[^0-9.]/g, '');
   s = s.replace(/^0+/, '0');

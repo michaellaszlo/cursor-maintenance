@@ -1,4 +1,6 @@
 var CursorMaintenanceDemo = (function () {
+  'use strict';
+
   var messages = {
         formatting: {
           off: '<span class="icon">&#x25a1;</span>formatting off',
@@ -134,6 +136,7 @@ var CursorMaintenanceDemo = (function () {
 
     // An illustrative formatting function for the retrospective approach.
     document.getElementById('flexibleCode').value = "function (s) {\n" +
+        "  // Comma-separated dollar amount with unlimited cent precision.\n" +
         "  var decimalPos, whole, fraction, start, groups, i;\n" +
         "  s = s.replace(/[^0-9.]/g, '');\n" +
         "  s = s.replace(/^0+/, '0');\n" +
