@@ -132,20 +132,25 @@ var CursorMaintenanceDemo = (function () {
         makeFlexibleMaintainer(document.getElementById('flexibleCode')));
 
     document.getElementById('flexibleCode').value = "function (s) {\n" +
-        "  var decimalPos;\n" +
+        "  var decimalPos, whole, fraction, start, groups, i;\n" +
         "  s = s.replace(/[^0-9.]/g, '');\n" +
         "  s = s.replace(/^0+/, '0');\n" +
         "  if (s.length >= 2 && s.charAt(0) == '0' && s.charAt(1) != '.') {\n" +
         "    s = s.substring(1);\n" +
         "  }\n" +
         "  decimalPos = s.indexOf('.');\n" +
-        "  if (decimalPos != -1) {\n" +
-        "    s = s.replace(/[.]/g, '');\n" +
-        "    s = s.substring(0, decimalPos) + '.' +\n" +
-        "        s.substring(decimalPos);\n" +
+        "  s = s.replace(/[.]/g, '');\n" +
+        "  whole = (decimalPos == -1 ? s : s.substring(0, decimalPos));\n" +
+        "  start = whole.length % 3 || 3;\n" +
+        "  groups = [ whole.substring(0, start) ];\n" +
+        "  for (i = start; i < whole.length; i += 3) {\n" +
+        "    groups.push(whole.substring(i, i + 3));\n" +
         "  }\n" +
+        "  whole = groups.join(',');\n" +
+        "  s = whole + (decimalPos == -1 ?\n" +
+        "      '' : '.' + s.substring(decimalPos));\n" +
         "  return '$' + s;\n" +
-        "}";
+        "}"
     document.getElementById('flexibleInput').click();
     document.getElementById('flexibleInput').blur();
 
