@@ -78,30 +78,26 @@ textarea.code {
 }
 
 .notes {
-  padding: 10px 10px 0;
-  background: #ffe;
-  border: 1px dotted #aaa;
+  padding: 3px 10px;
+  background: #eee;
 }
 .notes.hidden {
-  display: inline;
-  padding: 0;
-  background: none;
-  border: none;
-}
-.notes.hidden p {
   display: none;
 }
-.notes .button {
-  cursor: pointer;
-  padding: 3px 8px;
+.hider.hiding {
   background: #fff;
   border: 1px solid #ccc;
-  border-radius: 3px;
-  position: relative;
-  left: -11px;
-  top: -11px;
 }
-.notes.hidden .button {
-  left: 0;
-  top: 0;
+.hider.hiding::after {
+  content: ' \25b8';
+}
+.hider::after {
+  content: ' \25be';
+}
+.hider {
+  cursor: pointer;
+  padding: 3px 8px;
+  background: #eee;
+  border: 1px solid #eee;
+  border-radius: 3px;
 }
