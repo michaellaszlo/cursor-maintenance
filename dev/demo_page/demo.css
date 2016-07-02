@@ -87,14 +87,19 @@ textarea.code {
 .hider.hiding {
   background: #fff;
   border: 1px solid #ccc;
+  border: 1px solid #fff;
+  color: #888;
 }
-.hider.hiding::after {
-  content: ' \25b8';
+.hider.hiding::before {
+  content: '\25b8';
+  color: #222;
 }
-.hider::after {
-  content: ' \25be';
+.hider::before {
+  content: '\25be';
+  color: #222;
 }
 .hider {
+  color: #888;
   cursor: pointer;
   padding: 3px 8px;
   background: #eee;

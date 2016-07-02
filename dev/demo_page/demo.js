@@ -117,7 +117,7 @@ var CursorMaintenanceDemo = (function () {
   }
 
   function load() {
-    var divs, i, notes, hider;
+    var divs, i, notes, hider, label;
 
     // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
@@ -161,13 +161,15 @@ var CursorMaintenanceDemo = (function () {
     scrollTo(0, 0);
 
     // Hide all notes. Add buttons to expand each note section individually.
-    function makeHiderResponse(hider, notes) {
+    function makeHiderResponse(hider, label, notes) {
       return function () {
         if (hider.className.indexOf('hiding') == -1) {
           hider.className = 'hider hiding';
+          hider.innerHTML = label;
           notes.className = 'notes hidden';
         } else {
           hider.className = 'hider';
+          hider.innerHTML = ' hide';
           notes.className = 'notes';
         }
       }
@@ -178,11 +180,13 @@ var CursorMaintenanceDemo = (function () {
         continue;
       }
       notes = divs[i];
-      notes.className = 'notes hidden';
       hider = document.createElement('span');
+      label = notes.innerHTML.replace(/\s*<p>\s*/g, '');
+      label = ' ' + label.substring(0, label.indexOf(' ', 20)) + '...';
       hider.className = 'hider hiding';
-      hider.innerHTML = 'notes';
-      hider.onclick = makeHiderResponse(hider, notes);
+      hider.innerHTML = label;
+      notes.className = 'notes hidden';
+      hider.onclick = makeHiderResponse(hider, label, notes);
       notes.parentNode.insertBefore(hider, notes);
     }
 
