@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title> Comparison of cursor maintainenance approaches </title>
+<title> Comparison of cursor-maintenance implementations </title>
 
 <link rel="stylesheet" type="text/css" href="comparison.css">
 
@@ -14,6 +14,31 @@
 </head>
 <body>
 <div id="wrapper">
+
+<h1> Comparison of cursor-maintenance implementations </h1>
+
+<div class="notes">
+
+<p> This page shows the effects of several attempts at <a href="">cursor
+maintenance</a> on two formatting operations, <em>commatize</em> and
+<em>specify</em>. You can specify the input text for each formatting
+operation by editing the input field at the top of the respective column
+in the following table. You can also move the cursor to the position of
+your choosing.
+
+<p> The result of the formatting operation is displayed immediately below
+the input field. The remaining cells show the cursor positions computed by
+the various implementations of cursor maintenance. The <em>ad hoc</em>,
+<em>mock cursor</em>, and <em>meta</em> implementations only return a
+new cursor position. The retrospective approach is implemented using two
+formulas, <em>split Levenshtein</em> and <em>balanced frequencies</em>,
+which return a numerical score for every possible cursor position in the
+formatted text. To view the scores computed by a retrospective formula,
+click on the button labeled "scores" in the respective result cell.
+
+
+</div>
+
 
 <table id="comparisons">
 
