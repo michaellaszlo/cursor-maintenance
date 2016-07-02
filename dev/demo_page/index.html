@@ -11,7 +11,7 @@
 <script src="../cursor_maintainer.js"></script>
 <script src="demo.js"></script>
 
-<title> Cursor maintenance </title>
+<title> Cursor maintenance demos </title>
 
 </head>
 <body>
@@ -21,8 +21,42 @@
 
 <h1> Cursor-maintenance demos </h1>
 
+<div class="notes">
+
+<p> This page demonstrates two approaches to maintaining cursor position in a text input field that formats its contents in real time. </p>
+
+<p> The problem of cursor maintenance is discussed in a <a
+href="">detailed article</a>. </p>
+
+<p> Fully documented source code is available in a <a href="">source
+repository</a>. </p>
+
+</div>
+
 
 <h2> Meta approach </h2>
+
+<div class="notes">
+
+<p> In the meta approach, we reimplement a given text formatting operation
+by applying elementary operations to a text-with-cursor object. The object
+moves the cursor in a predictable manner for each elementary operation.
+
+<p> Below we demonstrate the meta approach with two formatting operations,
+<em>commatize</em> and <em>trimify</em>.
+
+<p> <em>Commatize</em> is defined for text consisting only of
+digits and commas. Input strings containing other characters are
+rejected by a validation function that runs before the formatting
+operation. <em>Commatize</em> displays a non-negative integer with commas
+separating each three-digit group from right to left. </p>
+
+<p> <em>Trimify</em> is applicable to any text, so the input is not
+validated before formatting. <em>Trimify</em> removes whitespace from
+the beginning of the text, then condenses all other whitespace sequences
+to one character each. </p>
+
+</div>
 
 
 <h3> commatize </h3>
@@ -37,6 +71,10 @@
 
 <h2> Retrospective approach </h2>
 
+<div class="notes">
+
+</div>
+
 
 <h3> input field </h3>
 
@@ -46,37 +84,6 @@
 <h3> formatting operation </h3>
 
 <textarea id="flexibleCode" spellcheck="false" class="code"></textarea>
-
-
-
-<h2> Notes </h2>
-
-<p> This page demonstrates two approaches to cursor maintenance. The
-problem is discussed in a <a href="">detailed article</a>. </p>
-
-<p> Additional code and technical documents are available in a <a
-href="">source repository</a>. </p>
-
-
-<h3> Meta </h3>
-
-<p> The meta approach entails reimplementing a formatting operation
-by applying highly localized text operations to a text-with-cursor
-object. This object moves the cursor in a predictable manner after each
-local text operation. </p>
-
-<p> The <em>commatize</em> formatting operation is only applicable
-to a string of digits and commas. The input field strips out all other
-characters before applying <em>commatize</em>. The formatted text displays
-a non-negative integer with commas separating each three-digit group
-from right to left. </p>
-
-<p> The <em>trimify</em> formatting operation is applicable to any
-text. It removes whitespace from the beginning and end of the text,
-and condenses all other whitespace sequences to one character each. </p>
-
-
-<h3> Retrospective </h3>
 
 
 </div><!--end wrapper -->
