@@ -117,6 +117,7 @@ var CursorMaintenanceDemo = (function () {
   }
 
   function load() {
+    var divs, i, div, button;
 
     // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
@@ -131,6 +132,7 @@ var CursorMaintenanceDemo = (function () {
     setMaintainer(document.getElementById('flexibleInput'),
         makeFlexibleMaintainer(document.getElementById('flexibleCode')));
 
+    // An illustrative formatting function for the retrospective approach.
     document.getElementById('flexibleCode').value = "function (s) {\n" +
         "  var decimalPos, whole, fraction, start, groups, i;\n" +
         "  s = s.replace(/[^0-9.]/g, '');\n" +
@@ -153,6 +155,34 @@ var CursorMaintenanceDemo = (function () {
         "}"
     document.getElementById('flexibleInput').click();
     document.getElementById('flexibleInput').blur();
+
+    // The page position may have been changed by focus events as the input
+    //  fields were initialized, so let's reset to the upper left corner.
+    scrollTo(0, 0);
+
+    // Hide all notes. Add buttons to expand each note section individually.
+    function makeButtonHandler(button, div) {
+      return function () {
+        if (div.className.indexOf('hidden') == -1) {
+          div.className += ' hidden';
+        } else {
+          div.className = div.className.replace(/\s*hidden\s*/g, ' ');
+        }
+      }
+    }
+    divs = document.getElementsByTagName('div');
+    for (i = 0; i < divs.length; ++i) {
+      div = divs[i];
+      if (div.className.indexOf('notes') == -1) {
+        continue;
+      }
+      div.className += ' hidden';
+      button = document.createElement('span');
+      button.className = 'button';
+      button.innerHTML = 'notes';
+      button.onclick = makeButtonHandler(button, div);
+      div.insertBefore(button, div.firstChild);
+    }
 
   }
 
