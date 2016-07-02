@@ -23,10 +23,13 @@
 
 <div class="notes">
 
-<p> This page demonstrates two approaches to maintaining cursor position in a text input field that formats its contents in real time. </p>
+<p> This page demonstrates two approaches to maintaining cursor position
+in a text input field that formats its contents in real time. The goal
+of cursor maintenance is to move the cursor in newly formatted text in
+such a way as to minimize user surprise. </p>
 
-<p> The problem of cursor maintenance is discussed in a <a
-href="">detailed article</a>. </p>
+<p> For a detailed discussion of cursor maintenance, see <a
+href="">Michael Laszlo's article</a>. </p>
 
 <p> Fully documented source code is available in a <a href="">source
 repository</a>. </p>
@@ -38,23 +41,23 @@ repository</a>. </p>
 
 <div class="notes">
 
-<p> In the meta approach, we reimplement a given text formatting operation
-by applying elementary operations to a text-with-cursor object. The object
+<p> In the meta approach, we reimplement a text formatting operation by
+applying elementary operations to a text-with-cursor object. The object
 moves the cursor in a predictable manner for each elementary operation.
 
 <p> Below we demonstrate the meta approach with two formatting operations,
 <em>commatize</em> and <em>trimify</em>.
 
-<p> <em>Commatize</em> is defined for text consisting only of
-digits and commas. Input strings containing other characters are
-rejected by a validation function that runs before the formatting
-operation. <em>Commatize</em> displays a non-negative integer with commas
-separating each three-digit group from right to left. </p>
+<p> Commatize is defined for text consisting of digits and commas. Input
+strings containing other characters are rejected by a validation
+function that runs before the formatting operation. Commatize displays a
+non-negative integer with commas separating each three-digit group from
+right to left. </p>
 
-<p> <em>Trimify</em> is applicable to any text, so the input is not
-validated before formatting. <em>Trimify</em> removes whitespace from
-the beginning of the text, then condenses all other whitespace sequences
-to one character each. </p>
+<p> Trimify is applicable to any text, so the input is not validated
+before formatting. Trimify removes whitespace from the beginning of
+the text, then condenses all other whitespace sequences to one space
+each. </p>
 
 </div>
 

@@ -76,3 +76,9 @@ textarea.code {
   font-size: 14px;
   height: 350px;
 }
+
+.notes {
+  border: 2px solid #eee;
+  padding: 5px 10px;
+  background: #ffe;
+}
