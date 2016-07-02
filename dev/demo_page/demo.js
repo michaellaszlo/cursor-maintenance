@@ -1,8 +1,8 @@
 var CursorMaintenanceDemo = (function () {
   var messages = {
         formatting: {
-          off: '<span class="icon">&#x2610;</span>formatting disabled',
-          on: '<span class="icon">&#x2611;</span>formatting on'
+          off: '<span class="icon">&#x25a1;</span>formatting off',
+          on: '<span class="icon">&#x25a0;</span>formatting on'
         }
       };
 
@@ -117,7 +117,7 @@ var CursorMaintenanceDemo = (function () {
   }
 
   function load() {
-    var divs, i, notes, hider, label;
+    var divs, i, notes, columns, content, snippet;
 
     // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
@@ -160,17 +160,15 @@ var CursorMaintenanceDemo = (function () {
     //  fields were initialized, so let's reset to the upper left corner.
     scrollTo(0, 0);
 
-    // Hide all notes. Add buttons to expand each note section individually.
-    function makeHiderResponse(hider, label, notes) {
+    // Collapse all notes. Add an expander widget to each note section.
+    function makeExpanderAction(notes, columns, content) {
       return function () {
-        if (hider.className.indexOf('hiding') == -1) {
-          hider.className = 'hider hiding';
-          hider.innerHTML = label;
-          notes.className = 'notes hidden';
+        if (notes.className.indexOf('collapsed') == -1) {
+          notes.className = 'notes collapsed';
+          columns.content.innerHTML = content.snippet;
         } else {
-          hider.className = 'hider';
-          hider.innerHTML = ' hide';
           notes.className = 'notes';
+          columns.content.innerHTML = content.full;
         }
       }
     }
@@ -180,14 +178,24 @@ var CursorMaintenanceDemo = (function () {
         continue;
       }
       notes = divs[i];
-      hider = document.createElement('span');
-      label = notes.innerHTML.replace(/\s*<p>\s*/g, '');
-      label = ' ' + label.substring(0, label.indexOf(' ', 20)) + '...';
-      hider.className = 'hider hiding';
-      hider.innerHTML = label;
-      notes.className = 'notes hidden';
-      hider.onclick = makeHiderResponse(hider, label, notes);
-      notes.parentNode.insertBefore(hider, notes);
+      columns = {
+        expander: document.createElement('div'),
+        content: document.createElement('div')
+      };
+      columns.expander.className = 'expander';
+      columns.expander.innerHTML = '<span class="icon">&#x22ef;</span>';
+      columns.content.className = 'content';
+      content = {
+        full: notes.innerHTML
+      };
+      snippet = content.full.replace(/\s*<p>\s*/g, '')
+      snippet = '<p>' + snippet.substring(0, snippet.indexOf(' ', 20));
+      content.snippet = snippet;
+      notes.innerHTML = '';
+      notes.insertBefore(columns.content, notes.firstChild);
+      notes.insertBefore(columns.expander, notes.firstChild);
+      columns.expander.onclick = makeExpanderAction(notes, columns, content);
+      columns.expander.click();
     }
 
   }
