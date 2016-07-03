@@ -253,9 +253,9 @@ def commatize(s):             # s consists of digits and commas.
     return s
 ```
 
-The other formatting operation, `trimify`, removes all space characters
-from the beginning and end of the text, and condenses sequences of spaces
-elsewhere in the text to one character each.
+The other formatting operation, `trimify`, removes all whitespace from
+the beginning of the text, and condenses whitespace sequences elsewhere
+in the text to one character each.
 
 For example, the input text
 
@@ -263,7 +263,7 @@ For example, the input text
 
 is transformed by `trimify` into:
 
-  `how much wood could a woodchuck chuck`
+  `how much wood could a woodchuck chuck `
 
 I define this formatting operation in Python as follows.
 
@@ -298,7 +298,7 @@ problem.
 
 Here is a case in the `trimify` test suite:
 
-  ('  whirled    peas  now  ', 11, 'whirled peas now', 8)
+  ('  whirled    peas  now  ', 11, 'whirled peas now ', 8)
 
 The first three values of the tuple constitute a problem instance. The
 fourth value is the answer. Before `trimify`, the cursor is at position
@@ -308,7 +308,7 @@ fourth value is the answer. Before `trimify`, the cursor is at position
 
 After `trimify`, the cursor moves to position 8:
 
-  `whirled ^peas now`
+  `whirled ^peas now `
 
 According to my automated test suite, that is the answer to this problem
 instance.
@@ -320,7 +320,7 @@ to the immediate left or right of the single space that remains after
 `trimify`. In my test suite, it's on the right. Here it's on the left,
 in position 7:
 
-  `whirled^ peas now`
+  `whirled^ peas now `
 
 The user would be surprised by any answer other than position 7 or
 8. We always want to choose one of these two answers, and we want to do
@@ -399,15 +399,15 @@ immediate left of the cursor may nor may not appear in the formatted text.
 
 In this case, the space to the left of the cursor is preserved:
 
-  ` Hello, ^world.  `  ->  `Hello, ^world.`
+  ` Hello, ^world.  `  ->  `Hello, ^world. `
 
 In this case it is removed:
 
-  ` ^Hello, world.  `  ->  `^Hello, world.`
+  ` ^Hello, world.  `  ->  `^Hello, world. `
 
 Sometimes all the spaces around the cursor vanish:
 
-  ` Hello, world. ^ `  ->  `Hello, world.^`
+  `  ^  Hello, world. ^ `  ->  `^Hello, world.`
 
 It turns out that we can handle every case with the trick of appending
 a non-space character to `s[:cursor]` before trimifying it:
@@ -473,12 +473,10 @@ the right:
 
   `Hello, ^ world.`  ->  `Hello, ^world.`
 
-If the mock cursor is the first character or the last character and
-there is a space next to it, we delete that space:
+If the mock cursor is the first character and there is a space next to
+it, we delete that space:
 
   `^ Hello, world.`  ->  `^Hello, world.`
-
-  `Hello, world. ^`  ->  `Hello, world.^`
 
 The mock cursor works well with `trimify` because it causes localized
 formatting errors that are easy to fix.
