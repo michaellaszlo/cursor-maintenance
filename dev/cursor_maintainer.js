@@ -104,13 +104,22 @@ var CursorMaintainer = (function () {
     return null;
   }
 
-  mockCursor.commatize = function (s, cursor) {
-    var cursorChar = chooseCursorChar(s),
-        groups = [],
+  function makeMockCursor(costFunction, plainFormatter) {
+    return function (s, cursor) {
+      var cursorChar = chooseCursorChar(s),
+          t = s.substring(0, cursor) + cursorChar + s.substring(cursor),
+          result = plainFormatter(s, cursorChar),
+          cursor = result.indexOf(cursorChar),
+          text = result.replace(cursorChar, '');
+      return { text: text, cursor: cursor };
+    };
+  }
+
+  mockCursor.commatize = function (s, cursorChar) {
+    var groups = [],
         groupChars = [],
         digitCount = 0,
         i, ch;
-    s = s.substring(0, cursor) + cursorChar + s.substring(cursor);
     for (i = s.length - 1; i >= 0; --i) {
       ch = s.charAt(i);
       if (ch != ',') {
@@ -131,22 +140,15 @@ var CursorMaintainer = (function () {
     if (s.charAt(0) == cursorChar && s.charAt(1) == ',') {
       s = cursorChar + s.substring(2);
     }
-    cursor = s.indexOf(cursorChar);
-    s = s.replace(cursorChar, '');
-    return { text: s, cursor: cursor };
+    return s;
   };
 
-  mockCursor.trimify = function (s, cursor) {
-    var cursorChar = chooseCursorChar(s);
-    s = s.substring(0, cursor) + cursorChar + s.substring(cursor);
+  mockCursor.trimify = function (s, cursorChar) {
     s = format.trimify(s).text;
-    s = s.replace(' ' + cursorChar + ' ', ' ' + cursorChar);
     if (s.charAt(0) == cursorChar) {
       s = s.replace(cursorChar + ' ', cursorChar);
     }
-    cursor = s.indexOf(cursorChar);
-    s = s.replace(cursorChar, '');
-    return { text: s, cursor: cursor };
+    return s;
   };
 
 
