@@ -104,18 +104,18 @@ var CursorMaintainer = (function () {
     return null;
   }
 
-  function makeMockCursor(costFunction, plainFormatter) {
+  function makeMockCursor(format) {
     return function (s, cursor) {
       var cursorChar = chooseCursorChar(s),
           t = s.substring(0, cursor) + cursorChar + s.substring(cursor),
-          result = plainFormatter(s, cursorChar),
-          cursor = result.indexOf(cursorChar),
-          text = result.replace(cursorChar, '');
+          formatted = format(t, cursorChar),
+          cursor = formatted.indexOf(cursorChar),
+          text = formatted.replace(cursorChar, '');
       return { text: text, cursor: cursor };
     };
   }
 
-  mockCursor.commatize = function (s, cursorChar) {
+  mockCursor.commatize = makeMockCursor(function (s, cursorChar) {
     var groups = [],
         groupChars = [],
         digitCount = 0,
@@ -141,15 +141,17 @@ var CursorMaintainer = (function () {
       s = cursorChar + s.substring(2);
     }
     return s;
-  };
+  });
 
-  mockCursor.trimify = function (s, cursorChar) {
+  mockCursor.trimify = makeMockCursor(function (s, cursorChar) {
     s = format.trimify(s).text;
     if (s.charAt(0) == cursorChar) {
       s = s.replace(cursorChar + ' ', cursorChar);
+    } else {
+      s = s.replace(' ' + cursorChar + ' ', ' ' + cursorChar);
     }
     return s;
-  };
+  });
 
 
   //--- Meta: local operations on a text-with-cursor object.
@@ -325,9 +327,9 @@ var CursorMaintainer = (function () {
     return cost;
   }
 
-  function makeRetrospective(costFunction, plainFormatter) {
+  function makeRetrospective(costFunction, format) {
     return function (original, cursor) {
-      var formatted = plainFormatter(original).text,
+      var formatted = format(original).text,
           bestCost = costFunction(original, cursor, formatted, 0),
           bestPos = 0,
           cost,

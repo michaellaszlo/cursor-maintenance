@@ -10,7 +10,10 @@ var BatchTestCursorMaintenance = (function () {
     load('../cursor_maintainer.js');
     CM = CursorMaintainer;
 
-    [ 'adHoc', 'mockCursor', 'meta'//, 'splitLevenshtein', 'balancedFrequencies'
+    [ //'adHoc',
+      'mockCursor',
+      //'meta',
+      //'splitLevenshtein', 'balancedFrequencies'
     ].forEach(function (approach) {
       print('-----', approach);
       test = new Test(CM[approach]);
