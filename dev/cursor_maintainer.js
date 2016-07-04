@@ -8,31 +8,40 @@ var CursorMaintainer = (function () {
       retrospective;
 
 
-  //--- Plain formatting operations: no alteration of the cursor position.
-  format = {};
+  //--- Plain formatting operations. No cursor involved.
 
   /* commatize takes a string of digits and commas. It adjusts commas so
      that they separate the digits into groups of three. */
-  format.commatize = function (s, cursor) {
-    var start,
-        groups,
-        i;
-    s = s.replace(/,/g, '');
-    start = s.length % 3 || 3;
-    groups = [ s.substring(0, start) ];
+  function commatize(s) {                    // s is a string composed of
+    var start, groups, i;                    //  digits and commas.
+    s = s.replace(/,/g, '');                 // Remove all commas.
+    start = s.length % 3 || 3;               // Begin with 1, 2, or 3 digits.
+    groups = [ s.substring(0, start) ];      // Make the first group of digits.
     for (i = start; i < s.length; i += 3) {
-      groups.push(s.substring(i, i + 3));
+      groups.push(s.substring(i, i + 3));    // Add three-digit groups.
     }
-    s = groups.join(',');
-    return { text: s, cursor: cursor };
+    s = groups.join(',');                    // Insert commas between groups.
+    return s;
   };
 
   /* trimify removes all whitespace from the beginning of the string and
      reduces other whitespace sequences to a single space each. */
+  function trimify(s) {          // s is an arbitrary string.
+    s = s.replace(/^\s+/, '');   // Remove whitespace from the beginning.
+    s = s.replace(/\s+/g, ' ');  // Condense remaining whitespace sequences
+    return s;                    //  to one space each.
+  };
+
+
+  //--- Plain formatting operations wrapped for testing: cursor unchanged.
+  format = {};
+
+  format.commatize = function (s, cursor) {
+    return { text: commatize(s), cursor: cursor };
+  };
+
   format.trimify = function (s, cursor) {
-    s = s.replace(/^\s+/, '');
-    s = s.replace(/\s+/g, ' ');
-    return { text: s, cursor: cursor };
+    return { text: trimify(s), cursor: cursor };
   };
 
 
