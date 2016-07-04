@@ -240,17 +240,20 @@ In my investigation of cursor maintenance, I ran experiments using
 two formatting operations. The first formats positive integers into
 comma-separated three-digit groups, as in the examples above. I call
 this formatting operation `commatize`. I define it with the following
-Python function.
+JavaScript function.
 
 ```
-def commatize(s):             # s consists of digits and commas.
-    s = s.replace(',', '')    # Remove all commas.
-    start = len(s) % 3 or 3   # Begin with 1, 2, or 3 digits.
-    groups = [ s[:start] ]    # Make the first group of digits.
-    for i in range(start, len(s), 3):
-        groups.append(s[i : i + 3])  # Add three-digit groups.
-    s = ','.join(groups)      # Insert commas between groups.
-    return s
+function commatize(s) {                    // s is a string composed of
+  var start, groups, i;                    //  digits and commas.
+  s = s.replace(/,/g, '');                 // Remove all commas.
+  start = s.length % 3 || 3;               // Begin with 1, 2, or 3 digits.
+  groups = [ s.substring(0, start) ];      // Make the first group of digits.
+  for (i = start; i < s.length; i += 3) {
+    groups.push(s.substring(i, i + 3));    // Add three-digit groups.
+  }
+  s = groups.join(',');                    // Insert commas between groups.
+  return s;
+};
 ```
 
 The other formatting operation, `trimify`, removes all whitespace from
@@ -265,13 +268,14 @@ is transformed by `trimify` into:
 
   `how much wood could a woodchuck chuck `
 
-I define this formatting operation in Python as follows.
+I define this formatting operation in JavaScript as follows.
 
 ```
-def trimify(s):     # s consists of spaces and non-space characters.
-    s = s.strip()   # Remove spaces from beginning and end.
-    s = re.sub('[ ]+', ' ', s)  # Condense other space sequences.
-    return s
+function trimify(s) {          // s is an arbitrary string.
+  s = s.replace(/^\s+/, '');   // Remove whitespace from the beginning.
+  s = s.replace(/\s+/g, ' ');  // Condense remaining whitespace sequences
+  return s;                    //  to one space each.
+};
 ```
 
 
@@ -280,15 +284,9 @@ def trimify(s):     # s consists of spaces and non-space characters.
 Some cursor-maintenance involve rewriting your formatting operations. To
 verify that the rewritten version of a formatting operation performs
 the same text transformation as the original version, I ran automated
-tests on the command line.
-
-I wrote a Python script,
-[`approach_examples.py`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.py),
-and an equivalent JavaScript file,
-[`approach_example.js`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/approach_examples.js),
-to perform automated testing. The repository's
-[README](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/README.md)
-contains detailed documentation on using these files.
+tests on the command line. The [batch tester]() is available in a [source
+repository]() together with my [implementations of cursor maintenance]()
+and other code that I will mention in this article.
 
 In addition to verifying the text transformation, the automated
 tests helped me to assess the cursor positions computed by various
@@ -301,8 +299,8 @@ Here is a case in the `trimify` test suite:
   ('  whirled    peas  now  ', 11, 'whirled peas now ', 8)
 
 The first three values of the tuple constitute a problem instance. The
-fourth value is the answer. Before `trimify`, the cursor is at position
-11:
+fourth value is a model answer. In this instance, the cursor is initially
+at position 11:
 
   `  whirled  ^  peas  now  `
 
@@ -310,8 +308,7 @@ After `trimify`, the cursor moves to position 8:
 
   `whirled ^peas now `
 
-According to my automated test suite, that is the answer to this problem
-instance.
+That is the correct answer according to this test suite.
 
 Is it the optimal answer? Due to the fuzzy nature of the problem,
 it's hard to say. What we can say confidently is that if the cursor
@@ -366,23 +363,30 @@ across the formatting operation. We can use this idea to write a new
 version of `commatize`:
 
 ```
-def commatize_with_cursor(s, cursor):
-    # Count the digit characters to the left of the cursor.
-    left_digit_count = cursor - s[:cursor].count(',')
-    # Apply the original commatize function.
-    s = commatize(s)
-    if left_digit_count == 0:
-        return (s, 0)
-    # Count off digit characters.
-    for pos, ch in enumerate(s):
-        if ch != ',':
-            left_digit_count -= 1
-            if left_digit_count == 0:
-                break
-    # Put the cursor to the right of the counted digts.
-    cursor = pos + 1
-    return (s, cursor)
+adHoc.commatize = function (s, cursor) {
+  var pos, ch, leftDigitCount;
+  // Count the digit characters to the left of the cursor.
+  leftDigitCount = cursor - count(s.substring(0, cursor), ',');
+  // Apply the original commatize function.
+  s = commatize(s);
+  if (leftDigitCount == 0) {
+    return { text: s, cursor: 0 };
+  }
+  // Count off digit characters.
+  for (pos = 0; pos < s.length; ++pos) {
+    ch = s.charAt(pos);
+    if (ch != ',') {
+      if (--leftDigitCount == 0) {
+        break;
+      }
+    }
+  }
+  // Place the cursor to the right of the counted digits.
+  cursor = pos + 1;
+  return { text: s, cursor: cursor };
+};
 ```
+
 
 This function calls the original `commatize` to transform the text. It
 performs cursor maintenance with a calculation devised for the particular
@@ -412,15 +416,17 @@ Sometimes all the spaces around the cursor vanish:
 It turns out that we can handle every case with the trick of appending
 a non-space character to `s[:cursor]` before trimifying it:
 
-````
-def trimify_with_cursor(s, cursor):
-    # Split the string and guard the cursor's position with a non-space.
-    left_trimmed = trimify(s[:cursor] + '|')
-    s = trimify(s)
-    # The cursor moves to the right end of the trimified substring or the
-    # entire trimified text, whichever is shorter.
-    cursor = min(len(left_trimmed) - 1, len(s))
-    return (s, cursor)
+```
+adHoc.trimify = function (s, cursor) {
+  var leftTrimmed;
+  // Split the string and guard the cursor's position with a non-space.
+  leftTrimmed = format.trimify(s.substring(0, cursor) + '|').text;
+  s = format.trimify(s).text;
+  // The cursor moves to the right end of the trimified substring or the
+  //  entire trimified text, whichever is shorter.
+  cursor = Math.min(s.length, leftTrimmed.length - 1);
+  return { text: s, cursor: cursor };
+};
 ```
 
 This trickery works in the sense that it calculates reasonable cursor
@@ -574,18 +580,22 @@ Here is my cursor-maintaining implementation of `commatize` using a
 `TextWithCursor` class that I wrote for this experiment:
 
 ```
-def commatize_with_cursor(s, cursor):
-    t = TextWithCursor(s, cursor)
-    digit_count = 0
-    for pos in reversed(range(t.length())):
-        if t.read(pos) == ',':
-            t.delete(pos)
-        elif digit_count < 2:
-            digit_count += 1
-        elif pos > 0:
-            t.insert(pos, ',')
-            digit_count = 0
-    return (t.text, t.cursor)
+meta.commatize = function (s, cursor) {
+  var t = new TextWithCursor(s, cursor),
+      digitCount = 0,
+      pos;
+  for (pos = t.length() - 1; pos >= 0; --pos) {
+    if (t.read(pos) == ',') {
+      t.delete(pos);
+    } else if (digitCount == 3) {
+      t.insert(pos + 1, ',');
+      digitCount = 1;
+    } else {
+      ++digitCount;
+    }
+  }
+  return t;
+};
 ```
 
 The notion of performing local operations on a text-with-cursor object
