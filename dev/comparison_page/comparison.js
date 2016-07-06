@@ -176,6 +176,8 @@ var CursorMaintenanceComparison = (function () {
     inputs.trimify.click();
     outputs.commatize.balancedFrequencies.button.click();
     outputs.trimify.balancedFrequencies.button.click();
+
+    // Add expander
   }
 
   return {

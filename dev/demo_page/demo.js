@@ -165,14 +165,8 @@ var CursorMaintenanceDemo = (function () {
     //  fields were initialized, so let's reset to the upper left corner.
     scrollTo(0, 0);
 
-    // Add expander widgets to note sections.
-    divs = document.getElementsByTagName('div');
-    for (i = 0; i < divs.length; ++i) {
-      if (divs[i].className.indexOf('notes') == -1) {
-        continue;
-      }
-      NoteExpander.enable(divs[i]);  // Notes are collapsed by default.
-    }
+    // Add expander widgets to note sections. Notes are collapsed by default.
+    NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
 
   return {

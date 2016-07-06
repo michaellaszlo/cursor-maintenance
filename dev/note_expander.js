@@ -38,7 +38,21 @@ var NoteExpander = (function () {
     }
   }
 
+  function enableByTagAndClass(root, tag, name) {
+    var elements, names, i, j;
+    elements = root.getElementsByTagName(tag);
+    for (i = 0; i < elements.length; ++i) {
+      names = elements[i].className.split(/\s+/);
+      for (j = 0; j < names.length; ++j) {
+        if (names[j] == name) {
+          enable(elements[i]);
+        }
+      }
+    }
+  }
+
   return {
-    enable: enable
+    enable: enable,
+    enableByTagAndClass: enableByTagAndClass
   };
 })();
