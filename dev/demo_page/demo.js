@@ -1,6 +1,8 @@
 var CursorMaintenanceDemo = (function () {
   'use strict';
 
+  // This module requires CursorMaintainer and NoteExpander.
+
   var messages = {
         formatting: {
           off: '<span class="icon">&#x25a1;</span>formatting off',
@@ -163,44 +165,14 @@ var CursorMaintenanceDemo = (function () {
     //  fields were initialized, so let's reset to the upper left corner.
     scrollTo(0, 0);
 
-    // Collapse all notes. Add an expander widget to each note section.
-    function makeExpanderAction(notes, columns, content) {
-      return function () {
-        if (notes.className.indexOf('collapsed') == -1) {
-          notes.className = 'notes collapsed';
-          columns.content.innerHTML = content.snippet;
-        } else {
-          notes.className = 'notes';
-          columns.content.innerHTML = content.full;
-        }
-      }
-    }
+    // Add expander widgets to note sections.
     divs = document.getElementsByTagName('div');
     for (i = 0; i < divs.length; ++i) {
       if (divs[i].className.indexOf('notes') == -1) {
         continue;
       }
-      notes = divs[i];
-      columns = {
-        expander: document.createElement('div'),
-        content: document.createElement('div')
-      };
-      columns.expander.className = 'expander';
-      columns.expander.innerHTML = '<span class="icon">&#x22ef;</span>';
-      columns.content.className = 'content';
-      content = {
-        full: notes.innerHTML
-      };
-      snippet = content.full.replace(/\s*<p>\s*/g, '')
-      snippet = '<p>' + snippet.substring(0, snippet.indexOf(' ', 20));
-      content.snippet = snippet;
-      notes.innerHTML = '';
-      notes.insertBefore(columns.content, notes.firstChild);
-      notes.insertBefore(columns.expander, notes.firstChild);
-      columns.expander.onclick = makeExpanderAction(notes, columns, content);
-      columns.expander.click();
+      NoteExpander.enable(divs[i]);  // Notes are collapsed by default.
     }
-
   }
 
   return {
