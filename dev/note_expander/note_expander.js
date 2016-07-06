@@ -2,39 +2,40 @@ var NoteExpander = (function () {
   'use strict';
 
   // Collapse all notes. Add an expander widget to each note section.
-  function makeExpanderAction(notes, columns, content) {
+  function makeExpanderAction(container, columns, content) {
     return function () {
-      if (notes.className.indexOf('collapsed') == -1) {
-        notes.className = 'notes collapsed';
+      if (container.className.indexOf('expander-collapsed') == -1) {
+        container.className += ' expander-collapsed';
         columns.content.innerHTML = content.snippet;
       } else {
-        notes.className = 'notes';
+        container.className = container.className.replace(
+            /\s+expander-collapsed/, '');
         columns.content.innerHTML = content.full;
       }
     }
   }
 
-  function enable(notes, doNotCollapse) {
+  function enable(container, doNotCollapse) {
     var columns, content, snippet;
     columns = {
-      expander: document.createElement('div'),
+      button: document.createElement('div'),
       content: document.createElement('div')
     };
-    columns.expander.className = 'expander';
-    columns.expander.innerHTML = '<span class="icon">&#x22ef;</span>';
-    columns.content.className = 'content';
+    columns.button.className = 'expander-button';
+    columns.button.innerHTML = '<span class="expander-icon">&#x22ef;</span>';
+    columns.content.className = 'expander-content';
     content = {
-      full: notes.innerHTML
+      full: container.innerHTML
     };
     snippet = content.full.replace(/\s*<p>\s*/g, '')
     snippet = '<p>' + snippet.substring(0, snippet.indexOf(' ', 20));
     content.snippet = snippet;
-    notes.innerHTML = '';
-    notes.insertBefore(columns.content, notes.firstChild);
-    notes.insertBefore(columns.expander, notes.firstChild);
-    columns.expander.onclick = makeExpanderAction(notes, columns, content);
+    container.innerHTML = '';
+    container.insertBefore(columns.content, container.firstChild);
+    container.insertBefore(columns.button, container.firstChild);
+    columns.button.onclick = makeExpanderAction(container, columns, content);
     if (!doNotCollapse) {
-      columns.expander.click();
+      columns.button.click();
     }
   }
 
