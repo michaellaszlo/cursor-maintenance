@@ -178,7 +178,7 @@ var CursorMaintenanceComparison = (function () {
     outputs.trimify.balancedFrequencies.button.click();
 
     // Add expander to notes (collapsed by default).
-    NoteExpander.enableByTagAndClass(document, 'div', 'notes');
+    NoteExpander.enableByTagAndClass(document, 'div', 'notes', true);
   }
 
   return {

@@ -34,19 +34,20 @@ var NoteExpander = (function () {
     container.insertBefore(columns.content, container.firstChild);
     container.insertBefore(columns.button, container.firstChild);
     columns.button.onclick = makeExpanderAction(container, columns, content);
-    if (!doNotCollapse) {
+    columns.button.click();
+    if (doNotCollapse) {
       columns.button.click();
     }
   }
 
-  function enableByTagAndClass(root, tag, name) {
+  function enableByTagAndClass(root, tag, name, doNotCollapse) {
     var elements, names, i, j;
     elements = root.getElementsByTagName(tag);
     for (i = 0; i < elements.length; ++i) {
       names = elements[i].className.split(/\s+/);
       for (j = 0; j < names.length; ++j) {
         if (names[j] == name) {
-          enable(elements[i]);
+          enable(elements[i], doNotCollapse);
         }
       }
     }
