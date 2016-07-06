@@ -5,8 +5,22 @@
 }
 
 body {
-  font-family: sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
+
+#wrapper {
+  margin: 10px 20px 20px;
+}
+
+a {
+  text-decoration: none;
+  color: #1e74b1;
+}
+a:hover {
+  color: #47975d;
+  border-bottom: 1px solid;
+}
+
 
 h1, h2, h3 {
   margin: 20px 0 10px;
@@ -22,12 +36,9 @@ h3 {
   color: #333;
 }
 
-#wrapper {
-  margin: 10px 20px 20px;
-}
-
 p {
   margin: 10px 0;
+  line-height: 21px;
 }
 
 input, textarea {
@@ -61,7 +72,7 @@ input {
   color: #555;
 }
 .toggle .icon {
-  font-size: 20px;
+  font-size: 21px;
   margin-right: 4px;
   position: relative;
   top: 2px;
@@ -73,8 +84,8 @@ textarea {
   height: 100px;
 }
 textarea.code {
-  font-family: monospace;
-  font-size: 14px;
-  height: 350px;
+  font-family: 'Droid Sans Mono', monospace;
+  font-size: 13px;
+  height: 400px;
 }
 
