@@ -40,27 +40,32 @@ table {
   table-layout: fixed;
   background: #fff;
 }
+.section {
+  border-top: 1px solid #ddd;
+}
 td {
   overflow: hidden;
-  border-bottom: 1px solid #f2f2f2;
-  border-left: 2px solid #e8e8e8;
   padding: 8px 10px;
   text-align: left;
   position: relative;
   vertical-align: top;
 }
-td.label {
+.label {
   color: #666;
   text-align: right;
   padding-left: 0;
-  border-left: 0;
+}
+.header {
+  background: #333;
+  color: #fff;
+  padding: 3px 8px;
 }
 
 input, .output {
   font-family: 'Droid Sans Mono', monospace;
   font-size: 15px;
   letter-spacing: 1px;
-  padding: 2px;
+  padding: 3px 5px;
   border: 1px solid transparent;
   overflow: hidden;
   width: 100%;
@@ -79,20 +84,24 @@ input {
   background: #f8f2d9;
   border-color: #f8f2d9;
 }
-.given .output {
-  background: #e1ebe9;
-  border-color: #e1ebe9;
+.user .output {
+  background: #e1ebf4;
+  border-color: #e1ebf4;
+}
+.formatted .output {
+  background: #eee;
+  border-color: #eee;
 }
 .cursor {
   border: 1px solid #ad4246;
   margin: 0 -1px;
 }
 .output.original {
-  border: 1px dotted #89a1b0;
+  border: 1px solid #a5c2d4;
 }
 .output.active {
-  background: #d1e9ee;
-  border: 1px solid #bcd2d6;
+  border-color: #77a86a;
+  background: #ecf4dd;
 }
 .output.active .cursor {
   animation: blinker 1.0s ease-out infinite;
@@ -108,22 +117,22 @@ td button {
   font-family: sans-serif;
   font-size: 13px;
   padding: 1px 3px 3px;
-  background: #eee;
+  background: #e1ebf4;
   color: #666;
-  border: 2px solid #eee;
+  border: 2px solid #e1ebf4;
   border-radius: 3px;
   cursor: pointer;
   outline: none;
 }
 td button:hover {
-  background: #e4e4e4;
+  background: #e1ebf4;
   color: #222;
-  border-color: #c0be9e;
+  border-color: #ccc;
 }
 td button.active, td button.active:hover {
-  background: #c9c9c1;
-  color: #111;
-  border-color: #c9c9c1;
+  background: #ccc;
+  color: #000;
+  border-color: #ccc;
   cursor: default;
 }
 
@@ -131,8 +140,8 @@ td button.active, td button.active:hover {
   margin-bottom: 10px;
 }
 .scoreItem .output {
-  background: #deded5;
-  border-color: #deded5;
+  background: #eee;
+  border-color: #eee;
 }
 .scoreItem .score {
   margin-left: 4px;

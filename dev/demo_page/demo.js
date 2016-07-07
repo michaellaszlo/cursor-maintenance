@@ -166,7 +166,7 @@ var CursorMaintenanceDemo = (function () {
     scrollTo(0, 0);
 
     // Add expander widgets to note sections. Notes are collapsed by default.
-    NoteExpander.enableByTagAndClass(document, 'div', 'notes', true);
+    NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
 
   return {
