@@ -17,7 +17,7 @@ a {
   color: #1e74b1;
 }
 a:hover {
-  color: #47975d;
+  color: #08a203;
   border-bottom: 1px solid;
 }
 
@@ -44,17 +44,23 @@ p {
 input, textarea {
   font-size: 16px;
   outline: none;
-  border: 2px solid #aaa;
+  border: 2px solid #b7c7d8;
   border-radius: 3px;
   padding: 4px 6px;
-  background: #fbfbfb;
-  color: #666;
+  background: #fff;
+  color: #444;
 }
 
 input:focus, textarea:focus {
-  border: 2px solid #666;
+  border: 2px solid #33547d;
   background: #fff;
-  color: #333;
+  color: #222;
+}
+#flexibleCode {
+  border-color: #bbd8c2;
+}
+#flexibleCode:focus {
+  border-color: #367d4e;
 }
 
 input {

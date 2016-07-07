@@ -62,6 +62,7 @@ var CursorMaintenanceDemo = (function () {
     toggleBox.className = 'toggle';
     toggleBox.onclick = function () {
       if (!input.status.formatting) {
+        saved.text = null;
         input.status.formatting = true;
         this.className += ' active';
         toggleBox.innerHTML = messages.formatting.on;
@@ -136,7 +137,15 @@ var CursorMaintenanceDemo = (function () {
     setMaintainer(document.getElementById('flexibleInput'),
         makeFlexibleMaintainer(document.getElementById('flexibleCode')));
 
-    // An illustrative formatting function for the retrospective approach.
+    // Fill input and code box with sample content.
+    document.getElementById('commatizeInput').value = '3171814';
+    document.getElementById('commatizeInput').click();
+    document.getElementById('trimifyInput').value =
+        "\"Other maps are such shapes, with their islands and capes! / " +
+        "   But we've got our brave Captain to thank / " +
+        "(So the crew would protest) \"that he's bought us the best— / " +
+        "   A perfect and absolute blank!\"";
+    document.getElementById('trimifyInput').click();
     document.getElementById('flexibleCode').value = "function (s) {\n" +
         "  // Comma-separated dollar amount with unlimited cent precision.\n" +
         "  var decimalPos, whole, fraction, start, groups, i;\n" +
@@ -158,11 +167,12 @@ var CursorMaintenanceDemo = (function () {
         "      '' : '.' + s.substring(decimalPos));\n" +
         "  return '$' + s;\n" +
         "}"
+    document.getElementById('flexibleInput').value = '29031.925';
     document.getElementById('flexibleInput').click();
     document.getElementById('flexibleInput').blur();
 
     // The page position may have been changed by focus events as the input
-    //  fields were initialized, so let's reset to the upper left corner.
+    //  fields were initialized. Let's reset to the upper left corner.
     scrollTo(0, 0);
 
     // Add expander widgets to note sections. Notes are collapsed by default.

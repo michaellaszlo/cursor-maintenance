@@ -152,6 +152,7 @@ var CursorMaintenanceComparison = (function () {
                 { parent: cell, className: 'output' });
         if (approach == 'userText') {
           inputs[operation] = make('input', { parent: cell, type: 'text',
+              spellcheck: false,
               maxLength: inputMaxLengths[operation] });
           output.className += ' original';
           cell.style.minWidth = cellMinWidths[operation] + 'px';

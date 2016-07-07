@@ -11,8 +11,8 @@
 <link rel="stylesheet" href="../note_expander/note_expander.css">
 <link rel="stylesheet" href="comparison.css">
 
-<script src="../note_expander/note_expander.js"></script>
 <script src="../cursor_maintainer.js"></script>
+<script src="../note_expander/note_expander.js"></script>
 <script src="comparison.js"></script>
 
 </head>
@@ -23,22 +23,23 @@
 
 <div class="notes">
 
-<p> This page shows the effects of several attempts at <a href="">cursor
+<p> This page shows the effects of several approaches to <a href="">cursor
 maintenance</a> on two formatting operations, <em>commatize</em> and
-<em>specify</em>. You can specify the input text for each formatting
-operation by editing the input field at the top of the respective column
-in the following table. You can also move the cursor to the position of
-your choosing.
+<em>trimify</em>. You can alter the input text and cursor position
+in the input field below the name of each formatting operation in the
+following table.
 
-<p> The result of the formatting operation is displayed immediately below
-the input field. The remaining cells show the cursor positions computed by
-the various implementations of cursor maintenance. The <em>ad hoc</em>,
-<em>mock cursor</em>, and <em>meta</em> implementations only return a
-new cursor position. The retrospective approach is implemented using two
-formulas, <em>split Levenshtein</em> and <em>balanced frequencies</em>,
-which return a numerical score for every possible cursor position in the
-formatted text. To view the scores computed by a retrospective formula,
-click on the button labeled "scores" in the respective result cell.
+<p> The result of the formatting operation is displayed below the input
+field. The remaining cells show the cursor positions computed by various
+implementations of cursor maintenance.
+
+<p> The <em>ad hoc</em>, <em>mock cursor</em>, and <em>meta</em>
+implementations only return a new cursor position. The retrospective
+approach returns a numerical score for every possible cursor position
+in the formatted text. To view the scores computed by one of the
+retrospective formulas, <em>split Levenshtein</em> and <em>balanced
+frequencies</em>, click on the "scores" button next to the respective
+result cell.
 
 </div>
 
