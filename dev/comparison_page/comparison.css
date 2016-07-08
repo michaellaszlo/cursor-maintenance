@@ -40,15 +40,19 @@ table {
   table-layout: fixed;
   background: #fff;
 }
-.section {
-  border-top: 1px solid #ddd;
-}
 td {
   overflow: hidden;
-  padding: 8px 10px;
+  padding: 10px;
   text-align: left;
   position: relative;
   vertical-align: top;
+}
+.sectionBegin td {
+  border-top: 1px solid #ccc;
+  padding-top: 15px;
+}
+.sectionEnd td {
+  padding-bottom: 15px;
 }
 .label {
   color: #666;
@@ -135,8 +139,12 @@ td button.active, td button.active:hover {
   cursor: default;
 }
 
+#scores td {
+  border-top: 1px dotted #ccc;
+  padding-top: 20px;
+}
 .scoreItem {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 .scoreItem .output {
   background: #eee;
