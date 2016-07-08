@@ -142,7 +142,7 @@ var CursorMaintenanceDemo = (function () {
     document.getElementById('commatizeInput').click();
     document.getElementById('trimifyInput').value =
         "\"Other maps are such shapes, with their islands and capes! / " +
-        "   But we've got our brave Captain to thank / " +
+        "   But we've got our brave Captain to thank\" / " +
         "(So the crew would protest) \"that he's bought us the best— / " +
         "   A perfect and absolute blank!\"";
     document.getElementById('trimifyInput').click();
