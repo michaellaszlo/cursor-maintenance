@@ -7,7 +7,7 @@
   cursor: pointer;
   width: 10%;
   max-width: 30px;
-  padding: 5px 0;
+  padding: 3px 0;
   text-align: center;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -27,7 +27,6 @@
 }
 .expander-content {
   width: 90%;
-  padding: 0 10px;
   border-radius: 5px;
   border-top-left-radius: 0;
   background: #f4f4f4;
