@@ -23,7 +23,7 @@ a:hover {
 }
 
 h1 {
-  color: #555;
+  color: #777;
 }
 
 .notes {
@@ -140,7 +140,7 @@ td button.active, td button.active:hover {
 }
 
 #scores td {
-  border-top: 1px dotted #ccc;
+  border-top: 1px solid #eee;
   padding-top: 20px;
 }
 .scoreItem {

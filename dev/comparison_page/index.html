@@ -23,23 +23,23 @@
 
 <div class="notes">
 
-<p> This page shows the effects of several approaches to <a href="">cursor
-maintenance</a> on two formatting operations, <em>commatize</em> and
-<em>trimify</em>. You can alter the input text and cursor position
-in the input field below the name of each formatting operation in the
-following table.
+<p> This page displays the performance of several approaches to
+<a href="">cursor maintenance</a> on two formatting operations,
+<em>commatize</em> and <em>trimify</em>.
 
-<p> The result of the formatting operation is displayed below the input
-field. The remaining cells show the cursor positions computed by various
-implementations of cursor maintenance.
+<p> You can alter the input text and cursor position for each
+formatting operation in the corresponding input field, in the row labeled
+"before". The result of the formatting operation is displayed in the next
+cell down, in the row labeled "after". The next five cells show the cursor
+positions computed by various implementations of cursor maintenance.
 
 <p> The <em>ad hoc</em>, <em>mock cursor</em>, and <em>meta</em>
 implementations only return a new cursor position. The retrospective
-approach returns a numerical score for every possible cursor position
-in the formatted text. To view the scores computed by one of the
-retrospective formulas, <em>split Levenshtein</em> and <em>balanced
-frequencies</em>, click on the "scores" button next to the respective
-result cell.
+approach, which is implemented here with two scoring formulas called
+<em>split Levenshtein</em> and <em>balanced frequencies</em>, returns
+a numerical score for every possible cursor position in the formatted
+text. To view the scores computed by a formula, click on "scores" next
+to the corresponding result cell.
 
 </div>
 
@@ -53,11 +53,11 @@ result cell.
 </tr>
 
 <tr class="outputs user">
-  <td class="label"> user text </td>
+  <td class="label"> before </td>
 </tr>
 
 <tr class="outputs formatted sectionEnd">
-  <td class="label"> formatted text </td>
+  <td class="label"> after </td>
 </tr>
 
 <tr class="outputs sectionBegin">

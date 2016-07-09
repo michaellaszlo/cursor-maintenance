@@ -26,9 +26,10 @@
 <div class="notes">
 
 <p> This page demonstrates two approaches to maintaining cursor position
-in a text input field that formats its contents in real time. The goal
-is to position the cursor in newly formatted text so as to minimize user
-surprise.
+in a text input field that formats its contents in real time. Whenever
+a formatting operation alters the text, the cursor position must be
+reconsidered. The goal of cursor maintenance is to place the cursor in
+a position that minimizes user surprise.
 
 <p> The problem of cursor maintenance is discussed in a <a
 href="">detailed article</a>.
@@ -55,9 +56,9 @@ strings containing other characters are rejected by a validation
 function that runs before the formatting operation. Commatize displays
 a non-negative integer with commas separating groups of three digits.
 
-<p> Trimify is applicable to any text, so the input is not validated
-before formatting. Trimify removes whitespace from the beginning of the
-text, then condenses all other whitespace sequences to one space each.
+<p> Trimify is applicable to any text. The input is not validated before
+formatting. Trimify removes whitespace from the beginning of the text,
+then condenses all other whitespace sequences to one space each.
 
 </div>
 
@@ -76,19 +77,21 @@ text, then condenses all other whitespace sequences to one space each.
 
 <div class="notes">
 
-<p> In the retrospective approach, we calculate a new cursor position
-by comparing the new text to the old text and cursor. We only consider
-the current instance of text formatting. Thus, any formatting operation
-can be used without modification.
+<p> In retrospective cursor maintenance, we calculate a cursor position by
+comparing the formatted text to the original text and cursor position. We
+only consider the current instance of text formatting. Thus, there is
+no need to modify the formatting operation or even to know what it does
+in general.
 
 <p> You can define a formatting operation to be used in the following
 input field by inserting a JavaScript function into the editable code
-box below. Any function that takes a string argument and returns a string
-is formally valid as a formatting operation.
+box below. To serve as a formatting operation, the function must take
+a string argument and return a string.
 
-<p> The retrospective formula used here computes the ratios of individual
-character frequencies to the left and right of the cursor in the old
-text, then tries to achieve similar ratios in the new text using a
+<p> The retrospective scoring formula used here is called <em>balanced
+frequencies</em>. It computes the ratios of individual character
+frequencies to the left and right of the cursor in the original text,
+then tries to achieve similar ratios in the formatted text using a
 least-squares fit.
 
 </div>

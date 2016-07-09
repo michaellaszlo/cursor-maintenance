@@ -32,8 +32,8 @@ var CursorMaintenanceComparison = (function () {
           formattedText = CM.format[operation](originalText).text,
           maintainer;
       // Echo input. Show formatted text without cursor.
-      setOutput(outputs[operation].userText, originalText, originalCursor);
-      setOutput(outputs[operation].formattedText, formattedText);
+      setOutput(outputs[operation].before, originalText, originalCursor);
+      setOutput(outputs[operation].after, formattedText);
       // Show text formatted with cursor maintenance.
       Object.keys(outputs[operation]).forEach(function (approach) {
         var result;
@@ -52,12 +52,12 @@ var CursorMaintenanceComparison = (function () {
         activeInputMirror.className =
             activeInputMirror.className.replace(/\s*active\s*/g, '');
       }
-      activeInputMirror = outputs[operation].userText;
+      activeInputMirror = outputs[operation].before;
       activeInputMirror.className += ' active';
     }
     input.onblur = function () {
-      outputs[operation].userText.className =
-          outputs[operation].userText.className.replace(/\s*active\s*/g, '');
+      outputs[operation].before.className =
+          outputs[operation].before.className.replace(/\s*active\s*/g, '');
     };
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
@@ -150,7 +150,7 @@ var CursorMaintenanceComparison = (function () {
             cell = make('td', { parent: row }),
             output = outputs[operation][approach] = make('span',
                 { parent: cell, className: 'output' });
-        if (approach == 'userText') {
+        if (approach == 'before') {
           inputs[operation] = make('input', { parent: cell, type: 'text',
               spellcheck: false,
               maxLength: inputMaxLengths[operation] });
