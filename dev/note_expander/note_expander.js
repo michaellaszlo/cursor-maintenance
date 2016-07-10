@@ -3,10 +3,20 @@ var NoteExpander = (function () {
 
   // Collapse all notes. Add an expander widget to each note section.
   function makeExpanderAction(container, columns, content) {
+    var snippet = content.snippet,
+        parts = [],
+        n = snippet.length,
+        x, i;
+    for (i = 0; i < n; ++i) {
+      x = Math.floor(255 * i / n);
+      parts.push('<span style="color: rgb(' + x + ', ' + x + ', ' + x + ')">' +
+          snippet.charAt(i) + '</span>');
+    }
+    snippet = parts.join('');
     return function () {
       if (container.className.indexOf('expander-collapsed') == -1) {
         container.className += ' expander-collapsed';
-        columns.content.innerHTML = content.snippet;
+        columns.content.innerHTML = snippet;
       } else {
         container.className = container.className.replace(
             /\s+expander-collapsed/, '');
