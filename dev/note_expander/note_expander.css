@@ -1,7 +1,12 @@
+.expander-collapsed {
+  position: relative;
+}
+
 .expander-button, .expander-content {
   display: inline-block;
   height: 100%;
 }
+
 .expander-button {
   float: left;
   cursor: pointer;
@@ -17,6 +22,7 @@
 .expander-collapsed .expander-button {
   background: #eee;
 }
+
 .expander-icon {
   display: inline-block;
   transform: rotate(-90deg);
@@ -25,6 +31,7 @@
 .expander-collapsed .expander-icon {
   transform: rotate(0);
 }
+
 .expander-content {
   width: 90%;
   border-radius: 5px;
@@ -39,4 +46,15 @@
 .expander-collapsed .expander-content {
   background: transparent;
   color: #bbb;
+}
+
+.expander-fog {
+  pointer-events: none;
+  display: none;
+  position: absolute;
+  top: 0;
+  border: 1px solid orange;
+}
+.expander-collapsed .expander-fog {
+  display: block;
 }
