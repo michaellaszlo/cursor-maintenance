@@ -1,25 +1,28 @@
 var NoteExpander = (function () {
   'use strict';
 
-  function makeExpanderAction(button, content) {
+  function makeExpanderAction(wrapper, button, content) {
     return function () {
-      console.log(content.className);
-      if (content.className.indexOf('expander-collapsed') == -1) {
-        content.className += ' expander-collapsed';
+      console.log(wrapper.className);
+      if (wrapper.className.indexOf('expander-collapsed') == -1) {
+        wrapper.className += ' expander-collapsed';
       } else {
-        content.className = content.className.replace(
+        wrapper.className = wrapper.className.replace(
             /\s+expander-collapsed/, '');
       }
     }
   }
 
   function enable(content, doNotCollapse) {
-    var button = document.createElement('div');
+    var wrapper = document.createElement('div'),
+        button = document.createElement('div');
     button.className = 'expander-button';
     button.innerHTML = '<span class="expander-icon">&#x22ef;</span>';
     content.className = 'expander-content';
-    content.parentNode.insertBefore(button, content);
-    button.onclick = makeExpanderAction(button, content);
+    content.parentNode.insertBefore(wrapper, content);
+    wrapper.appendChild(content);
+    wrapper.appendChild(button);
+    button.onclick = makeExpanderAction(wrapper, button, content);
     button.click();
     if (doNotCollapse) {
       button.click();
