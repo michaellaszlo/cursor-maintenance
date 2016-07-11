@@ -2,15 +2,13 @@ var NoteExpander = (function () {
   'use strict';
 
   function makeExpanderAction(wrapper, button, content) {
-    var fog = document.createElement('canvas');
+    var fog = document.createElement('div');
     fog.className = 'expander-fog';
     wrapper.appendChild(fog);
     return function () {
       if (wrapper.className.indexOf('expander-collapsed') == -1) {
         wrapper.className += ' expander-collapsed';
         content.style.height = fog.style.height = button.offsetHeight + 'px';
-        fog.style.width = content.offsetWidth - button.offsetWidth + 'px';
-        fog.style.left = button.offsetWidth + 'px';
       } else {
         wrapper.className = wrapper.className.replace(
             /\s+expander-collapsed/, '');

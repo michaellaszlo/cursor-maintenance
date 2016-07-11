@@ -45,15 +45,18 @@
 }
 .expander-collapsed .expander-content {
   background: transparent;
-  color: #bbb;
+  color: #999;
 }
 
 .expander-fog {
   pointer-events: none;
   display: none;
   position: absolute;
+  left: 30px;
   top: 0;
-  border: 1px solid orange;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, white 50%);
 }
 .expander-collapsed .expander-fog {
   display: block;
