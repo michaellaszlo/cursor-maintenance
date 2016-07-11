@@ -3,12 +3,13 @@ var NoteExpander = (function () {
 
   function makeExpanderAction(wrapper, button, content) {
     return function () {
-      console.log(wrapper.className);
       if (wrapper.className.indexOf('expander-collapsed') == -1) {
         wrapper.className += ' expander-collapsed';
+        content.style.height = button.offsetHeight + 'px';
       } else {
         wrapper.className = wrapper.className.replace(
             /\s+expander-collapsed/, '');
+        content.style.height = '';
       }
     }
   }
