@@ -764,6 +764,31 @@ means that the cost of computing the left-right ratios for all cursor
 positions is within a constant factor of the length of the text.
 
 
+## The layer approach
+
+The retrospective approach with character frequencies, although easy to
+implement and generally accurate, can occasionally arrive at puzzling
+decisions. Consider a dynamically `commatize`d input field that is
+currently in this state:
+
+  1^00,900
+
+The user enters a `0`:
+
+  10^00,900
+
+According to retrospection with character frequencies, the optimum result
+is this:
+
+  1^,000,900
+
+The user expects this:
+
+  1,0^00,900
+
+Where did the retrospective formula go wrong?
+
+
 ## Summary
 
 I haven't found a fully satisfying approach to the problem of

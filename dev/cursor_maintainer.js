@@ -367,6 +367,11 @@ var CursorMaintainer = (function () {
   };
 
 
+  //--- Layer: seek the closest cursor ratio in a fixed subset of characters.
+  layer = {};
+
+
+
   return {
     format: format,
     adHoc: adHoc,
@@ -375,6 +380,7 @@ var CursorMaintainer = (function () {
     splitLevenshtein: retrospective.splitLevenshtein,
     balancedFrequencies: retrospective.balancedFrequencies,
     costBalancedFrequencies: costBalancedFrequencies,
-    makeRetrospective: makeRetrospective
+    makeRetrospective: makeRetrospective,
+    priorityLayer: priorityLayer
   };
 })();
