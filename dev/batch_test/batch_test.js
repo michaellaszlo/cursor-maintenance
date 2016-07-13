@@ -11,14 +11,16 @@ var BatchTestCursorMaintenance = (function () {
     CM = CursorMaintainer;
 
     [ //'format',
-      'adHoc',
-      'mockCursor',
-      'meta',
-      //'splitLevenshtein', 'balancedFrequencies'
+      //'adHoc',
+      //'mockCursor',
+      //'meta',
+      //'splitLevenshtein',
+      //'balancedFrequencies',
+      'layer'
     ].forEach(function (approach) {
       print('-----', approach);
       test = new Test(CM[approach]);
-      test.run();
+      test.run('commatize');
     });
     //(new Test()).display('commatize', false);
   }

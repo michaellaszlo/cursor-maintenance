@@ -5,7 +5,8 @@ var CursorMaintainer = (function () {
       adHoc,
       mockCursor,
       meta,
-      retrospective;
+      retrospective,
+      layer;
 
 
   //--- Plain formatting operations. No cursor involved.
@@ -367,9 +368,39 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Layer: seek the closest cursor ratio in a fixed subset of characters.
+  //--- Layer: seek the closest cursor ratio in a subset of characters.
   layer = {};
 
+  function makeLayer(testers, format) {
+    return function (original, cursor) {
+      var formatted = format(original).text,
+          originalLeft,
+          originalTotal,
+          originalRatio,
+          rank,
+          tester,
+          i;
+      for (rank = 0; rank < testers.length; ++rank) {
+        tester = testers[rank];
+        originalLeft = originalTotal = 0;
+        for (i = 0; i < original.length; ++i) {
+          if (tester.test(original.charAt(i))) {
+            ++originalTotal;
+            if (i < cursor) {
+              ++originalLeft;
+            }
+          }
+        }
+        print(original, '->', formatted);
+        print('original:', originalLeft, '/', originalTotal);
+      }
+      return { text: formatted, cursor: cursor };
+    };
+  }
+
+  layer.commatize = makeLayer([ /\d/ ], format.commatize);
+
+  layer.trimify = makeLayer([ /\S/ ], format.trimify);
 
 
   return {
@@ -381,6 +412,7 @@ var CursorMaintainer = (function () {
     balancedFrequencies: retrospective.balancedFrequencies,
     costBalancedFrequencies: costBalancedFrequencies,
     makeRetrospective: makeRetrospective,
-    priorityLayer: priorityLayer
+    layer: layer,
+    makeLayer: makeLayer
   };
 })();
