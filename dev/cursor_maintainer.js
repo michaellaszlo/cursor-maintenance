@@ -337,7 +337,7 @@ var CursorMaintainer = (function () {
     return cost;
   }
 
-  function makeRetrospective(costFunction, format) {
+  retrospective.make = function (costFunction, format) {
     return function (original, cursor) {
       var formatted = format(original).text,
           bestCost = costFunction(original, cursor, formatted, 0),
@@ -358,20 +358,20 @@ var CursorMaintainer = (function () {
   }
 
   retrospective.splitLevenshtein = {
-    commatize: makeRetrospective(costSplitLevenshtein, format.commatize),
-    trimify: makeRetrospective(costSplitLevenshtein, format.trimify)
+    commatize: retrospective.make(costSplitLevenshtein, format.commatize),
+    trimify: retrospective.make(costSplitLevenshtein, format.trimify)
   };
 
   retrospective.balancedFrequencies = {
-    commatize: makeRetrospective(costBalancedFrequencies, format.commatize),
-    trimify: makeRetrospective(costBalancedFrequencies, format.trimify)
+    commatize: retrospective.make(costBalancedFrequencies, format.commatize),
+    trimify: retrospective.make(costBalancedFrequencies, format.trimify)
   };
 
 
   //--- Layer: seek the closest cursor ratio in a subset of characters.
   layer = {};
 
-  function makeLayer(testers, format, preferRight) {
+  layer.make = function (testers, format, preferRight) {
     return function (original, cursor) {
       var originalCount, originalTotal, originalRatio,
           formattedCounts, formattedTotal, formattedRatio,
@@ -454,9 +454,9 @@ var CursorMaintainer = (function () {
     };
   }
 
-  layer.commatize = makeLayer([ /\d/ ], format.commatize);
+  layer.commatize = layer.make([ /\d/ ], format.commatize);
 
-  layer.trimify = makeLayer([ /\S/ ], format.trimify, true);
+  layer.trimify = layer.make([ /\S/ ], format.trimify, true);
 
 
   return {
@@ -467,8 +467,7 @@ var CursorMaintainer = (function () {
     splitLevenshtein: retrospective.splitLevenshtein,
     balancedFrequencies: retrospective.balancedFrequencies,
     costBalancedFrequencies: costBalancedFrequencies,
-    makeRetrospective: makeRetrospective,
-    layer: layer,
-    makeLayer: makeLayer
+    retrospective: retrospective,
+    layer: layer
   };
 })();

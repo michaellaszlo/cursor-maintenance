@@ -89,7 +89,7 @@ var CursorMaintenanceDemo = (function () {
         defaultResult,
         result,
         costFunction = CursorMaintainer.costBalancedFrequencies,
-        makeRetrospective = CursorMaintainer.makeRetrospective,
+        makeRetrospective = CursorMaintainer.retrospective.make,
         maintainer = null;
     function wrappedFormatter(text, cursor) {
       return { text: plainFormatter(text), cursor: cursor };
