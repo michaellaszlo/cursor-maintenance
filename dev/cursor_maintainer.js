@@ -373,81 +373,81 @@ var CursorMaintainer = (function () {
 
   function makeLayer(testers, format) {
     return function (original, cursor) {
-      var formatted = format(original).text,
-          originalLeft,
-          originalTotal,
-          originalRatio,
-          formattedLefts,
-          formattedTotal,
-          formattedRatio,
-          delta,
-          bestDelta,
-          bestFormattedRatio,
-          bestCursorLeft,
-          bestCursorRight,
-          rank,
-          tester,
-          pos;
+      var originalCount, originalTotal, originalRatio,
+          formattedCounts, formattedTotal, formattedRatio,
+          delta, bestDelta, bestFormattedRatio,
+          rank, tester, pos,
+          bestLeft, bestRight,
+          formatted = format(original).text,
+          left = 0,
+          right = formatted.length;
+      if (right == 0) {
+        return { text: '', cursor: 0 };
+      }
       for (rank = 0; rank < testers.length; ++rank) {
         tester = testers[rank];
         // Scan the original text, counting current layer characters.
-        originalLeft = 0;
+        originalCount = 0;
         originalTotal = 0;
         for (pos = 0; pos < original.length; ++pos) {
           if (tester.test(original.charAt(pos))) {
             ++originalTotal;
             // We only need the ratio for the original cursor position.
             if (pos < cursor) {
-              ++originalLeft;
+              ++originalCount;
             }
           }
         }
-        print();
-        print(original, '->', formatted);
-        print('original:', originalLeft, '/', originalTotal);
+        //print();
+        //print(original, '->', formatted);
+        //print('original:', originalCount, '/', originalTotal);
         // Bail out if the original text has no layer characters.
         if (originalTotal == 0) {
           continue;
         }
         // Compute the original cursor's ratio in the current layer.
-        originalRatio = originalLeft / originalTotal;
+        originalRatio = originalCount / originalTotal;
         // Scan the formatted text and store the layer count at each position.
-        formattedLefts = new Array(formatted.length + 1);
-        formattedLefts[0] = 0;
+        formattedCounts = new Array(formatted.length + 1);
+        formattedCounts[0] = 0;
         formattedTotal = 0;
         for (pos = 0; pos < formatted.length; ++pos) {
           if (tester.test(formatted.charAt(pos))) {
             ++formattedTotal;
           }
-          formattedLefts[pos + 1] = formattedTotal;
+          formattedCounts[pos + 1] = formattedTotal;
         }
         // Bail out if the formatted text has no layer characters.
         if (formattedTotal == 0) {
           continue;
         }
         // Scan the layer counts to compute the ratio at each cursor position.
-        // At position 0, the ratio is 0 and the delta is the original ratio.
-        bestFormattedRatio = 0;
-        bestDelta = originalRatio;
-        bestCursorLeft = 0;
-        bestCursorRight = 0;
-        for (pos = 1; pos <= formatted.length; ++pos) {
-          formattedRatio = formattedLefts[pos] / formattedTotal;
+        // Keep track of the closest ratio and the indices where it occurs.
+        bestFormattedRatio = formattedCounts[left] / formattedTotal;
+        bestDelta = Math.abs(originalRatio - bestFormattedRatio);
+        bestLeft = bestRight = left;
+        for (pos = left + 1; pos <= right; ++pos) {
+          formattedRatio = formattedCounts[pos] / formattedTotal;
           delta = Math.abs(originalRatio - formattedRatio);
           if (delta == bestDelta) {
-            bestCursorRight = pos;
+            bestRight = pos;
           } else if (delta < bestDelta) {
             bestFormattedRatio = formattedRatio;
             bestDelta = delta;
-            bestCursorLeft = pos;
-            bestCursorRight = pos;
+            bestLeft = bestRight = pos;
           }
         }
-        print('originalRatio', originalRatio);
-        print('bestFormattedRatio', bestFormattedRatio);
-        print('[' + bestCursorLeft + ', ' + bestCursorRight + ']');
+        //print('originalRatio', originalRatio);
+        //print('bestFormattedRatio', bestFormattedRatio);
+        //print('[' + bestLeft + ', ' + bestRight + ']');
+        if (bestLeft == bestRight) {
+          break;
+        }
+        // If there is a tie shrink the range for the next layer.
+        left = bestLeft;
+        right = bestRight;
       }
-      return { text: formatted, cursor: cursor };
+      return { text: formatted, cursor: bestLeft };
     };
   }
 

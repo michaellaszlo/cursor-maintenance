@@ -20,7 +20,7 @@ var BatchTestCursorMaintenance = (function () {
     ].forEach(function (approach) {
       print('-----', approach);
       test = new Test(CM[approach]);
-      test.run('commatize');
+      test.run('trimify');
     });
     //(new Test()).display('commatize', false);
   }
