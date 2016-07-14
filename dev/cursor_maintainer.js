@@ -371,7 +371,7 @@ var CursorMaintainer = (function () {
   //--- Layer: seek the closest cursor ratio in a subset of characters.
   layer = {};
 
-  function makeLayer(testers, format) {
+  function makeLayer(testers, format, preferRight) {
     return function (original, cursor) {
       var originalCount, originalTotal, originalRatio,
           formattedCounts, formattedTotal, formattedRatio,
@@ -447,13 +447,16 @@ var CursorMaintainer = (function () {
         left = bestLeft;
         right = bestRight;
       }
+      if (preferRight) {
+        return { text: formatted, cursor: bestRight };
+      }
       return { text: formatted, cursor: bestLeft };
     };
   }
 
   layer.commatize = makeLayer([ /\d/ ], format.commatize);
 
-  layer.trimify = makeLayer([ /\S/ ], format.trimify);
+  layer.trimify = makeLayer([ /\S/ ], format.trimify, true);
 
 
   return {
