@@ -777,16 +777,20 @@ The user enters a `0`:
 
   10^00,900
 
+The text `1000,900` is formatted to `1,000,900`. The user expects to
+see this:
+
+  1,0^00,900
+
 According to retrospection with character frequencies, the optimum result
 is this:
 
   1^,000,900
 
-The user expects this:
-
-  1,0^00,900
-
-Where did the retrospective formula go wrong?
+The trouble is that the retrospective formula does not discriminate
+between commas and digits. The comma ratio around the cursor was 0:1
+in the user text, so a 0:2 comma ratio in the formatted text earns more
+points than the 1:2 comma ratio that the user expects.
 
 
 ## Summary
