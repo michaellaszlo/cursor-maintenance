@@ -51,6 +51,7 @@ input, textarea {
   padding: 4px 6px;
   background: #fff;
   color: #444;
+  display: block;
 }
 
 input:focus, textarea:focus {
