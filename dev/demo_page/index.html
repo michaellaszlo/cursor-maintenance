@@ -102,6 +102,31 @@ least-squares fit.
 <textarea id="flexibleCode" spellcheck="false" class="code"></textarea>
 
 
+<h2> Layer approach </h2>
+
+<div class="notes">
+
+<p> In the layer approach, we define one or more character layers. Given
+a layer and a piece of text, we count the number of characters in the
+text that belong to the layer. For a given cursor position, we count
+the layer characters to the left of the cursor and divide this number
+by the total number of layer characters. The result is what we call the
+layer ratio at that cursor position in the text.
+
+<p> The layer-based cursor-maintenance algorithm seeks the cursor
+position in the formatted text whose layer ratio comes closest to that
+of the original cursor in the original text. In the event of a tie,
+the algorithm moves on to the next layer and compares the layer ratios
+of the tied cursor positions. This continues until either the range of
+optimal cursor positions is reduced to one or there are no more layers.
+
+<p> If the algorithm runs out of layers and there are still several
+optimal cursor positions, it chooses the leftmost by default. We can
+optionally specify that the rightmost cursor position is to be picked
+in all such cases.
+
+
+
 </div><!--end wrapper -->
 </body>
 </html>
