@@ -133,9 +133,14 @@ var CursorMaintenanceDemo = (function () {
         CursorMaintainer.meta.trimify);
 
     // Retrospective approach with balanced frequencies applied to a
-    //  user-supplied formatting function. No input validation.
+    //  user-defined formatting function. No input validation.
     setMaintainer(document.getElementById('retrospectiveInput'),
         makeFlexibleMaintainer(document.getElementById('retrospectiveCode')));
+
+    // Layer approach applied to a user-defined formatting function.
+    //  No input validation.
+    setMaintainer(document.getElementById('layerInput'),
+        makeFlexibleMaintainer(document.getElementById('layerCode')));
 
     // Fill input and code box with sample content.
     document.getElementById('commatizeInput').value = '3171814';
@@ -169,7 +174,12 @@ var CursorMaintenanceDemo = (function () {
         "}"
     document.getElementById('retrospectiveInput').value = '29031.925';
     document.getElementById('retrospectiveInput').click();
-    document.getElementById('retrospectiveInput').blur();
+    document.getElementById('layerCode').value =
+        document.getElementById('retrospectiveCode').value;
+    document.getElementById('layerInput').value =
+        document.getElementById('retrospectiveInput').value;
+    document.getElementById('layerInput').click();
+    document.getElementById('layerInput').blur();
 
     // The page position may have been changed by focus events as the input
     //  fields were initialized. Let's reset to the upper left corner.
