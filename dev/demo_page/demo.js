@@ -134,8 +134,8 @@ var CursorMaintenanceDemo = (function () {
 
     // Retrospective approach with balanced frequencies applied to a
     //  user-supplied formatting function. No input validation.
-    setMaintainer(document.getElementById('flexibleInput'),
-        makeFlexibleMaintainer(document.getElementById('flexibleCode')));
+    setMaintainer(document.getElementById('retrospectiveInput'),
+        makeFlexibleMaintainer(document.getElementById('retrospectiveCode')));
 
     // Fill input and code box with sample content.
     document.getElementById('commatizeInput').value = '3171814';
@@ -146,7 +146,7 @@ var CursorMaintenanceDemo = (function () {
         "(So the crew would protest) \"that he's bought us the best— / " +
         "   A perfect and absolute blank!\"";
     document.getElementById('trimifyInput').click();
-    document.getElementById('flexibleCode').value = "function (s) {\n" +
+    document.getElementById('retrospectiveCode').value = "function (s) {\n" +
         "  // Comma-separated dollar amount with unlimited cent precision.\n" +
         "  var decimalPos, whole, fraction, start, groups, i;\n" +
         "  s = s.replace(/[^0-9.]/g, '');\n" +
@@ -167,9 +167,9 @@ var CursorMaintenanceDemo = (function () {
         "      '' : '.' + s.substring(decimalPos));\n" +
         "  return '$' + s;\n" +
         "}"
-    document.getElementById('flexibleInput').value = '29031.925';
-    document.getElementById('flexibleInput').click();
-    document.getElementById('flexibleInput').blur();
+    document.getElementById('retrospectiveInput').value = '29031.925';
+    document.getElementById('retrospectiveInput').click();
+    document.getElementById('retrospectiveInput').blur();
 
     // The page position may have been changed by focus events as the input
     //  fields were initialized. Let's reset to the upper left corner.

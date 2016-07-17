@@ -59,11 +59,11 @@ input:focus, textarea:focus {
   background: #fff;
   color: #222;
 }
-#flexibleCode {
+.code {
   margin-top: 5px;
   border-color: #bbd8c2;
 }
-#flexibleCode:focus {
+.code:focus {
   border-color: #367d4e;
 }
 
