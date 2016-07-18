@@ -93,9 +93,15 @@ textarea {
   max-width: 600px;
   height: 100px;
 }
-textarea.code {
+textarea.code, textarea.layerTester {
   font-family: 'Droid Sans Mono', monospace;
   font-size: 13px;
+}
+textarea.code {
   height: 400px;
+}
+textarea.layerTester {
+  height: 30px;
+  margin-top: 5px;
 }
 
