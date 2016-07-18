@@ -82,29 +82,36 @@ var CursorMaintenanceDemo = (function () {
     return /^[0-9,]*$/.test(text);
   }
 
-  function makeFlexibleMaintainer(codeBox) {
+  function makeFlexibleMaintainer(codeBox, formatterToMaintainer) {
     var code = '',
-        plainFormatter,
+        //plainFormatter,
+        formatter,
         error,
         defaultResult,
         result,
         costFunction = CursorMaintainer.costBalancedFrequencies,
         makeRetrospective = CursorMaintainer.retrospective.make,
         maintainer = null;
-    function wrappedFormatter(text, cursor) {
-      return { text: plainFormatter(text), cursor: cursor };
-    }
+    //function wrappedFormatter(text, cursor) {
+    //  return { text: plainFormatter(text), cursor: cursor };
+    //}
     return function (text, cursor) {
       if (code !== codeBox.value) {
         code = codeBox.value;
         try {
-          plainFormatter = eval('(' + code + ')');
+          //plainFormatter = eval('(' + code + ')');
+          formatter = eval('(' + code + ')');
         } catch (error) {
-          console.log('error in evaluating code: ' + error);
+          console.log('error in evaluating input: ' + error);
         }
         maintainer = null;
-        if (typeof plainFormatter === 'function') {
-          maintainer = makeRetrospective(costFunction, wrappedFormatter);
+        //if (typeof plainFormatter === 'function') {
+        if (typeof formatter === 'function') {
+          //maintainer = makeRetrospective(costFunction, wrappedFormatter);
+          maintainer = formatterToMaintainer(formatter);
+        } else {
+          console.log('input does not yield a function');
+          return;
         }
       }
       defaultResult = { text: text, cursor: cursor };
@@ -139,8 +146,8 @@ var CursorMaintenanceDemo = (function () {
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
-    setMaintainer(document.getElementById('layerInput'),
-        makeFlexibleMaintainer(document.getElementById('layerCode')));
+    //setMaintainer(document.getElementById('layerInput'),
+    //    makeFlexibleMaintainer(document.getElementById('layerCode')));
 
     // Fill input and code box with sample content.
     document.getElementById('commatizeInput').value = '3171814';
