@@ -82,6 +82,9 @@ var CursorMaintenanceDemo = (function () {
     return /^[0-9,]*$/.test(text);
   }
 
+  // makeFlexibleMaintainer evaluates the contents of codeBox to make a
+  //  formatter that lacks cursor maintenance. It then applies
+  //  formatterToMaintainer to obtain a cursor-maintaining formatter.
   function makeFlexibleMaintainer(codeBox, formatterToMaintainer) {
     var code = '',
         //plainFormatter,
@@ -107,7 +110,7 @@ var CursorMaintenanceDemo = (function () {
         maintainer = null;
         //if (typeof plainFormatter === 'function') {
         if (typeof formatter === 'function') {
-          //maintainer = makeRetrospective(costFunction, wrappedFormatter);
+          //maintainer = makeRetrospective(wrappedFormatter, costFunction);
           maintainer = formatterToMaintainer(formatter);
         } else {
           console.log('input does not yield a function');

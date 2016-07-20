@@ -337,7 +337,7 @@ var CursorMaintainer = (function () {
     return cost;
   }
 
-  retrospective.make = function (costFunction, format) {
+  retrospective.make = function (format, costFunction) {
     return function (original, cursor) {
       var formatted = format(original).text,
           bestCost = costFunction(original, cursor, formatted, 0),
@@ -358,20 +358,20 @@ var CursorMaintainer = (function () {
   }
 
   retrospective.splitLevenshtein = {
-    commatize: retrospective.make(costSplitLevenshtein, format.commatize),
-    trimify: retrospective.make(costSplitLevenshtein, format.trimify)
+    commatize: retrospective.make(format.commatize, costSplitLevenshtein),
+    trimify: retrospective.make(format.trimify, costSplitLevenshtein)
   };
 
   retrospective.balancedFrequencies = {
-    commatize: retrospective.make(costBalancedFrequencies, format.commatize),
-    trimify: retrospective.make(costBalancedFrequencies, format.trimify)
+    commatize: retrospective.make(format.commatize, costBalancedFrequencies),
+    trimify: retrospective.make(format.trimify, costBalancedFrequencies)
   };
 
 
   //--- Layer: seek the closest cursor ratio in a subset of characters.
   layer = {};
 
-  layer.make = function (testers, format, preferRight) {
+  layer.make = function (format, testers, preferRight) {
     return function (original, cursor) {
       var originalCount, originalTotal, originalRatio,
           formattedCounts, formattedTotal, formattedRatio,
@@ -454,9 +454,9 @@ var CursorMaintainer = (function () {
     };
   }
 
-  layer.commatize = layer.make([ /\d/ ], format.commatize);
+  layer.commatize = layer.make(format.commatize, [ /\d/ ]);
 
-  layer.trimify = layer.make([ /\S/ ], format.trimify, true);
+  layer.trimify = layer.make(format.trimify, [ /\S/ ], true);
 
 
   return {
