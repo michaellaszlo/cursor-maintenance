@@ -82,10 +82,14 @@ var CursorMaintenanceDemo = (function () {
     return /^[0-9,]*$/.test(text);
   }
 
-  // makeFlexibleMaintainer evaluates the contents of codeBox to make a
-  //  formatter that lacks cursor maintenance. It then applies
-  //  formatterToMaintainer to obtain a cursor-maintaining formatter.
-  function makeFlexibleMaintainer(codeBox, formatterToMaintainer) {
+  // makeFormatterFromInput reads user input from codeBox and evaluates it
+  //  as JavaScript. It is generally thought to be unwise to evaluate
+  //  user-provided code. In our case, the code is read from the browser
+  //  and evaluated in the same browser session. This incurs the same kind
+  //  of risk as the user evaluating arbitrary code in the browser's
+  //  JavaScript console. In both cases, the code is entered by the user and
+  //  only has access to the user's browser.
+  function makeFormatterFromInput(codeBox) {
     var code = '',
         //plainFormatter,
         formatter,
