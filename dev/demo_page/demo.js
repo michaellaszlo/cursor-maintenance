@@ -84,54 +84,42 @@ var CursorMaintenanceDemo = (function () {
 
   // makeFormatterFromInput reads user input from codeBox and evaluates it
   //  as JavaScript. It is generally thought to be unwise to evaluate
-  //  user-provided code. In our case, the code is read from the browser
-  //  and evaluated in the same browser session. This incurs the same kind
-  //  of risk as the user evaluating arbitrary code in the browser's
-  //  JavaScript console. In both cases, the code is entered by the user and
-  //  only has access to the user's browser.
+  //  user-provided code. In our case, the code is evaluated in the
+  //  browser session in which the user entered the code. This incurs the
+  //  same level of risk as the user executing arbitrary code in the
+  //  browser's JavaScript console. In both cases, the code is entered
+  //  voluntarily by the user and is executed only in the user's browser.
   function makeFormatterFromInput(codeBox) {
     var code = '',
-        //plainFormatter,
-        formatter,
-        error,
-        defaultResult,
-        result,
-        costFunction = CursorMaintainer.costBalancedFrequencies,
-        makeRetrospective = CursorMaintainer.retrospective.make,
-        maintainer = null;
-    //function wrappedFormatter(text, cursor) {
-    //  return { text: plainFormatter(text), cursor: cursor };
-    //}
-    return function (text, cursor) {
+        formatter;
+    return function (text) {
+      var error,
+          okay = true;
+      // Check for cached code.
       if (code !== codeBox.value) {
         code = codeBox.value;
+        formatter = null;
         try {
-          //plainFormatter = eval('(' + code + ')');
           formatter = eval('(' + code + ')');
         } catch (error) {
+          okay = false;
           console.log('error in evaluating input: ' + error);
         }
-        maintainer = null;
-        //if (typeof plainFormatter === 'function') {
-        if (typeof formatter === 'function') {
-          //maintainer = makeRetrospective(wrappedFormatter, costFunction);
-          maintainer = formatterToMaintainer(formatter);
-        } else {
+        if (typeof formatter !== 'function') {
+          okay = false;
+          formatter = null;
           console.log('input does not yield a function');
-          return;
+        }
+        if (okay) {
+          codeBox.className = codeBox.className.replace(/\s+error\s*/, ' ');
+        } else {
+          codeBox.className += ' error';
         }
       }
-      defaultResult = { text: text, cursor: cursor };
-      if (maintainer === null) {
-        return defaultResult;
+      if (formatter === null) {
+        return text;
       }
-      try {
-        result = maintainer(text, cursor);
-      } catch (error) {
-        console.log('error in applying format: ' + error);
-        return defaultResult;
-      }
-      return result;
+      return formatter(text);
     };
   }
 
@@ -149,7 +137,9 @@ var CursorMaintenanceDemo = (function () {
     // Retrospective approach with balanced frequencies applied to a
     //  user-defined formatting function. No input validation.
     setMaintainer(document.getElementById('retrospectiveInput'),
-        makeFlexibleMaintainer(document.getElementById('retrospectiveCode')));
+        CursorMaintainer.retrospective.make(
+          makeFormatterFromInput(document.getElementById('retrospectiveCode')),
+          CursorMaintainer.retrospective.costBalancedFrequencies));
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.

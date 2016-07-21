@@ -66,6 +66,9 @@ input:focus, textarea:focus {
 .code:focus {
   border-color: #367d4e;
 }
+.code.error {
+  border-color: #aa0202;
+}
 
 input {
   width: 50%;
