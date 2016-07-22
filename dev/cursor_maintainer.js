@@ -6,6 +6,7 @@ var CursorMaintainer = (function () {
       mockCursor,
       meta,
       retrospective,
+      cost,
       layer;
 
 
@@ -241,6 +242,7 @@ var CursorMaintainer = (function () {
 
   //--- Retrospective: compare the old text and cursor to the new text.
   retrospective = {};
+  cost = retrospective.cost = {};
 
   function levenshtein(s, t) {
     var n = s.length,
@@ -275,12 +277,12 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  function costSplitLevenshtein(s, sCursor, t, tCursor) {
+  cost.splitLevenshtein = function (s, sCursor, t, tCursor) {
     var cursorChar = chooseCursorChar(s + t),
         left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
         right = levenshtein(s.substring(sCursor), t.substring(tCursor));
     return left + right;
-  }
+  };
 
   function getCounts(s, chars) {
     var counts = {},
@@ -322,7 +324,7 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
-  function costBalancedFrequencies(s, sCursor, t, tCursor) {
+  cost.balancedFrequencies = function (s, sCursor, t, tCursor) {
     var chars = getCommonChars(s, t),
         sCounts = leftRightCounts(s, sCursor, chars),
         tCounts = leftRightCounts(t, tCursor, chars),
@@ -335,7 +337,7 @@ var CursorMaintainer = (function () {
       cost += Math.pow(Math.abs(a - b), 2);
     }
     return cost;
-  }
+  };
 
   retrospective.make = function (format, costFunction) {
     return function (original, cursor) {
@@ -355,17 +357,14 @@ var CursorMaintainer = (function () {
       }
       return { text: formatted, cursor: bestPos, scores: scores };
     };
-  }
-
-  retrospective.splitLevenshtein = {
-    commatize: retrospective.make(format.commatize, costSplitLevenshtein),
-    trimify: retrospective.make(format.trimify, costSplitLevenshtein)
   };
 
-  retrospective.balancedFrequencies = {
-    commatize: retrospective.make(format.commatize, costBalancedFrequencies),
-    trimify: retrospective.make(format.trimify, costBalancedFrequencies)
-  };
+  [ 'splitLevenshtein', 'balancedFrequencies' ].forEach(function (name) {
+    retrospective[name] = {
+      commatize: retrospective.make(format.commatize, cost[name]),
+      trimify: retrospective.make(format.trimify, cost[name])
+    };
+  });
 
 
   //--- Layer: seek the closest cursor ratio in a subset of characters.
@@ -466,7 +465,6 @@ var CursorMaintainer = (function () {
     meta: meta,
     splitLevenshtein: retrospective.splitLevenshtein,
     balancedFrequencies: retrospective.balancedFrequencies,
-    costBalancedFrequencies: costBalancedFrequencies,
     retrospective: retrospective,
     layer: layer
   };
