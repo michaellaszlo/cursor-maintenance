@@ -242,7 +242,7 @@ var CursorMaintainer = (function () {
 
   //--- Retrospective: compare the old text and cursor to the new text.
   retrospective = {};
-  cost = retrospective.cost = {};
+  cost = {};
 
   function levenshtein(s, t) {
     var n = s.length,
@@ -465,6 +465,7 @@ var CursorMaintainer = (function () {
     meta: meta,
     splitLevenshtein: retrospective.splitLevenshtein,
     balancedFrequencies: retrospective.balancedFrequencies,
+    cost: cost,
     retrospective: retrospective,
     layer: layer
   };

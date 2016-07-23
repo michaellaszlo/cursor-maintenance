@@ -91,7 +91,8 @@ var CursorMaintenanceDemo = (function () {
   //  voluntarily by the user and is executed only in the user's browser.
   function makeFormatterFromInput(codeBox) {
     var code = '',
-        formatter = null;
+        formatter = null,
+        result;
     return function (text) {
       var error,
           okay = true;
@@ -108,7 +109,7 @@ var CursorMaintenanceDemo = (function () {
         if (typeof formatter !== 'function') {
           okay = false;
           formatter = null;
-          console.log('input does not yield a function');
+          console.log('input does not evaluate to a function');
         }
         if (okay) {
           codeBox.className = codeBox.className.replace(/\s+error\s*/, ' ');
@@ -117,9 +118,15 @@ var CursorMaintenanceDemo = (function () {
         }
       }
       if (formatter === null) {
-        return text;
+        result =  text;
+      } else {
+        result = formatter(text);
+        if (typeof result !== 'string') {
+          console.log('formatter does not yield a string: ' + result);
+          result = text;
+        }
       }
-      return formatter(text);
+      return { text: result };
     };
   }
 
@@ -136,11 +143,11 @@ var CursorMaintenanceDemo = (function () {
 
     // Retrospective approach with balanced frequencies applied to a
     //  user-defined formatting function. No input validation.
-    console.log(CursorMaintainer.retrospective.cost.balancedFrequencies);
+    console.log(CursorMaintainer.cost.balancedFrequencies);
     setMaintainer(document.getElementById('retrospectiveInput'),
         CursorMaintainer.retrospective.make(
           makeFormatterFromInput(document.getElementById('retrospectiveCode')),
-          CursorMaintainer.retrospective.cost.balancedFrequencies));
+          CursorMaintainer.cost.balancedFrequencies));
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
