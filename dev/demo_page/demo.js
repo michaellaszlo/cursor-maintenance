@@ -130,6 +130,12 @@ var CursorMaintenanceDemo = (function () {
     };
   }
 
+  function getTesters() {
+  }
+
+  function getPreferRight() {
+  }
+
   function load() {
     var divs, i, notes, columns, content, snippet;
 
@@ -151,8 +157,10 @@ var CursorMaintenanceDemo = (function () {
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
-    //setMaintainer(document.getElementById('layerInput'),
-    //    makeFlexibleMaintainer(document.getElementById('layerCode')));
+    setMaintainer(document.getElementById('layerInput'),
+        makeFormatterFromInput(document.getElementById('retrospectiveCode')),
+        getTesters(),
+        getPreferRight);
 
     // Fill input and code box with sample content.
     document.getElementById('commatizeInput').value = '3171814';
