@@ -134,6 +134,9 @@ var CursorMaintenanceDemo = (function () {
   }
 
   function getPreferRight() {
+    var container = document.getElementById('preferRightBox'),
+        buttons = container.getElementsByTagName('input');
+    return buttons[1].checked;
   }
 
   function load() {
@@ -149,7 +152,6 @@ var CursorMaintenanceDemo = (function () {
 
     // Retrospective approach with balanced frequencies applied to a
     //  user-defined formatting function. No input validation.
-    console.log(CursorMaintainer.cost.balancedFrequencies);
     setMaintainer(document.getElementById('retrospectiveInput'),
         CursorMaintainer.retrospective.make(
           makeFormatterFromInput(document.getElementById('retrospectiveCode')),
@@ -158,9 +160,10 @@ var CursorMaintenanceDemo = (function () {
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
     setMaintainer(document.getElementById('layerInput'),
-        makeFormatterFromInput(document.getElementById('retrospectiveCode')),
-        getTesters(),
-        getPreferRight);
+        CursorMaintainer.layer.make(
+            makeFormatterFromInput(document.getElementById('layerCode')),
+            getTesters(),
+            getPreferRight()));
 
     // Fill input and code box with sample content.
     document.getElementById('commatizeInput').value = '3171814';

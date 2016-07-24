@@ -108,3 +108,12 @@ textarea.layerTester {
   margin-top: 5px;
 }
 
+#preferRightBox {
+  width: auto;
+}
+#preferRightBox input {
+  display: inline;
+  width: auto;
+  margin-left: 5px;
+}
+
