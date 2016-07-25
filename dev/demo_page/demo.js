@@ -131,6 +131,28 @@ var CursorMaintenanceDemo = (function () {
   }
 
   function getTesters() {
+    var container = document.getElementById('testerBox'),
+        inputs = container.getElementsByTagName('textarea'),
+        testers = [],
+        i, tester, error;
+    for (var i = 0; i < inputs.length; ++i) {
+      try {
+        tester = eval('(' + inputs[i].value + ')');
+      } catch (error) {
+        console.log('error in evaluating input: ' + error);
+        continue;
+      }
+      if (typeof tester !== 'object') {
+        console.log('input does not evaluate to an object');
+        continue;
+      }
+      if (typeof tester.test !== 'function') {
+        console.log('object does not have a .test member function');
+        continue;
+      }
+      testers.push(tester);
+    }
+    return testers;
   }
 
   function getPreferRight() {
@@ -154,8 +176,9 @@ var CursorMaintenanceDemo = (function () {
     //  user-defined formatting function. No input validation.
     setMaintainer(document.getElementById('retrospectiveInput'),
         CursorMaintainer.retrospective.make(
-          makeFormatterFromInput(document.getElementById('retrospectiveCode')),
-          CursorMaintainer.cost.balancedFrequencies));
+            makeFormatterFromInput(
+                document.getElementById('retrospectiveCode')),
+            CursorMaintainer.cost.balancedFrequencies));
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
