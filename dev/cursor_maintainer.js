@@ -376,10 +376,10 @@ var CursorMaintainer = (function () {
           formattedCounts, formattedTotal, formattedRatio,
           delta, bestDelta, bestFormattedRatio,
           rank, tester, pos,
-          bestLeft, bestRight,
           formatted = format(original).text,
           left = 0,
-          right = formatted.length;
+          right = formatted.length,
+          bestLeft = left, bestRight = right;
       if (right == 0) {
         return { text: '', cursor: 0 };
       }
@@ -442,7 +442,7 @@ var CursorMaintainer = (function () {
         if (bestLeft == bestRight) {
           break;
         }
-        // If there is a tie shrink the range for the next layer.
+        // If there is a tie, shrink the range for the next layer.
         left = bestLeft;
         right = bestRight;
       }
