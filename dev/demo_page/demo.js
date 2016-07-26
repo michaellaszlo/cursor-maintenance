@@ -104,12 +104,12 @@ var CursorMaintenanceDemo = (function () {
           formatter = eval('(' + code + ')');
         } catch (error) {
           okay = false;
-          console.log('error in evaluating input: ' + error);
+          console.log('user-defined formatter: syntax error');
         }
         if (typeof formatter !== 'function') {
           okay = false;
           formatter = null;
-          console.log('input does not evaluate to a function');
+          console.log('user-defined formatter: not a function');
         }
         if (okay) {
           codeBox.className = codeBox.className.replace(/\s+error\s*/, ' ');
@@ -122,7 +122,8 @@ var CursorMaintenanceDemo = (function () {
       } else {
         result = formatter(text);
         if (typeof result !== 'string') {
-          console.log('formatter does not yield a string: ' + result);
+          console.log('user-defined formatter: did not return a string' +
+              result);
           result = text;
         }
       }
@@ -135,24 +136,32 @@ var CursorMaintenanceDemo = (function () {
         inputs = container.getElementsByTagName('textarea'),
         testers = [],
         i, tester, error;
-    for (var i = 0; i < inputs.length; ++i) {
+    for (i = 0; i < inputs.length; ++i) {
       try {
         tester = eval('(' + inputs[i].value + ')');
       } catch (error) {
-        console.log('error in evaluating input: ' + error);
+        console.log('user-defined tester: syntax error');
         continue;
       }
       if (typeof tester !== 'object') {
-        console.log('input does not evaluate to an object');
+        console.log('user-defined tester: not an object');
         continue;
       }
       if (typeof tester.test !== 'function') {
-        console.log('object does not have a .test member function');
+        console.log('user-defined tester: no .test method');
         continue;
       }
       testers.push(tester);
     }
     return testers;
+  }
+
+  function addTesterBox() {
+    var container = document.getElementById('testerBox'),
+        testerBox = document.createElement('textarea');
+    testerBox.spellcheck = false;
+    testerBox.className = 'layerTester';
+    container.appendChild(testerBox);
   }
 
   function getPreferRight() {
@@ -222,6 +231,9 @@ var CursorMaintenanceDemo = (function () {
     document.getElementById('retrospectiveInput').click();
     document.getElementById('layerCode').value =
         document.getElementById('retrospectiveCode').value;
+    for (i = 0; i < 3; ++i) {
+      addTesterBox();
+    }
     document.getElementById('layerInput').value =
         document.getElementById('retrospectiveInput').value;
     document.getElementById('layerInput').click();
