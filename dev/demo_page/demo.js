@@ -18,10 +18,20 @@ var CursorMaintenanceDemo = (function () {
     input.setSelectionRange(position, position);
   }
 
-  function setMaintainer(input, format, validate) {
-    var saved = { text: null, cursor: 0 },
-        formatted,
-        toggleBox;
+  function setMaintainer(input, format, options) {
+    var formatted,
+        toggleBox,
+        validate = null,
+        makeFormat = false,
+        saved = { text: null, cursor: 0 };
+    if (options && typeof options == 'object') {
+      if ('validate' in options) {
+        validate = options.validate;
+      }
+      if ('makeFormat' in options) {
+        makeFormat = options.makeFormat;
+      }
+    }
     function processInput() {
       var text,
           cursor,
@@ -29,7 +39,7 @@ var CursorMaintenanceDemo = (function () {
       text = input.value;
       cursor = getCursorPosition(input);
       // If the input is invalid, restore the saved state and bail out.
-      if (validate !== undefined && validate(text) !== true) {
+      if (validate !== null && validate(text) !== true) {
         input.value = saved.text;
         setCursorPosition(input, saved.cursor);
         return;
@@ -175,7 +185,7 @@ var CursorMaintenanceDemo = (function () {
 
     // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
-        CursorMaintainer.meta.commatize, commatizeValidator);
+        CursorMaintainer.meta.commatize, { validate: commatizeValidator });
 
     // Meta version of trimify. No input validation.
     setMaintainer(document.getElementById('trimifyInput'),
