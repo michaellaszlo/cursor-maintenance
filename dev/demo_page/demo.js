@@ -53,7 +53,11 @@ var CursorMaintenanceDemo = (function () {
         saved.cursor = cursor;
         return;
       }
-      formatted = format(text, cursor);
+      if (makeFormat) {
+        formatted = format()(text, cursor);
+      } else {
+        formatted = format(text, cursor);
+      }
       // If formatting leaves the user text unchanged, accept the user cursor.
       if (formatted.text === text) {
         saved.cursor = cursor;
@@ -202,10 +206,12 @@ var CursorMaintenanceDemo = (function () {
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
     setMaintainer(document.getElementById('layerInput'),
-        CursorMaintainer.layer.make(
-            makeFormatterFromInput(document.getElementById('layerCode')),
-            getTesters(),
-            getPreferRight()));
+        function () {
+            return CursorMaintainer.layer.make(
+                makeFormatterFromInput(document.getElementById('layerCode')),
+                getTesters(),
+                getPreferRight())
+        }, { makeFormat: true });
 
     // Fill input and code box with sample content.
     document.getElementById('commatizeInput').value = '3171814';
