@@ -172,13 +172,17 @@ var CursorMaintenanceDemo = (function () {
 
   function addTesterBox(value) {
     var container = document.getElementById('testerBox'),
-        testerBox = document.createElement('textarea');
+        testerBox = document.createElement('textarea'),
+        button = document.createElement('div');
     testerBox.spellcheck = false;
     testerBox.className = 'layerTester';
     if (value) {
       testerBox.value = value;
     }
     container.appendChild(testerBox);
+    button.className = 'deleteButton';
+    button.innerHTML = 'delete';
+    container.appendChild(button);
   }
 
   function getPreferRight() {

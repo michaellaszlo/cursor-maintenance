@@ -108,6 +108,12 @@ textarea.layerTester {
   margin-top: 5px;
 }
 
+.deleteButton {
+  display: inline-block;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+
 #preferRightBox {
   width: auto;
 }
