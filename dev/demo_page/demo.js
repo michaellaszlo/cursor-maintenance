@@ -170,11 +170,14 @@ var CursorMaintenanceDemo = (function () {
     return testers;
   }
 
-  function addTesterBox() {
+  function addTesterBox(value) {
     var container = document.getElementById('testerBox'),
         testerBox = document.createElement('textarea');
     testerBox.spellcheck = false;
     testerBox.className = 'layerTester';
+    if (value) {
+      testerBox.value = value;
+    }
     container.appendChild(testerBox);
   }
 
@@ -247,9 +250,9 @@ var CursorMaintenanceDemo = (function () {
     document.getElementById('retrospectiveInput').click();
     document.getElementById('layerCode').value =
         document.getElementById('retrospectiveCode').value;
-    for (i = 0; i < 3; ++i) {
-      addTesterBox();
-    }
+    addTesterBox('/\\d+/');
+    addTesterBox();
+    addTesterBox();
     document.getElementById('layerInput').value =
         document.getElementById('retrospectiveInput').value;
     document.getElementById('layerInput').click();
