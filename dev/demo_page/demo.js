@@ -185,9 +185,24 @@ var CursorMaintenanceDemo = (function () {
     var container = document.getElementById('testerBox'),
         deleteButton = document.createElement('div'),
         newButton = document.createElement('div');
+    function lastTester() {
+      var items = container.getElementsByTagName('div'),
+          i;
+      for (i = items.length - 1; i >= 0; --i) {
+        if (items[i].className.indexOf('testerBox') != -1) {
+          return items[i];
+        }
+      }
+      return null;
+    }
     deleteButton.className = newButton.className = 'button';
     deleteButton.innerHTML = '&uarr; delete';
     newButton.innerHTML = 'new &darr;';
+    deleteButton.onclick = function () {
+    };
+    newButton.onclick = function () {
+      var tester = lastTester;
+    };
     container.appendChild(deleteButton);
     container.appendChild(newButton);
   }
