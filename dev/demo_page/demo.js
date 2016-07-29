@@ -172,17 +172,24 @@ var CursorMaintenanceDemo = (function () {
 
   function addTesterBox(value) {
     var container = document.getElementById('testerBox'),
-        testerBox = document.createElement('textarea'),
-        button = document.createElement('div');
+        testerBox = document.createElement('textarea');
     testerBox.spellcheck = false;
     testerBox.className = 'layerTester';
     if (value) {
       testerBox.value = value;
     }
     container.appendChild(testerBox);
-    button.className = 'deleteButton';
-    button.innerHTML = 'delete';
-    container.appendChild(button);
+  }
+
+  function addTesterBoxButtons() {
+    var container = document.getElementById('testerBox'),
+        deleteButton = document.createElement('div'),
+        newButton = document.createElement('div');
+    deleteButton.className = newButton.className = 'button';
+    deleteButton.innerHTML = '&uarr; delete';
+    newButton.innerHTML = 'new &darr;';
+    container.appendChild(deleteButton);
+    container.appendChild(newButton);
   }
 
   function getPreferRight() {
@@ -257,6 +264,7 @@ var CursorMaintenanceDemo = (function () {
     addTesterBox('/\\d+/');
     addTesterBox();
     addTesterBox();
+    addTesterBoxButtons();
     document.getElementById('layerInput').value =
         document.getElementById('retrospectiveInput').value;
     document.getElementById('layerInput').click();
