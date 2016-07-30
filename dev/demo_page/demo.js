@@ -211,10 +211,16 @@ var CursorMaintenanceDemo = (function () {
     container.appendChild(newButton);
   }
 
-  function getPreferRight() {
+  function getPreference() {
     var container = document.getElementById('preferRightBox'),
         buttons = container.getElementsByTagName('input');
-    return buttons[1].checked;
+    return buttons[0].checked ? 'left' : 'right';
+  }
+
+  function setPreference(direction) {
+    var container = document.getElementById('preferRightBox'),
+        buttons = container.getElementsByTagName('input');
+    buttons[direction == 'left' ? 0 : 1].checked = true;
   }
 
   function load() {
@@ -243,7 +249,7 @@ var CursorMaintenanceDemo = (function () {
             return CursorMaintainer.layer.make(
                 makeFormatterFromInput(document.getElementById('layerCode')),
                 getTesters(),
-                getPreferRight())
+                getPreference() == 'right');
         }, { makeFormat: true });
 
     // Fill input and code box with sample content.
@@ -275,16 +281,27 @@ var CursorMaintenanceDemo = (function () {
         "  s = whole + (decimalPos == -1 ?\n" +
         "      '' : '.' + s.substring(decimalPos));\n" +
         "  return '$' + s;\n" +
-        "}"
+        "}";
     document.getElementById('retrospectiveInput').value = '29031.925';
     document.getElementById('retrospectiveInput').click();
-    document.getElementById('layerCode').value =
-        document.getElementById('retrospectiveCode').value;
+    document.getElementById('layerCode').value = "function (s) {\n" +
+        "  // Ten-digit phone number with hyphens.\n" +
+        "  var t;\n" +
+        "  s = s.replace(/\\D+/g, '').substring(0, 10);\n" +
+        "  t = s.substring(0, 3);\n" +
+        "  if (s.length >= 3) {\n" +
+        "    t += '-' + s.substring(3, 6);\n" +
+        "  }\n" +
+        "  if (s.length >= 6) {\n" +
+        "    t += '-' + s.substring(6);\n" +
+        "  }\n" +
+        "  return t;\n" +
+        "}";
+    setPreference('right');
     addTesterButtons();
     addTester('/\\d+/');
     addTester();
-    document.getElementById('layerInput').value =
-        document.getElementById('retrospectiveInput').value;
+    document.getElementById('layerInput').value = "716";
     document.getElementById('layerInput').click();
     document.getElementById('layerInput').blur();
 
