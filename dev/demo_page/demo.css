@@ -96,14 +96,14 @@ textarea {
   max-width: 600px;
   height: 100px;
 }
-textarea.code, textarea.layerTester {
+textarea.code, textarea.tester {
   font-family: 'Droid Sans Mono', monospace;
   font-size: 13px;
 }
 textarea.code {
   height: 400px;
 }
-textarea.layerTester {
+textarea.tester {
   height: 30px;
   margin-top: 5px;
 }
@@ -122,6 +122,12 @@ textarea.layerTester {
 .button:hover {
   border-color: #999;
   color: #222;
+}
+#deleteButton.disabled {
+  cursor: default;
+  border-color: #ccc;
+  color: #666;
+  opacity: 0.3;
 }
 
 #preferRightBox {

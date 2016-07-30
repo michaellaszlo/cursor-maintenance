@@ -170,38 +170,42 @@ var CursorMaintenanceDemo = (function () {
     return testers;
   }
 
-  function addTesterBox(value) {
+  function addTester(value) {
     var container = document.getElementById('testerBox'),
-        testerBox = document.createElement('textarea');
-    testerBox.spellcheck = false;
-    testerBox.className = 'layerTester';
+        deleteButton = document.getElementById('deleteButton'),
+        tester = document.createElement('textarea');
+    tester.spellcheck = false;
+    tester.className = 'tester';
     if (value) {
-      testerBox.value = value;
+      tester.value = value;
     }
-    container.appendChild(testerBox);
+    container.insertBefore(tester, deleteButton);
   }
 
-  function addTesterBoxButtons() {
+  function addTesterButtons() {
     var container = document.getElementById('testerBox'),
         deleteButton = document.createElement('div'),
         newButton = document.createElement('div');
-    function lastTester() {
-      var items = container.getElementsByTagName('div'),
-          i;
-      for (i = items.length - 1; i >= 0; --i) {
-        if (items[i].className.indexOf('testerBox') != -1) {
-          return items[i];
-        }
-      }
-      return null;
-    }
+    deleteButton.id = 'deleteButton';
+    newButton.id = 'newButton';
     deleteButton.className = newButton.className = 'button';
     deleteButton.innerHTML = '&uarr; delete';
     newButton.innerHTML = 'new &darr;';
     deleteButton.onclick = function () {
+      var tester = deleteButton.previousSibling;
+      if (tester === null) {
+        return;
+      }
+      container.removeChild(tester);
+      tester = deleteButton.previousSibling;
+      if (tester === null) {
+        deleteButton.className += ' disabled';
+      }
     };
     newButton.onclick = function () {
-      var tester = lastTester;
+      addTester();
+      deleteButton.className =
+          deleteButton.className.replace(/\s+disabled/, '');
     };
     container.appendChild(deleteButton);
     container.appendChild(newButton);
@@ -276,10 +280,9 @@ var CursorMaintenanceDemo = (function () {
     document.getElementById('retrospectiveInput').click();
     document.getElementById('layerCode').value =
         document.getElementById('retrospectiveCode').value;
-    addTesterBox('/\\d+/');
-    addTesterBox();
-    addTesterBox();
-    addTesterBoxButtons();
+    addTesterButtons();
+    addTester('/\\d+/');
+    addTester();
     document.getElementById('layerInput').value =
         document.getElementById('retrospectiveInput').value;
     document.getElementById('layerInput').click();
