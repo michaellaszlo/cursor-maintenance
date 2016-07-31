@@ -769,8 +769,13 @@ positions is within a constant factor of the length of the text.
 Our retrospective scoring formulas treat all characters equally. Humans
 do not. In a `commatize`d input field, for example, we are primarily
 interested in the cursor's position with respect to the digit
-characters. With `trimify`, we are mostly concerned with non-space
-characters.
+characters. In `trimify`, we are mostly concerned with the cursor's
+positioning among the non-space characters of the text.
+
+Why not employ a strategy that recognizes the semantic differences
+between different classes of characters? Let's define a layer by means
+of a boolean function that takes a character and return true iff the
+character belongs to the layer.
 
 Consider this state:
 
