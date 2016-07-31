@@ -289,18 +289,18 @@ var CursorMaintenanceDemo = (function () {
         "  var t;\n" +
         "  s = s.replace(/\\D+/g, '').substring(0, 10);\n" +
         "  t = s.substring(0, 3);\n" +
-        "  if (s.length >= 3) {\n" +
+        "  if (s.length > 3) {\n" +
         "    t += '-' + s.substring(3, 6);\n" +
         "  }\n" +
-        "  if (s.length >= 6) {\n" +
+        "  if (s.length > 6) {\n" +
         "    t += '-' + s.substring(6);\n" +
         "  }\n" +
         "  return t;\n" +
         "}";
-    setPreference('right');
+    setPreference('left');
     addTesterButtons();
     addTester('/\\d+/');
-    document.getElementById('layerInput').value = "71";
+    document.getElementById('layerInput').value = "716";
     document.getElementById('layerInput').click();
     document.getElementById('layerInput').blur();
 

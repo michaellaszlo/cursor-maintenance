@@ -766,16 +766,21 @@ positions is within a constant factor of the length of the text.
 
 ## The layer approach
 
-Our retrospective scoring formulas treat all characters equally. Humans
-do not. In a `commatize`d input field, for example, we are primarily
-interested in the cursor's position with respect to the digit
-characters. In `trimify`, we are mostly concerned with the cursor's
-positioning among the non-space characters of the text.
+A qualitative flaw of our retrospective approach is that it treats
+all characters equally. It fails to reflect the semantics of various
+characters in a given text format. In a `commatize`d input field, we
+are primarily interested in the cursor's position relative to the digit
+characters. When it comes to `trimify`, we are mostly concerned with
+the cursor's positioning among non-whitespace characters.
 
-Why not employ a strategy that recognizes the semantic differences
-between different classes of characters? Let's define a layer by means
-of a boolean function that takes a character and return true iff the
-character belongs to the layer.
+These observations lead to the idea of evaluating cursor positions with
+respect to a sequence of character classes that we'll call layers. The
+first step in this approach is to manually define and rank the layers
+for a given formatting operation. For example, let's define two layers
+for `commatize`: the first layer consists of the digit characters `0`
+through `9`, and the second layer consists of the comma character `,`.
+
+
 
 Consider this state:
 
@@ -799,8 +804,23 @@ The comma ratio around the cursor was 0:1 in the user text. Because the
 retrospective formula does not discriminate between commas and digits,
 the the 0:2 comma ratio in the formatted text outweighs the digit ratio.
 
+- once the layers and side preference are configured, the rest is automatic
+- naming the significant layers is easy
+- the difficulty in configuration comes down to edge cases
+- layers may overlap
+- layers may cover a strict subset of all possible input characters  
+- consider the choices for the last layer
+  - all characters
+  - all characters not matched by an earlier layer
+  - leave the lowest-priority significant layer as the last layer
+    -> break the tie to left or right without looking at other characters
+
 
 ## Summary
+
+- a spectrum of approaches
+- one end: labor-intensive, customized, can be made highly accurate
+- other end: automatic, oblivious, prone to inconvenient cursor placement
 
 I haven't found a fully satisfying approach to the problem of
 cursor maintenance. The most accurate solutions depend on a thorough
