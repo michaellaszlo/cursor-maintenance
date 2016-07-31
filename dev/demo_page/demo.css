@@ -78,7 +78,7 @@ input {
 .toggle {
   margin: -10px 0 5px;
   font-size: 14px;
-  color: #aaa;
+  color: #aa0202;
   cursor: pointer;
 }
 .toggle.active {

@@ -766,10 +766,13 @@ positions is within a constant factor of the length of the text.
 
 ## The layer approach
 
-The retrospective approach with character frequencies, although easy to
-implement and generally accurate, can occasionally arrive at puzzling
-decisions. Consider a dynamically `commatize`d input field that is
-currently in this state:
+Our retrospective scoring formulas treat all characters equally. Humans
+do not. In a `commatize`d input field, for example, we are primarily
+interested in the cursor's position with respect to the digit
+characters. With `trimify`, we are mostly concerned with non-space
+characters.
+
+Consider this state:
 
   1^00,900
 
@@ -787,10 +790,9 @@ is this:
 
   1^,000,900
 
-The trouble is that the retrospective formula does not discriminate
-between commas and digits. The comma ratio around the cursor was 0:1
-in the user text, so a 0:2 comma ratio in the formatted text earns more
-points than the 1:2 comma ratio that the user expects.
+The comma ratio around the cursor was 0:1 in the user text. Because the
+retrospective formula does not discriminate between commas and digits,
+the the 0:2 comma ratio in the formatted text outweighs the digit ratio.
 
 
 ## Summary

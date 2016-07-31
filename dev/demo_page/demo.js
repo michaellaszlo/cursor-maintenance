@@ -300,8 +300,7 @@ var CursorMaintenanceDemo = (function () {
     setPreference('right');
     addTesterButtons();
     addTester('/\\d+/');
-    addTester();
-    document.getElementById('layerInput').value = "716";
+    document.getElementById('layerInput').value = "71";
     document.getElementById('layerInput').click();
     document.getElementById('layerInput').blur();
 
