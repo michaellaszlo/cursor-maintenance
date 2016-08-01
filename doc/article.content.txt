@@ -700,9 +700,9 @@ For example, in the state
 we can observe that the character `l` occurs twice to the left of the
 cursor and once to its right.
 
-Let's define a pair of character-frequency functions, `left` and
-`right`, that each take a string, a position, and a character. In
-the situation above, with
+Let's define a pair of character-frequency functions, `left` and `right`,
+that each take a character, a string, and a position. In the situation
+above, with
 
   s = `  Hello,  world.  `
 
@@ -710,16 +710,16 @@ the situation above, with
 
 we have:
 
-  left(s, p, 'l') = 2
+  left('l', s, p) = 2
 
-  right(s, p, 'l') = 1
+  right('l', s, p) = 1
 
 Suppose the text `s` is transformed by some formatting operation into
 the text `t`. If there is a position `q` in `t` such that
 
-  left(t, q, 'l') = 2
+  left('l', t, q) = 2
 
-  right(t, q, 'l') = 1
+  right('l', t, q) = 1
 
 we can say that `q` is a good choice of formatted cursor position with
 respect to the character `l`. There may be several such cursor positions,
@@ -729,20 +729,20 @@ characters?
 
 I propose that we compute the ratio
 
-  a = left(s, p, c) / (left(s, p, c) + right(s, p, c))
+  a = left(c, s, p) / (left(c, s, p) + right(c, s, p))
 
 for each character `c` that occurs in both `s` and `t`. Likewise,
 we compute
 
-  b = left(t, q, c) / (left(t, q, c) + right(t, q, c))
+  b = left(c, t, q) / (left(c, t, q) + right(c, t, q))
 
 for each position `q` in `t`.
 
 Then we take the square of the absolute difference:
 
-  cost(q, c) = abs(a - b) ** 2
+  cost(c, q) = abs(a - b) ** 2
 
-The score of position `q` is the sum of the values `cost(q, c)` over all
+The score of position `q` is the sum of the values `cost(c, q)` over all
 characters `c` that occur in both `s` and `t`. We choose the position that
 achieves the minimum score. If there are several, we choose the leftmost.
 
@@ -768,8 +768,9 @@ positions is within a constant factor of the length of the text.
 
 A qualitative flaw of our retrospective approach is that it treats
 all characters equally. It fails to reflect the semantics of various
-characters in a given text format. In a `commatize`d input field, we
-are primarily interested in the cursor's position relative to the digit
+characters in a given text format. In other words, humans do not
+view all characters equally. In a `commatize`d input field, we are
+primarily interested in the cursor's position relative to the digit
 characters. When it comes to `trimify`, we are mostly concerned with
 the cursor's positioning among non-whitespace characters.
 
@@ -780,29 +781,41 @@ for a given formatting operation. For example, let's define two layers
 for `commatize`: the first layer consists of the digit characters `0`
 through `9`, and the second layer consists of the comma character `,`.
 
+For a given layer `L`, we assign a score to cursor position `p` in text
+`s` by computing the ratio
+
+  left(L, s, p) / (left(L, s, p) + right(L, s, p))
+
+where `left` is the number of characters to the left of `p` that belong
+to layer `L`. Likewise, `right` counts the characters to the right of
+`p` belonging to `L`.
 
 
-Consider this state:
-
-  1^00,900
-
-The user enters a `0`:
+Consider a state in which the user has just entered a `0`:
 
   10^00,900
 
-The text `1000,900` is formatted to `1,000,900`. The user expects to
-see this:
+The text `1000,900` is formatted to `1,000,900`.
 
-  1,0^00,900
 
 According to retrospection with character frequencies, the optimum result
 is this:
 
   1^,000,900
 
-The comma ratio around the cursor was 0:1 in the user text. Because the
-retrospective formula does not discriminate between commas and digits,
-the the 0:2 comma ratio in the formatted text outweighs the digit ratio.
+This inconvenient cursor position is caused by the indiscriminate
+averaging of character frequency ratios. For the comma character, the
+frequency ratio in the user text is 0:1, and the closest match in the
+formatted text is 0:2, which occurs when the cursor is to the left of all
+commas. This ratio match outweighs the ratio match among `0` characters.
+
+With the layer approach, on the other hand, we start by evaluating
+cursor positions among the digit characters. This yields a single optimal
+cursor position:
+
+  1,0^00,900
+
+
 
 - once the layers and side preference are configured, the rest is automatic
 - naming the significant layers is easy
