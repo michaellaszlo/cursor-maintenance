@@ -767,28 +767,40 @@ positions is within a constant factor of the length of the text.
 ## The layer approach
 
 A qualitative flaw of our retrospective approach is that it treats
-all characters equally. It fails to reflect the semantics of various
-characters in a given text format. In other words, humans do not
-view all characters equally. In a `commatize`d input field, we are
-primarily interested in the cursor's position relative to the digit
-characters. When it comes to `trimify`, we are mostly concerned with
-the cursor's positioning among non-whitespace characters.
+all characters equally, whereas humans do not. The semantics of
+various characters depend on the text format in which they occur. In a
+`commatize`d input field, we are primarily interested in the cursor's
+position with respect to the digit characters. When it comes to `trimify`,
+we are mostly concerned with the cursor's positioning among non-whitespace
+characters.
 
-These observations lead to the idea of evaluating cursor positions with
-respect to a sequence of character classes that we'll call layers. The
+These observations lead to the idea of evaluating cursor positions
+relative to a sequence of character classes that we'll call layers. The
 first step in this approach is to manually define and rank the layers
 for a given formatting operation. For example, let's define two layers
 for `commatize`: the first layer consists of the digit characters `0`
 through `9`, and the second layer consists of the comma character `,`.
 
 For a given layer `L`, we assign a score to cursor position `p` in text
-`s` by computing the ratio
+`s` by computing the left-right ratio
 
   left(L, s, p) / (left(L, s, p) + right(L, s, p))
 
 where `left` is the number of characters to the left of `p` that belong
-to layer `L`. Likewise, `right` counts the characters to the right of
+to layer `L`. Similarly, `right` counts the characters to the right of
 `p` belonging to `L`.
+
+This ratio formula is much like the one used in the retrospective
+approach. The difference is that we do not calculate individual ratios
+for each character. Instead we have an aggregate ratio for all the
+characters in a layer. When evaluating cursor positions for a given layer,
+we calculate one ratio at each position.
+
+The goal is to find a position in the formatted text where the ratio
+is closest to that of the user position in the user text. Often there
+will be several positions in the formatted text that come equally close
+to the target ratio. These positions must be adjacent because the ratio
+increases monotonically from left to right.
 
 
 Consider a state in which the user has just entered a `0`:
@@ -815,7 +827,7 @@ cursor position:
 
   1,0^00,900
 
-
+calculating the ratio takes linear time, as with retrospective
 
 - once the layers and side preference are configured, the rest is automatic
 - naming the significant layers is easy
