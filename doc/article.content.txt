@@ -789,17 +789,16 @@ through `9`, and the second layer consists of the comma character `,`.
 For a given layer `L`, we assign a score to cursor position `p` in text
 `s` by computing the left-right ratio
 
-  left(L, s, p) / (left(L, s, p) + right(L, s, p))
+  left(L, s, p) / count(L, s)
 
-where `left` is the number of characters to the left of `p` that belong
-to layer `L`. Similarly, `right` counts the characters to the right of
-`p` belonging to `L`.
+where `left` yields the number of characters to the left of `p` that
+belong to layer `L`, and `count` denotes the total number of characters in
+`s` belonging to `L`.
 
 This ratio formula is much like the one used in the retrospective
 approach. The difference is that we do not calculate individual ratios
 for each character. Instead we have an aggregate ratio for all the
-characters in a layer. When evaluating cursor positions for a given layer,
-we calculate one ratio at each position.
+characters in a layer.
 
 The goal is to find a position in the formatted text where the ratio
 is closest to that of the user position in the user text. Often there
