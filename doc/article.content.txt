@@ -727,24 +727,31 @@ or there may be none. Then there are the left-right frequencies of
 characters other than `l`. How do we achieve a balance among the various
 characters?
 
-I propose that we compute the ratio
+I propose that we compute, given position `p` in the user text `s`,
+the ratio
 
   a = left(c, s, p) / (left(c, s, p) + right(c, s, p))
 
-for each character `c` that occurs in both `s` and `t`. Likewise,
-we compute
+for each character `c` that occurs in both `s` and `t`.
 
-  b = left(c, t, q) / (left(c, t, q) + right(c, t, q))
+The denominator is always equal to the frequency of character `c`
+throughout `s`, which we'll denote `count(c, s)`, letting us write:
 
-for each position `q` in `t`.
+  a = left(c, s, p) / count(c, s)
+
+Similarly, at each position `q` in the formatted text `t`, we calculate
+
+  b = left(c, t, q) / count(c, t)
+
+for each character `c` that is common to `s` and `t`.
 
 Then we take the square of the absolute difference:
 
   cost(c, q) = abs(a - b) ** 2
 
 The score of position `q` is the sum of the values `cost(c, q)` over all
-characters `c` that occur in both `s` and `t`. We choose the position that
-achieves the minimum score. If there are several, we choose the leftmost.
+common characters `c`. We choose the position that achieves the minimum
+score. If there are several, we choose the leftmost.
 
 In my testing, I have found that this scoring formula works approximately
 as well as the one using the Levenshtein distance. This is a subjective
@@ -756,12 +763,10 @@ The character-frequency formula is advantageous in terms of computational
 cost. Given a fixed set of characters in a text of size `n`, we can count
 the `left` frequencies at every position with one scan in `O(n)` time.
 
-The value of `left` at position `n` gives us the value of `right` at
-position `0`. Furthermore, this value is the sum of `left` and `right`
-at every position. With a second scan through the `left` frequencies,
-we can compute the remaining values of `right` in `O(n)` time. This
-means that the cost of computing the left-right ratios for all cursor
-positions is within a constant factor of the length of the text.
+The `left` frequencies at the rightmost position give us the `count`
+values. With a second scan through the `left` frequencies, we compute
+the ratio of `left` to `count`. Thus, the overall computational cost is
+linear with respect to the length of the text.
 
 
 ## The layer approach
