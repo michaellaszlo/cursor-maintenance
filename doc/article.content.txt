@@ -752,6 +752,8 @@ The score of position `q` is the sum of the values `cost(c, q)` over all
 common characters `c`. We choose the position that achieves the minimum
 score. If there are several, we choose the leftmost.
 
+-- example
+
 In my testing, I have found that this scoring formula works approximately
 as well as the one using the Levenshtein distance. This is a subjective
 impression. In order to quantify the accuracy of each approach, I would
@@ -770,13 +772,14 @@ computational cost is linear with respect to the length of the text.
 
 ## The layer approach
 
-A qualitative flaw of our retrospective approach is that it treats
-all characters equally, whereas humans do not. The semantics of
-various characters depend on the text format in which they occur. In a
-`commatize`d input field, we are primarily interested in the cursor's
-position with respect to the digit characters. When it comes to `trimify`,
-we are mostly concerned with the cursor's positioning among non-whitespace
-characters.
+A weakness of the foregoing retrospective formulae is that they treat all
+characters equally, whereas users do not. The way in which we discriminate
+among characters depends on the text format. In a `commatize`d input
+field, we primarily look at the cursor's position with respect to the
+digit characters. It would make sense to position the cursor among
+the digits in the text before looking at any commas. When it comes
+to `trimify`, our primary concern is the cursor's positioning among
+non-whitespace characters.
 
 These observations lead to the idea of evaluating cursor positions
 relative to a sequence of character classes that we'll call layers. The
@@ -784,6 +787,8 @@ first step in this approach is to manually define and rank the layers
 for a given formatting operation. For example, let's define two layers
 for `commatize`: the first layer consists of the digit characters `0`
 through `9`, and the second layer consists of the comma character `,`.
+
+-- example
 
 For a given layer `L`, we assign a score to cursor position `p` in text
 `s` by computing the ratio
@@ -794,19 +799,14 @@ where `left` yields the number of characters to the left of `p` that
 belong to layer `L`, and `count` is the total number of characters in
 `s` that belong to `L`.
 
-This scoring formula is much like the one used in the retrospective
-approach. The difference is that we do not calculate individual ratios
-for each character. Instead, we have an aggregate ratio for all the
-characters in a layer.
-
-In considering the first layer, L_0, we are seeking a position in the
-formatted text with a score that is closest to that of the user position
-in the user text. That is, given the target
+When considering the first layer, L_0, we seek a position in the formatted
+text with a score that is closest to that of the user position in the
+user text. That is, given the target
 
   a_0  =  left(L_0, s, p) / count(L_0, s)
 
-for layer `L_0` in the user text `s` at cursor position `p`, we want to
-minimize the absolute difference
+for layer `L_0` in the user text `s` with the cursor at position `p`,
+we want to minimize the absolute difference
 
   abs(left(L_0, t, q) / count(L_0, t) - a_0)
 
@@ -815,6 +815,8 @@ over all positions `t` in the formatted text `q`.
 If several positions in the formatted text are equally close to the
 target score, these positions must be adjacent because the scoring
 function increases monotonically from left to right.
+
+-- example
 
 Let's write `[l_0, r_0]` to denote the range of optimal positions found
 for layer `L_0` over the entire formatted text. If `l_0` is equal to
@@ -825,28 +827,27 @@ in the formatted text.
 
 We ignore positions outside the range `[l_0, r_0]` even if they achieve
 a closer score in layer `L_1`. The search in the higher-ranked `L_0`
-narrowed the range of candidate positions. Thus, the range `[l_1,
-r_1]` must be a subrange (not necessarily a strict subrange) of `[l_0,
-r_0]`. We continue this process with successive layers until the range
-narrows to a single position or no more layers remain.
+restricts the range of candidate positions. Thus, the range `[l_1, r_1]`
+must be a subrange (not necessarily a strict subrange) of `[l_0, r_0]`.
 
-If we run out of layers, we return the left end of the final range.
-Optionally, we can configure the process to return the right end of the
-final range. The parameters of the layer approach for a given formatting
-operation consist of a sequence of layer definitions and a one-bit
-value indicating whether we prefer the left end or right end as a final
-tie-breaker. Each layer can be defined with a regular expression or with
-a function that, given a character, returns a Boolean value indicating
-whether the character belongs to the layer.
+We successively scan layers until the candidate range narrows to a single
+position or no more layers remain. If we run out of layers, we return the
+left end of the final range. Optionally, we can configure the algorithm
+to return the right end of the final range.
 
+All in all, the parameters that we supply to the layer approach are a
+sequence of layer definitions and a one-bit value indicating whether
+we prefer the left end or right end as a final tie-breaker. Each layer
+can be defined with a regular expression or with a function that takes
+a character and returns `true` if the character is in the layer.
 
+-- example
 
 Consider a state in which the user has just entered a `0`:
 
   10^00,900
 
 The text `1000,900` is formatted to `1,000,900`.
-
 
 According to retrospection with character frequencies, the optimum result
 is this:
@@ -865,11 +866,10 @@ cursor position:
 
   1,0^00,900
 
-calculating the ratio takes linear time, as with retrospective
+-- observations
 
-- once the layers and side preference are configured, the rest is automatic
-- naming the significant layers is easy
-- the difficulty in configuration comes down to edge cases
+- calculating the ratio takes linear time, as with retrospective
+
 - layers may overlap
 - layers may cover a strict subset of all possible input characters  
 - consider the choices for the last layer
@@ -878,12 +878,16 @@ calculating the ratio takes linear time, as with retrospective
   - leave the lowest-priority significant layer as the last layer
     -> break the tie to left or right without looking at other characters
 
+- once the layers and side preference are configured, the rest is automatic
+- naming the significant layers is easy
+- the difficulty in configuration comes down to edge cases
+
 
 ## Summary
 
 - a spectrum of approaches
 - one end: labor-intensive, customized, can be made highly accurate
-- other end: automatic, oblivious, prone to inconvenient cursor placement
+- other end: automatic, oblivious, prone to making mistakes
 
 I haven't found a fully satisfying approach to the problem of
 cursor maintenance. The most accurate solutions depend on a thorough
