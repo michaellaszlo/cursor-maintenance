@@ -823,12 +823,21 @@ Otherwise, we proceed to the next layer, `L_1`, and seek to break the
 tie by evaluating the scoring function over the range `[l_0, r_0]`
 in the formatted text.
 
-We don't care if some position outside the range `[l_0, r_0]` achieves
-a closer score in layer `L_1`. The search in layer `L_0` restricts the
-range of candidate positions. Thus, the range `[l_1, r_1]` must be a
-subrange (not necessarily a strict subrange) of `[l_0, r_0]`. We continue
-this process with successive layers until the range narrows to a single
-position or we run out layers.
+We ignore positions outside the range `[l_0, r_0]` even if they achieve
+a closer score in layer `L_1`. The search in the higher-ranked `L_0`
+narrowed the range of candidate positions. Thus, the range `[l_1,
+r_1]` must be a subrange (not necessarily a strict subrange) of `[l_0,
+r_0]`. We continue this process with successive layers until the range
+narrows to a single position or no more layers remain.
+
+If we run out of layers, we return the left end of the final range.
+Optionally, we can configure the process to return the right end of the
+final range. The parameters of the layer approach for a given formatting
+operation consist of a sequence of layer definitions and a one-bit
+value indicating whether we prefer the left end or right end as a final
+tie-breaker. Each layer can be defined with a regular expression or with
+a function that, given a character, returns a Boolean value indicating
+whether the character belongs to the layer.
 
 
 
