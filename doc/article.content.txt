@@ -868,6 +868,12 @@ cursor position:
 
 -- observations
 
+The computational cost of the layer approach is in the same order of
+growth as the retrospective approach with character frequencies, which
+uses a very similar scoring function. We can compute the total layer
+size for a piece of text in one scan, and in a second scan we compute
+the ratios.
+
 - calculating the ratio takes linear time, as with retrospective
 
 - layers may overlap
