@@ -785,14 +785,14 @@ original state `14^,00`, we can see that `1^,400` scores 1 because the
 the `,` is on the wrong side. We humans know, but the formula does not,
 that digits are more important than commas in this text format.
 
-The character-frequency formula is advantageous in terms of computational
-cost. Given a fixed set of characters in a text of size `n`, we can count
-the `left` frequencies at every position with one scan in `O(n)` time.
-
-The `left` frequencies at the rightmost position give us the `count`
-values for each character. With a second scan through the `left`
-frequencies, we compute the ratio of `left` to `count`. Thus, the overall
-computational cost is linear with respect to the length of the text.
+The approach with character frequencies has a distinct advantage over
+the Levenshtein-based formula when it comes to running time. Given a
+fixed set of characters in a text of size `n`, we can count the `left`
+frequencies at every position with one scan in `O(n)` time. The rightmost
+`left` frequency of a character gives us its `count` value. With a second
+scan through the `left` frequencies, we compute the ratio of `left` to
+`count`. The overall computational cost is linear with respect to the
+length of the text.
 
 
 ## The layer approach
