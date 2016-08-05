@@ -734,9 +734,9 @@ Given position `p` in the user text `s`, let us compute the ratio
 
 for each character `c` that occurs in both `s` and `t`.
 
-The denominator is always equal to the frequency of character `c`
-throughout `s`, which we'll denote `count(c, s)`. This lets us simplify
-the formula:
+Observe that `left(c, s, p) + right(c, s, p)` is always equal to the total
+frequency of character `c` in `s`. By denoting the total frequency as
+`count(c, s)`, we can write the formula more concisely:
 
   a = left(c, s, p) / count(c, s)
 
@@ -765,11 +765,8 @@ For the formatting instance `14,^00` -> `1,400`, the scores are:
 
 Here the cursor position with the lowest score is indeed optimal.
 
-In my informal testing, I found this scoring approach to be more accurate
-than the one using the Levenshtein distance. However, there are still
-cases that the character-frequency formula gets wrong.
-
-For the formatting instance `14^,00` -> `1,400`, the scores are:
+There are still cases that the character-frequency formula gets wrong. For
+the formatting instance `14^,00` -> `1,400`, the scores are:
 
   ^1,400 2
   1^,400 1
@@ -783,27 +780,27 @@ score 1 with the character-frequency formula. By comparing these to the
 original state `14^,00`, we can see that `1^,400` scores 1 because the
 `4` is on the wrong side of the cursor, and `1,4^00` scores 1 because
 the `,` is on the wrong side. We humans know, but the formula does not,
-that digits are more important than commas in this text format.
+that commas are less important than commas in this text format.
 
-The approach with character frequencies has a distinct advantage over
-the Levenshtein-based formula when it comes to running time. Given a
-fixed set of characters in a text of size `n`, we can count the `left`
-frequencies at every position with one scan in `O(n)` time. The rightmost
-`left` frequency of a character gives us its `count` value. With a second
-scan through the `left` frequencies, we compute the ratio of `left` to
-`count`. The overall computational cost is linear with respect to the
+When it comes to running time, the character-frequency formula is
+distinctly superior to the Levenshtein-based formula. Given a fixed set
+of characters in a text of size `n`, we can count the `left` frequencies
+at every position with one scan in `O(n)` time. The rightmost `left`
+frequency gives us the `count` value. With a second scan through the
+`left` frequencies, we compute the ratio of `left` to `count` at each
+position. The overall computational cost is linear with respect to the
 length of the text.
 
 
 ## The layer approach
 
-A weakness of the foregoing retrospective formulae is that they treat all
+A weakness of the preceding retrospective formulae is that they treat all
 characters equally, whereas users do not. The way in which we discriminate
 among characters depends on the text format. In a `commatize`d input
-field, we primarily look at the cursor's position with respect to the
-digit characters. It would make sense to position the cursor among the
-digits in the text before considering commas. When it comes to `trimify`,
-our primary concern is the cursor's positioning among non-whitespace
+field, the user primarily looks at the cursor's position with respect to
+the digit characters. It would make sense to position the cursor among
+the digits in the text before considering commas. For `trimify`, the
+user's primary concern is the cursor's positioning among non-whitespace
 characters.
 
 These observations lead to the idea of evaluating cursor positions
@@ -921,9 +918,17 @@ cost is `O(n)` for text of length `n`.
 - one end: labor-intensive, customized, can be made highly accurate
 - other end: automatic, oblivious, prone to making mistakes
 
-subjective impression. In order to quantify the accuracy of each approach,
-I would have to assemble a significant corpus of problem instances along
-with a gold standard for judging formatted cursor positions.
+- it seems to that the layer approach occupies a sweet spot in the spectrum
+- for hands-off cursor maintenance, the character-frequency formula seems best
+- I only have subjective impressions
+- reason 1:
+  subjective impression. In order to quantify the accuracy of each approach,
+  I would have to assemble a significant corpus of problem instances along
+  with a gold standard for judging formatted cursor positions.
+- reason 2:
+  I don't care about quantification
+  an approach that makes errors is not a good approach at all
+
 
 I haven't found a fully satisfying approach to the problem of
 cursor maintenance. The most accurate solutions depend on a thorough
