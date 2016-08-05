@@ -763,6 +763,28 @@ For the formatting instance `14,^00` -> `1,400`, the scores are:
   1,40^0 0.25
   1,400^ 1
 
+Here the cursor position with the lowest score is indeed optimal.
+
+In my informal testing, I found this scoring approach to be more accurate
+than the one using the Levenshtein distance. However, there are still
+cases that the character-frequency formula gets wrong.
+
+For the formatting instance `14^,00` -> `1,400`, the scores are:
+
+  ^1,400 2
+  1^,400 1
+  1,^400 2
+  1,4^00 1
+  1,40^0 1.25
+  1,400^ 2
+
+The minimal score is a tie between `1^,400` and `1,4^00`, both of which
+score 1 with the character-frequency formula. By comparing these to the
+original state `14^,00`, we can see that `1^,400` scores 1 because the
+`4` is on the wrong side of the cursor, and `1,4^00` scores 1 because
+the `,` is on the wrong side. We humans know, but the formula does not,
+that digits are more important than commas in this text format.
+
 The character-frequency formula is advantageous in terms of computational
 cost. Given a fixed set of characters in a text of size `n`, we can count
 the `left` frequencies at every position with one scan in `O(n)` time.
