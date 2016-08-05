@@ -655,7 +655,7 @@ operation.
 The weakness of split Levenshtein is that it often computes tied
 scores. For example, given the user text and cursor
 
-  14^,00
+  14,^00
 
 with the formatted text
 
@@ -663,18 +663,19 @@ with the formatted text
 
 the following scores are computed for each formatted cursor position:
 
-  ^1,400 4
-  1^,400 2
+  ^1,400 6
+  1^,400 4
   1,^400 2
   1,4^00 2
-  1,40^0 4
-  1,400^ 6
+  1,40^0 3
+  1,400^ 5
 
 Whenever there is a tie, I arbitrarily choose the leftmost of the
-lowest-scoring positions. In many cases, such as the one shown here, this
-turns out to be a poor choice. Here the rightmost among the tied positions
-is best. In other cases, the average of the tied positions is visually
-optimal. There is no simple tie-breaking strategy that works consistently.
+lowest-scoring positions. In many cases, such as the one shown here,
+this turns out to be a poor choice. Here the rightmost among the tied
+positions is best. In other cases, it would be better to use the leftmost
+tied position or something in the middle. There is no simple tie-breaking
+strategy that works consistently.
 
 Another drawback is the computational cost. It takes `O(n^2)` time
 to compute the Levenshtein distance for a pair of strings of length
@@ -695,37 +696,37 @@ character frequencies on each side of the cursor.
 
 For example, in the state
 
-  `  Hello, ^ world.  `
+  `  later, ^ alligator  `
 
-we can observe that the character `l` occurs twice to the left of the
-cursor and once to its right.
+we can observe that the character `l` occurs once to the left of the
+cursor and twice to its right.
 
 Let's define a pair of character-frequency functions, `left` and `right`,
 that each take a character, a string, and a position. In the situation
 above, with
 
-  s = `  Hello,  world.  `
+  s = `  later,  alligator  `
 
-  p = 10
+  p = 9
 
 we have:
 
-  left('l', s, p) = 2
+  left('l', s, p) = 1
 
-  right('l', s, p) = 1
+  right('l', s, p) = 2
 
 Suppose the text `s` is transformed by some formatting operation into
 the text `t`. If there is a position `q` in `t` such that
 
-  left('l', t, q) = 2
+  left('l', t, q) = 1
 
-  right('l', t, q) = 1
+  right('l', t, q) = 2
 
-we can say that `q` is a good choice of formatted cursor position with
-respect to the character `l`. There may be several such cursor positions,
-or there may be none. Then there are the left-right frequencies of
-characters other than `l`. How do we achieve a balance among the various
-characters?
+we may conjecture that `q` is a good choice of formatted cursor
+position with respect to the character `l`. There may be several such
+cursor positions, or there may be none. Then there are the left-right
+frequencies of characters other than `l`. How do we achieve a balance
+among the various characters?
 
 Given position `p` in the user text `s`, let us compute the ratio
 
@@ -734,7 +735,8 @@ Given position `p` in the user text `s`, let us compute the ratio
 for each character `c` that occurs in both `s` and `t`.
 
 The denominator is always equal to the frequency of character `c`
-throughout `s`, which we'll denote `count(c, s)`, letting us write:
+throughout `s`, which we'll denote `count(c, s)`. This lets us simplify
+the formula:
 
   a = left(c, s, p) / count(c, s)
 
@@ -744,7 +746,7 @@ Similarly, at each position `q` in the formatted text `t`, we calculate
 
 for each character `c` that is common to `s` and `t`.
 
-Then we take the square of the absolute difference:
+Then we take the square of the absolute difference between `a` and `b`:
 
   cost(c, q) = abs(a - b) ** 2
 
@@ -752,13 +754,14 @@ The score of position `q` is the sum of the values `cost(c, q)` over all
 common characters `c`. We choose the position that achieves the minimum
 score. If there are several, we choose the leftmost.
 
--- example
+For the formatting instance `14,^00` -> `1,400`, the scores are:
 
-In my testing, I have found that this scoring formula works approximately
-as well as the one using the Levenshtein distance. This is a subjective
-impression. In order to quantify the accuracy of each approach, I would
-have to assemble a significant corpus of problem instances along with
-a gold standard for judging formatted cursor positions.
+  ^1,400 3
+  1^,400 2
+  1,^400 1
+  1,4^00 0
+  1,40^0 0.25
+  1,400^ 1
 
 The character-frequency formula is advantageous in terms of computational
 cost. Given a fixed set of characters in a text of size `n`, we can count
@@ -776,10 +779,10 @@ A weakness of the foregoing retrospective formulae is that they treat all
 characters equally, whereas users do not. The way in which we discriminate
 among characters depends on the text format. In a `commatize`d input
 field, we primarily look at the cursor's position with respect to the
-digit characters. It would make sense to position the cursor among
-the digits in the text before looking at any commas. When it comes
-to `trimify`, our primary concern is the cursor's positioning among
-non-whitespace characters.
+digit characters. It would make sense to position the cursor among the
+digits in the text before considering commas. When it comes to `trimify`,
+our primary concern is the cursor's positioning among non-whitespace
+characters.
 
 These observations lead to the idea of evaluating cursor positions
 relative to a sequence of character classes that we'll call layers. The
@@ -870,9 +873,10 @@ cursor position:
 
 The computational cost of the layer approach is in the same order of
 growth as the retrospective approach with character frequencies, which
-uses a very similar scoring function. We can compute the total layer
-size for a piece of text in one scan, and in a second scan we compute
-the ratios.
+uses a very similar scoring function. In one scan of the text we count
+the number of layer characters to the left of each position. In a second
+scan of candidate positions, we compute the position scores. The overall
+cost is `O(n)` for text of length `n`.
 
 - calculating the ratio takes linear time, as with retrospective
 
@@ -894,6 +898,10 @@ the ratios.
 - a spectrum of approaches
 - one end: labor-intensive, customized, can be made highly accurate
 - other end: automatic, oblivious, prone to making mistakes
+
+subjective impression. In order to quantify the accuracy of each approach,
+I would have to assemble a significant corpus of problem instances along
+with a gold standard for judging formatted cursor positions.
 
 I haven't found a fully satisfying approach to the problem of
 cursor maintenance. The most accurate solutions depend on a thorough
