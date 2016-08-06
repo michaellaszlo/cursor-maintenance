@@ -778,9 +778,10 @@ the formatting instance `14^,00` -> `1,400`, the scores are:
 The minimal score is a tie between `1^,400` and `1,4^00`, both of which
 score 1 with the character-frequency formula. By comparing these to the
 original state `14^,00`, we can see that `1^,400` scores 1 because the
-`4` is on the wrong side of the cursor, and `1,4^00` scores 1 because
-the `,` is on the wrong side. We humans know, but the formula does not,
-that commas are less important than commas in this text format.
+`4` was previously to the left of the cursor and here is to the right.
+Similarly, `1,4^00` scores 1 because the `,` has moved from the right
+to the left. The formula doesn't know, as humans do, that it's more
+important to keep the digits properly disposed around the cursor.
 
 When it comes to running time, the character-frequency formula is
 distinctly superior to the Levenshtein-based formula. Given a fixed set
@@ -788,8 +789,8 @@ of characters in a text of size `n`, we can count the `left` frequencies
 at every position with one scan in `O(n)` time. The rightmost `left`
 frequency gives us the `count` value. With a second scan through the
 `left` frequencies, we compute the ratio of `left` to `count` at each
-position. The overall computational cost is linear with respect to the
-length of the text.
+position. The time complexity is linear with respect to the length of
+the text.
 
 
 ## The layer approach
@@ -810,7 +811,11 @@ for a given formatting operation. For example, let's define two layers
 for `commatize`: the first layer consists of the digit characters `0`
 through `9`, and the second layer consists of the comma character `,`.
 
--- example
+The text `1,400` has the following characters in each layer:
+
+  full text: 1,400
+    layer 1: 1 400
+    layer 2:  ,
 
 For a given layer `L`, we assign a score to cursor position `p` in text
 `s` by computing the ratio
@@ -838,8 +843,6 @@ If several positions in the formatted text are equally close to the
 target score, these positions must be adjacent because the scoring
 function increases monotonically from left to right.
 
--- example
-
 Let's write `[l_0, r_0]` to denote the range of optimal positions found
 for layer `L_0` over the entire formatted text. If `l_0` is equal to
 `r_0`, we stop looking and return `l_0` as our choice of cursor position.
@@ -850,18 +853,19 @@ in the formatted text.
 We ignore positions outside the range `[l_0, r_0]` even if they achieve
 a closer score in layer `L_1`. The search in the higher-ranked `L_0`
 restricts the range of candidate positions. Thus, the range `[l_1, r_1]`
-must be a subrange (not necessarily a strict subrange) of `[l_0, r_0]`.
+must be a subrange of `[l_0, r_0]`. (It is a non-strict subrange because
+the ranges may be equal.)
 
 We successively scan layers until the candidate range narrows to a single
 position or no more layers remain. If we run out of layers, we return the
 left end of the final range. Optionally, we can configure the algorithm
 to return the right end of the final range.
 
-All in all, the parameters that we supply to the layer approach are a
-sequence of layer definitions and a one-bit value indicating whether
-we prefer the left end or right end as a final tie-breaker. Each layer
-can be defined with a regular expression or with a function that takes
-a character and returns `true` if the character is in the layer.
+The complete set of parameters that we supply to the layer approach
+consists of a sequence of layer definitions and a one-bit value indicating
+whether the final tie-breaker should be the left end or right end of the
+range. Each layer can be defined with a regular expression that matches
+single characters belonging to the layer.
 
 -- example
 
@@ -890,14 +894,12 @@ cursor position:
 
 -- observations
 
-The computational cost of the layer approach is in the same order of
-growth as the retrospective approach with character frequencies, which
-uses a very similar scoring function. In one scan of the text we count
-the number of layer characters to the left of each position. In a second
-scan of candidate positions, we compute the position scores. The overall
-cost is `O(n)` for text of length `n`.
-
-- calculating the ratio takes linear time, as with retrospective
+The layer approach has the same time complexity as the retrospective
+approach with character frequencies, which uses a very similar scoring
+function. In one scan of the text we count the number of layer characters
+to the left of each position. In a second scan of candidate positions,
+we compute the position scores. The overall cost is `O(n)` for text of
+length `n`.
 
 - layers may overlap
 - layers may cover a strict subset of all possible input characters  
