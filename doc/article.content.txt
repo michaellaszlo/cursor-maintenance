@@ -867,30 +867,19 @@ whether the final tie-breaker should be the left end or right end of the
 range. Each layer can be defined with a regular expression that matches
 single characters belonging to the layer.
 
--- example
+We can use these regular expressions for `commatize`:
 
-Consider a state in which the user has just entered a `0`:
+  layer 1: /[0-9]/
+  layer 2: /,/
 
-  10^00,900
+Let's review the formatting instance `14^,00` -> `1,400` using the
+layer approach. We start by examining the layer 1 characters in the
+original text.  There are four digits in `14^,00` and two of them are
+to the left of the cursor. The target ratio for layer 1 is:
 
-The text `1000,900` is formatted to `1,000,900`.
+  2 / 4 = 0.5.
 
-According to retrospection with character frequencies, the optimum result
-is this:
 
-  1^,000,900
-
-This inconvenient cursor position is caused by the indiscriminate
-averaging of character frequency ratios. For the comma character, the
-frequency ratio in the user text is 0:1, and the closest match in the
-formatted text is 0:2, which occurs when the cursor is to the left of all
-commas. This ratio match outweighs the ratio match among `0` characters.
-
-With the layer approach, on the other hand, we start by evaluating
-cursor positions among the digit characters. This yields a single optimal
-cursor position:
-
-  1,0^00,900
 
 -- observations
 
@@ -901,6 +890,7 @@ to the left of each position. In a second scan of candidate positions,
 we compute the position scores. The overall cost is `O(n)` for text of
 length `n`.
 
+configuration is not as straightforward as it may seem
 - layers may overlap
 - layers may cover a strict subset of all possible input characters  
 - consider the choices for the last layer
