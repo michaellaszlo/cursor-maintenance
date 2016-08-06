@@ -872,12 +872,37 @@ We can use these regular expressions for `commatize`:
   layer 1: /[0-9]/
   layer 2: /,/
 
-Let's review the formatting instance `14^,00` -> `1,400` using the
-layer approach. We start by examining the layer 1 characters in the
-original text.  There are four digits in `14^,00` and two of them are
-to the left of the cursor. The target ratio for layer 1 is:
+Let's review the formatting instance `14^,00` -> `1,400` using the layer
+approach. We start by scanning the original text and counting its layer
+1 characters. There are four digits in `14^,00` and two of them are to
+the left of the cursor. The target ratio for layer 1 is:
 
   2 / 4 = 0.5.
+
+Now we consider the formatted text. It also contains four layer 1
+characters. The initial candidate range is `[0, 5]`. We count the number
+of layer 1 characters that are to the left of each cursor position in
+the candidate range:
+
+      formatted text:  1 , 4 0 0
+  layer 1 characters:  1   4 0 0
+     cursor position: 0 1 2 3 4 5
+       layer 1 count: 0 1 1 2 3 3
+
+At position 2, the ratio is 2 / 4 = 0.5, which is equal to the target ratio.
+
+
+    character index: 01234
+  layer 1 character: 14 00
+
+  0.5 ":" 2 "/" 4
+
+  0 0 ":" 0 "/" 4
+  1 0.25 ":" 1 "/" 4
+  2 0.25 ":" 1 "/" 4
+  3 0.5 ":" 2 "/" 4
+  4 0.75 ":" 3 "/" 4
+  5 1 ":" 4 "/" 4
 
 
 
