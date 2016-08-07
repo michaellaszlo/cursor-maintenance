@@ -781,9 +781,9 @@ original state `14^,00`, we can see that `1^,400` scores 1 because the
 `4` was previously to the left of the cursor and here is to the right.
 Similarly, `1,4^00` scores 1 because the `,` has moved from the right
 to the left. The formula doesn't know, as humans do, that it's more
-important to keep the digits properly disposed around the cursor.
+important to keep the digits disposed properly around the cursor.
 
-When it comes to running time, the character-frequency formula is
+When it comes to computational cost, the character-frequency formula is
 distinctly superior to the Levenshtein-based formula. Given a fixed set
 of characters in a text of size `n`, we can count the `left` frequencies
 at every position with one scan in `O(n)` time. The rightmost `left`
@@ -880,40 +880,24 @@ the left of the cursor. The target ratio for layer 1 is:
   2 / 4 = 0.5.
 
 Now we consider the formatted text. It also contains four layer 1
-characters. The initial candidate range is `[0, 5]`. We count the number
-of layer 1 characters that are to the left of each cursor position in
-the candidate range:
+characters. The initial candidate range is `[0, 5]`. We count the layer
+1 characters to the left of each cursor position in the candidate range:
 
       formatted text:  1 , 4 0 0
   layer 1 characters:  1   4 0 0
      cursor position: 0 1 2 3 4 5
-       layer 1 count: 0 1 1 2 3 3
+       layer 1 count: 0 1 1 2 3 4
 
-At position 2, the ratio is 2 / 4 = 0.5, which is equal to the target ratio.
+At position 3, the ratio is 2 / 4 = 0.5, which is equal to the target
+ratio. No other position achieves this, so we return the result 3:
 
+  1,4^00
 
-    character index: 01234
-  layer 1 character: 14 00
-
-  0.5 ":" 2 "/" 4
-
-  0 0 ":" 0 "/" 4
-  1 0.25 ":" 1 "/" 4
-  2 0.25 ":" 1 "/" 4
-  3 0.5 ":" 2 "/" 4
-  4 0.75 ":" 3 "/" 4
-  5 1 ":" 4 "/" 4
-
-
-
--- observations
-
-The layer approach has the same time complexity as the retrospective
-approach with character frequencies, which uses a very similar scoring
-function. In one scan of the text we count the number of layer characters
-to the left of each position. In a second scan of candidate positions,
-we compute the position scores. The overall cost is `O(n)` for text of
-length `n`.
+Not only has the layer approach succeeded in this case of `commatize`, we
+can be assured that it will always keep the cursor positioned correctly
+with respect to the digits in the text. That's because `commatize` does
+not delete or insert digits, making the top layer equal in the original
+text and formatted text.
 
 configuration is not as straightforward as it may seem
 - layers may overlap
@@ -924,12 +908,15 @@ configuration is not as straightforward as it may seem
   - leave the lowest-priority significant layer as the last layer
     -> break the tie to left or right without looking at other characters
 
-- once the layers and side preference are configured, the rest is automatic
-- naming the significant layers is easy
-- the difficulty in configuration comes down to edge cases
+The layer approach has the same time complexity as the retrospective
+approach with character frequencies, which uses a very similar scoring
+function. In one scan of the text we count the number of layer characters
+to the left of each position. In a second scan of candidate positions,
+we compute the position scores. The overall cost is `O(n)` for text of
+length `n`.
 
 
-## Summary
+## Next steps
 
 - a spectrum of approaches
 - one end: labor-intensive, customized, can be made highly accurate
@@ -946,6 +933,9 @@ configuration is not as straightforward as it may seem
   I don't care about quantification
   an approach that makes errors is not a good approach at all
 
+- once the layers and side preference are configured, the rest is automatic
+- naming the significant layers is easy
+- the difficulty in configuration comes down to edge cases
 
 I haven't found a fully satisfying approach to the problem of
 cursor maintenance. The most accurate solutions depend on a thorough
