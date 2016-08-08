@@ -907,6 +907,19 @@ length `n`.
 
 ## Next steps
 
+If you want to implement a dynamically formatted input field with
+cursor maintenance, which approach should you choose? It depends on what
+formatting operation you're dealing with and how much time you have. You
+can achieve the highest level of accuracy by coding an ad hoc solution,
+but this is also the most labor-intensive approach. Among the flavors of
+ad hoc I have explored, my preference is for the meta approach because
+it can simplify the cursor calculations.
+
+At the other end of the spectrum from ad hoc is the retrospective
+approach with a general-purpose algorithm such as balanced frequencies,
+which lets you plug in any formatting operation blindly. It requires no
+customization and positions the cursor correctly much of the time.
+
 - a spectrum of approaches
 - one end: labor-intensive, customized, can be made highly accurate
 - other end: automatic, oblivious, prone to making mistakes
