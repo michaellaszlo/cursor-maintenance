@@ -913,18 +913,26 @@ formatting operation you're dealing with and how much time you have. You
 can achieve the highest level of accuracy by coding an ad hoc solution,
 but this is also the most labor-intensive approach. Among the flavors of
 ad hoc I have explored, my preference is for the meta approach because
-it can simplify the cursor calculations.
+it can help you simplify the cursor calculations. It still requires an
+intimate knowledge of the formatting operation, however.
 
-At the other end of the spectrum from ad hoc is the retrospective
-approach with a general-purpose algorithm such as balanced frequencies,
-which lets you plug in any formatting operation blindly. It requires no
-customization and positions the cursor correctly much of the time.
+At the other end of the spectrum from ad hoc is the retrospective approach
+with an all-purpose scoring function such as balanced frequencies. It
+requires no configuration and positions the cursor correctly much of
+the time. I'm afraid I can't do better than that vague, subjective
+assessment. In order to quantify the accuracy of any cursor-maintenance
+implementation, I would have to test it on a corpus of human text-editing
+actions drawn from a real-life application, and I would need a human
+judgment of cursor placement for each formatting instance to serve as
+a gold standard.
 
 - a spectrum of approaches
 - one end: labor-intensive, customized, can be made highly accurate
 - other end: automatic, oblivious, prone to making mistakes
 
-- it seems to that the layer approach occupies a sweet spot in the spectrum
+- it seems to me that the layer approach occupies a sweet spot in the spectrum
+  - some configuration and the rest is automatic
+  - can be made 
 - for hands-off cursor maintenance, the character-frequency formula seems best
 - I only have subjective impressions
 - reason 1:
