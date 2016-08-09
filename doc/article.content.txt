@@ -928,13 +928,11 @@ a gold standard.
 
 Would it be worthwhile to conduct such a study? Perhaps not. I would
 argue that the only acceptable cursor-maintenance algorithm is one that
-positions the cursor consistently and correctly all of the time. If
-there is even a small chance that the cursor will jump to a position
-that surprises the user, I consider it an unacceptable user interface.
+places the cursor consistently and correctly in every instance. If there
+are cases in which the cursor jumps to a surprising position, I consider
+the user interface to be broken. Therefore, I believe that we should
+only look for solutions that can be proven to work all of the time.
 
-- a spectrum of approaches
-- one end: labor-intensive, customized, can be made highly accurate
-- other end: automatic, oblivious, prone to making mistakes
 
 - it seems to me that the layer approach occupies a sweet spot in the spectrum
   - some configuration and the rest is automatic
