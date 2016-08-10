@@ -917,35 +917,26 @@ it can help you simplify the cursor calculations. It still requires an
 intimate knowledge of the formatting operation, however.
 
 At the other end of the spectrum from ad hoc is the retrospective approach
-with an all-purpose scoring function such as balanced frequencies. It
-requires no configuration and positions the cursor correctly much of
-the time. I'm afraid I can't do better than that vague, subjective
-assessment. In order to quantify the accuracy of any cursor-maintenance
-implementation, I would have to test it on a corpus of human text-editing
-actions drawn from a real-life application, and I would need a human
-judgment of cursor placement for each formatting instance to serve as
-a gold standard.
+with a configuration-free scoring function. Among these, I recommend
+balanced frequencies, which positions the cursor correctly much of
+the time. I'm afraid I can't do better than that vague assessment. In
+order to quantify the accuracy of any cursor-maintenance implementation,
+I would have to test it on a corpus of human text-editing actions drawn
+from a real-life application, and I would need a human judgment of cursor
+placement for each formatting instance to serve as a gold standard.
 
-Would it be worthwhile to conduct such a study? Perhaps not. I would
-argue that the only acceptable cursor-maintenance algorithm is one that
-places the cursor consistently and correctly in every instance. If there
-are cases in which the cursor jumps to a surprising position, I consider
-the user interface to be broken. Therefore, I believe that we should
-only look for solutions that can be proven to work all of the time.
+It may not be worthwhile to conduct such a study. I would argue that
+the only acceptable cursor-maintenance algorithm is one that places the
+cursor consistently and correctly in every instance. If there are cases
+in which the cursor jumps to a surprising position, I consider the user
+interface to be broken. Therefore, I believe that we should only look
+for solutions that can be proven to work all of the time.
 
+It seems to me that the layer approach occupies a sweet spot
+in the spectrum.  After the initial configuration, it proceeds
+automatically. This is not to say that the configuration is
+straightforward.
 
-- it seems to me that the layer approach occupies a sweet spot in the spectrum
-  - some configuration and the rest is automatic
-  - can be made 
-- for hands-off cursor maintenance, the character-frequency formula seems best
-- I only have subjective impressions
-- reason 1:
-  subjective impression. In order to quantify the accuracy of each approach,
-  I would have to assemble a significant corpus of problem instances along
-  with a gold standard for judging formatted cursor positions.
-- reason 2:
-  I don't care about quantification
-  an approach that makes errors is not a good approach at all
 
 - naming the significant layers is easy
 - the rest isn't straightforward
