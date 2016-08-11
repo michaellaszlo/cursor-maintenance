@@ -913,38 +913,39 @@ formatting operation you're dealing with and how much time you have. You
 can achieve the highest level of accuracy by coding an ad hoc solution,
 but this is also the most labor-intensive approach. Among the flavors of
 ad hoc I have explored, my preference is for the meta approach because
-it can help you simplify the cursor calculations. It still requires an
-intimate knowledge of the formatting operation, however.
+it can lead to simpler cursor calculations. Like every ad hoc approach,
+it depends on thorough knowledge of the formatting operation.
 
-At the other end of the spectrum from ad hoc is the retrospective approach
-with a configuration-free scoring function. Among these, I recommend
-balanced frequencies, which positions the cursor correctly much of
-the time. I'm afraid I can't do better than that vague assessment. In
-order to quantify the accuracy of any cursor-maintenance implementation,
-I would have to test it on a corpus of human text-editing actions drawn
-from a real-life application, and I would need a human judgment of cursor
-placement for each formatting instance to serve as a gold standard.
+At the other end of the spectrum is the retrospective approach
+with a zero-configuration scoring function. Among these, I recommend
+balanced frequencies, which positions the cursor correctly much of the
+time. I'm afraid I can't do better than that vague assessment. In order
+to quantify the accuracy of any cursor-maintenance implementation, I
+would have to test it on a corpus of human text-editing actions drawn
+from an application in the wild, and I would need a human judgment of
+the acceptable cursor positions for each formatting instance.
 
 It may not be worthwhile to conduct such a study. I would argue that
 the only acceptable cursor-maintenance algorithm is one that places the
 cursor consistently and correctly in every instance. If there are cases
 in which the cursor jumps to a surprising position, I consider the user
-interface to be broken. Therefore, I believe that we should only look
-for solutions that can be proven to work all of the time.
+interface to be broken. I believe that we should look for solutions that
+can be proven to work all of the time.
 
-It seems to me that the layer approach occupies a sweet spot
-in the spectrum.  After the initial configuration, it proceeds
-automatically. This is not to say that the configuration is
-straightforward.
+In the spectrum of approaches from custom-made to configuration-free,
+I would say that the layer approach occupies a sweet spot. It requires
+little configuration compared to the ad hoc approaches. For certain
+formatting operations, it can be made completely accurate. This is not
+to say that coming up with a correct configuration is a straightforward
+process. There are many possibilities and no obvious way to choose
+among them.
 
+Consider the choice we have to make for the final layer. After the
+significant layers, should we have a catchall layer that recognizes
+every character? Should it only match characters that are not matched
+by a higher-priority layer? Or should we dispense with any such layer
+and break ties to left or right after the last significant layer?
 
-- naming the significant layers is easy
-- the rest isn't straightforward
-- consider the choices for the last layer
-  - all characters
-  - all characters not matched by an earlier layer
-  - leave the lowest-priority significant layer as the last layer
-    -> break the tie to left or right without looking at other characters
 - in the preceding example, it would be better to omit the comma layer
   - always pick the leftmost tied position in the digit layer
   - this ensures that the cursor is always to the left of any commas
