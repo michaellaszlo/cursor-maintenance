@@ -1,6 +1,9 @@
 
 - clickable inter-text notes marked by ellipses:
   http://behindthetower.org/armed-civilians-and-the-ut-tower-tragedy
-  - are these equivalent to footnotes?
+
+- clickable footnotes:
+  http://www.lrb.co.uk/v37/n23/thomas-chatterton-williams/loaded-dice
+
 
 

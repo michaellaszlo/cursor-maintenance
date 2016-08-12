@@ -952,6 +952,12 @@ and break ties to left or right after the last significant layer?
 - edge cases are difficult
   - positions where layers meet
 
+Even if you succeed in finding a configuration that places the cursor
+correctly, it may not be desirable to dynamically format the text. For
+example, consider a formatting operation that strips whitespace from both
+ends of the input. If the input field applies this after every input,
+it becomes impossible to enter a space at the end of the text.
+
 Can you avoid cursor maintenance altogether? If you have an input field
 with a movable cursor and if the field formats its contents in real time
 after each user action, you should try to find a user-friendly cursor
@@ -962,11 +968,4 @@ formatting. It would be better to redesign the interface by, for example,
 keeping the unformatted text in the input field while displaying the
 formatted text in a non-editable text area.
 
-If you do want to perform real-time formatting with cursor maintenance,
-I advise against the ad hoc approach. It can be tempting to calculate
-cursor positions without a systematic approach, but doing so exposes you
-to a wide range of logical errors. An ad hoc computation is suitable
-only if you understand the formatting operation completely and you
-see exactly how to calculate formatted cursor positions. Otherwise,
-I recommend that you employ one of the other approaches.
 
