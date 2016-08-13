@@ -908,64 +908,54 @@ length `n`.
 ## Next steps
 
 If you want to implement a dynamically formatted input field with
-cursor maintenance, which approach should you choose? It depends on what
-formatting operation you're dealing with and how much time you have. You
-can achieve the highest level of accuracy by coding an ad hoc solution,
-but this is also the most labor-intensive approach. Among the flavors of
-ad hoc I have explored, my preference is for the meta approach because
-it can lead to simpler cursor calculations. Like every ad hoc approach,
-it depends on thorough knowledge of the formatting operation.
+cursor maintenance, which approach should you choose? You can achieve
+the highest level of accuracy by coding an ad hoc solution, as long as
+you have the time and expertise to do so. Among the flavors of ad hoc I
+have explored, my preference is for the meta approach because it helps
+you abstract away the cursor calculations. Like every ad hoc approach,
+it depends on detailed knowledge of the formatting operation.
 
-At the other end of the spectrum is the retrospective approach
-with a zero-configuration scoring function. Among these, I recommend
-balanced frequencies, which positions the cursor correctly much of the
-time. I'm afraid I can't do better than that vague assessment. In order
-to quantify the accuracy of any cursor-maintenance implementation, I
-would have to test it on a corpus of human text-editing actions drawn
-from an application in the wild, and I would need a human judgment of
-the acceptable cursor positions for each formatting instance.
+At the other end of the spectrum is the retrospective approach with
+a zero-configuration scoring function. Among these I recommend the
+frequency-balancing formula, which positions the cursor correctly much
+of the time. I can't do better than that vague assessment. In order to
+quantify the accuracy of a cursor-maintenance implementation, I would
+have to test it on a corpus of human text-editing actions drawn from
+an application in the wild, and I would need a human judgment of the
+acceptable cursor positions for each formatting instance.
 
 It may not be worthwhile to conduct such a study. I would argue that
-the only acceptable cursor-maintenance algorithm is one that places the
-cursor consistently and correctly in every instance. If there are cases
-in which the cursor jumps to a surprising position, I consider the user
-interface to be broken. I believe that we should look for solutions that
-can be proven to work all of the time.
+the only acceptable cursor-maintenance algorithm is one that places
+the cursor consistently and correctly in every instance. If there are
+cases in which the cursor jumps to a surprising position, I consider the
+input field to be broken. Instead of trying to quantify the inaccuracy
+of a cursor-maintenance algorithm, I believe that we should look for
+solutions that we can prove to be completely accurate.
 
-In the spectrum of approaches from custom-made to configuration-free,
-I would say that the layer approach occupies a sweet spot. It requires
-little configuration compared to the ad hoc approaches. For certain
-formatting operations, it can be made completely accurate. This is not
-to say that coming up with a correct configuration is a straightforward
-process. There are many possibilities and no obvious way to choose
-among them.
+In the spectrum of approaches from fully customized to configuration-free,
+the layer approach occupies a sweet spot. It requires little configuration
+compared to the ad hoc approaches. For certain formatting operations,
+it can be made completely accurate. This is not to say that coming up
+with a correct configuration is a straightforward process. There are
+many configuration choices and no obvious way to choose among them.
 
-Consider the choice we have to make for the final layer. After the
-significant layers, should we have a catchall layer that recognizes
-every character? Should it only match characters that are not matched
-by a higher-priority layer? Or should we dispense with any such layer
-and break ties to left or right after the last significant layer?
+Consider the choice we have to make for the final layer. Presume that
+we have already defined the significant layers, which is to say layers
+recognizing character classes that are explicitly named by the formatting
+operation. Now should we have a catchall layer that recognizes all
+possible characters? Should it only match characters that are not matched
+by a significant layer? Or should we dispense with a catchall layer and
+break ties to left or right after the last significant layer? Each of
+these seems to be a sensible option, yet each may lead to a different
+and perhaps non-optimal cursor maintainer.
 
-- in the preceding example, it would be better to omit the comma layer
-  - always pick the leftmost tied position in the digit layer
-  - this ensures that the cursor is always to the left of any commas
-- edge cases are difficult
-  - positions where layers meet
+- in the commatize example, it would be better to omit the comma layer
+- always pick the leftmost tied position in the digit layer
+- this ensures that the cursor is always to the left of any commas
 
 Even if you succeed in finding a configuration that places the cursor
 correctly, it may not be desirable to dynamically format the text. For
 example, consider a formatting operation that strips whitespace from both
 ends of the input. If the input field applies this after every input,
 it becomes impossible to enter a space at the end of the text.
-
-Can you avoid cursor maintenance altogether? If you have an input field
-with a movable cursor and if the field formats its contents in real time
-after each user action, you should try to find a user-friendly cursor
-position in the formatted text. In my opinion, failing to do so degrades
-the user experience to an unacceptable degree. If you do not want to
-attempt cursor maintenance, I recommend that you avoid real-time input
-formatting. It would be better to redesign the interface by, for example,
-keeping the unformatted text in the input field while displaying the
-formatted text in a non-editable text area.
-
 
