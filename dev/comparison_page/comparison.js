@@ -111,15 +111,13 @@ var CursorMaintenanceComparison = (function () {
     return element;
   }
 
-  function makeApproachName(s, isRetrospective) {
+  function makeApproachName(s) {
     var parts = s.replace(/^\s+|\s+$/g, '').split(/\s+/),
         i, name;
     for (i = 1; i < parts.length; ++i) {
       parts[i] = parts[i].charAt(0).toUpperCase() + parts[i].substring(1);
     }
     name = parts.join('');
-    //if (isRetrospective) {
-    //  name = 'retro
     return name;
   }
 
@@ -144,7 +142,7 @@ var CursorMaintenanceComparison = (function () {
       }
       cells = row.getElementsByTagName('td');
       isRetrospective = (row.className.indexOf('retrospective') != -1);
-      approach = makeApproachName(cells[0].innerHTML, isRetrospective);
+      approach = makeApproachName(cells[0].innerHTML);
       operations.forEach(function (operation) {
         var button,
             cell = make('td', { parent: row }),
