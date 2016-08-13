@@ -959,3 +959,31 @@ example, consider a formatting operation that strips whitespace from both
 ends of the input. If the input field applies this after every input,
 it becomes impossible to enter a space at the end of the text.
 
+- show example
+
+- another example: removal of zero-padding
+
+- and another: the user types "123," in a commatized field
+
+- edge cases are difficult
+  - positions where layers meet
+
+- a dynamically formatted input field must maintain the cursor perfectly
+  - otherwise, display the formatted text separately from the input field
+- a perfectly cursor-maintained input field may be user-unfriendly
+
+- despite all the difficulties, the allure remains
+  - an input field that formats on the fly would be magical
+- what formatting can be done dynamically without impeding the user?
+- perhaps we can develop a formalism for reasoning about this
+- if so, maybe it will lead to systematic configuration of cursor maintenance
+
+for now, I recommend the following strategy
+- if cursor maintenance worked perfectly, would your input field be usable?
+  - if not, can you modify the formatting operation to fix this problem?
+- if so, analyze the f.o. and break it down into layers
+- decide on tie-breaking: catch-all layer? left-right?
+- tweak until it works perfectly
+- if you can't get it to work perfectly, bail out
+
+
