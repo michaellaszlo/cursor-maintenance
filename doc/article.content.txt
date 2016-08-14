@@ -905,7 +905,7 @@ we compute the position scores. The overall cost is `O(n)` for text of
 length `n`.
 
 
-## Next steps
+## Discussion
 
 If you want to implement a dynamically formatted input field with
 cursor maintenance, which approach should you choose? You can achieve
@@ -948,23 +948,34 @@ or may not work well with a given formatting operation.
 In case of `commatize`, it is tempting to define a comma layer, as we
 did in the example above, but this makes for less consistent cursor
 positioning than if we reduce the configuration to a single layer that
-matches digits. Then if we break ties toward the left, we ensure that when
-the cursor is adjacent to a comma, it is always to the left of the comma.
+matches digits. Then if we break ties toward the left, we ensure that
+when the cursor and a comma are adjacent, the cursor is always placed
+to the left of the comma.
 
-Even if you succeed in finding a configuration that places the cursor
-correctly, it may not be desirable to dynamically format the text. For
-example, consider a formatting operation that strips whitespace from both
-ends of the input. If the input field applies this after every input,
-it becomes impossible to enter a space at the end of the text.
+Even if we achieve reliable cursor maintenance for a given formatting
+operation, we have to ask ourselves whether it makes sense to dynamically
+format the input. In some cases, doing so makes the input field unusable.
 
-- show example
+Consider a formatting operation that strips all whitespace from both
+ends of the input. If an input field applied this format dynamically,
+it would be impossible to type a space character at the right end: the
+input `Hello, ` would be instantly formatted to `Hello,`, effectively
+deleting the space each time the user attempted to type it.
 
-- another example: removal of zero-padding
+Our definition of `trimify` avoids this problem by allowing a single
+space at the right end of the input. However, this may mean that the
+input as shown in the input field is not in its final form because a
+postprocessing format will remove all whitespace from the right end.
 
-- and another: the user types "123," in a commatized field
+- problem: the user types "123," in a commatized field
+
+- problem: removal of zero-padding
 
 - edge cases are difficult
   - positions where layers meet
+
+
+# Next steps
 
 - a dynamically formatted input field must maintain the cursor perfectly
   - otherwise, display the formatted text separately from the input field
