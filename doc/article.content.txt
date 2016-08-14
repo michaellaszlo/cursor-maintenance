@@ -5,11 +5,10 @@ process the user's input to show it in a standard format. If you want
 to do real-time formatting and update the text in the input field while
 the user is editing it, this article is especially for you.
 
-If you are well acquainted with the problem of maintaining cursor position
-and you want to get straight to my code, you can see a live demo and
-clone my GitHub repository. The documentation on GitHub tells you how to
-use the code in your own project. In this article, I analyze the problem
-and describe various approaches I explored in the search for a solution.
+If you are well acquainted with the problem of maintaining cursor
+position, you can try out my live demo and look at the GitHub
+documentation if you want to use my code in your own project. In this
+article, I analyze the problem and describe my quest for a solution.
 
 
 ## Here is the problem
@@ -998,16 +997,16 @@ formatted input field is inherently unfriendly to users.
 Before making a dynamically formatted input field, think about whether it
 would help or hinder the user. Are there input sequences that would cause
 destructive formatting? If so, dynamic formatting is not suitable for
-this format. You should either display the formatted text separately from
-the input field, or format the input field on demand. In the latter case,
-the input field formats its content when the user performs a non-editing
-action such as clicking a button or hitting a special key such as Tab
-or Enter.
+this format. Either you should display the formatted text separately from
+the input field, or you should format the input field on demand. In the
+latter case, the input field formats its content when the user performs
+a non-editing action such as clicking a button or hitting a special key
+such as Tab or Enter.
 
 If you are formatting an input field on demand, cursor maintenance is
 not strictly necessary. You can remove the cursor at formatting time and
 require the user to click inside the input field to position the cursor
-and resume editing. However, it would be more convenient to leave the
+and resume editing. However, it would be more user-friendly to leave the
 cursor in the text, and to do this, you need cursor maintenance. If you
 opt for dynamic formatting, cursor maintenance is essential.
 
@@ -1024,6 +1023,13 @@ writing an ad hoc cursor maintainer or abandoning the idea of cursor
 maintenance. It would be better to remove the cursor at formatting time
 than to have an inconsistently maintained cursor.
 
-- point to GitHub
+My GitHub repository for this project contains implementations of the
+layer algorithm and the other approaches described in this article. The
+repository includes a comparison page that shows six approaches applied
+in parallel to `commatize` and `trimify`. I also have a demo page that
+shows more elaborate user interfaces for the meta, retrospective, and
+layer approaches. The retrospective and layer demos allow you to specify
+a format of your choosing within the web page. In the layer demo, you
+can specify your own layer configuration.
 
 
