@@ -907,14 +907,13 @@ length `n`.
 
 ## Discussion
 
-If you want to implement a dynamically formatted input field with
-cursor maintenance, which approach should you choose? You can achieve
-optimal accuracy by coding an ad hoc solution, as long as you have
-the time and expertise to do so. Among the flavors of ad hoc I have
-explored, my preference is for the meta approach because it provides an
-abstraction layer over the cursor-position calculations. As with every
-ad hoc approach, using it properly depends on detailed knowledge of the
-formatting operation.
+If you want to implement a dynamically formatted input field with cursor
+maintenance, which approach should you choose? You can achieve optimal
+accuracy by coding an ad hoc solution, as long as you have enough time and
+knowledge. Among the flavors of ad hoc I have explored, my preference is
+for the meta approach because it provides an abstraction layer over the
+cursor calculations. As with every ad hoc approach, using it properly
+depends on detailed knowledge of the formatting operation.
 
 At the other end of the spectrum is the retrospective approach with
 a zero-configuration scoring function. Among these I recommend the
@@ -935,11 +934,11 @@ solutions that we can prove to be completely accurate.
 
 In the spectrum of approaches from fully customized to configuration-free,
 the layer approach occupies a sweet spot. It requires little configuration
-compared to the ad hoc approaches, and for certain formatting operations,
-it can be made completely accurate. This is not to say that configuring
-it is a straightforward process. It is necessary to think through
-configuration choices and how they affect cursor positioning, especially
-in edge cases.
+compared to the ad hoc approaches, and it can be made completely accurate
+for certain formatting operations. This is not to say that configuring
+the layer approach is a straightforward process. It is necessary to think
+through configuration choices and how they affect cursor positioning,
+especially in edge cases.
 
 For example, should we define a fallback layer that matches characters
 that were not matched by earlier layers? Or should we have a catchall
@@ -949,7 +948,7 @@ or may not work well with a given formatting operation.
 In the case of `commatize`, it is tempting to define a comma layer,
 as we did in the example above, but for consistent cursor positioning
 it is better to reduce the configuration to a single layer that matches
-digits. Breaking ties toward the left ensures that when the cursor and a
+digits. Breaking ties to the left ensures that when the cursor and a
 comma are adjacent, the cursor is always placed to the left of the comma.
 
 Even if we achieve reliable cursor maintenance for a given formatting
@@ -968,35 +967,53 @@ may mean that the input as shown in the input field is not in its final
 form because a post-input formatting process will strip that space from
 the right end.
 
-There is also a hitch in our definition of `commatize`. Let's say we
-have a dynamically `commatized` input field into which a user wants to
-enter the number `250,000`. Suppose the user begins by typing `250,`. The
-input field instantly applies `commatize`, effectively deleting the comma:
+There is also a hitch in our definition of `commatize`. Suppose we have
+a dynamically `commatized` input field into which a user wants to enter
+the number `250,000`. The user begins by typing `250,` and the input
+field instantly applies `commatize`, effectively deleting the comma:
 
   `250,` -> `250`
 
 The user may repeatedly attempt to type a comma and see it deleted each
-time. The comma ends up in the intended location only after the user has
-typed the remaining digits of the number. Such an input field, although
-it formats the text correctly after each keystroke, might confuse users
-who are unaccustomed to dynamic formatting.
+time. The comma ends up in the intended location only after the user
+has typed the remaining digits of the number. Such an input field,
+although it formats the current text correctly after each keystroke,
+could confuse users who are unaccustomed to dynamic formatting.
 
-- problem: removal of zero-padding
+For an even more treacherous example, consider a numerical input field
+that automatically strips zero digits from the left end. If you paste
+in `0040001`, it gets formatted to `40001`. So far, so good. Now let's
+say you want to change the number to `50001`, so you backspace over the
+`4`. This is what happens in the input field:
 
-- edge cases are difficult
-  - positions where layers meet
+  `0001` -> `1`
+
+Now instead of typing `5`, as you had intended, you have to type `5000`
+because the input field deleted your zeros. For this format, a dynamically
+formatted input field is inherently unfriendly to users.
 
 
 # Next steps
 
-- a dynamically formatted input field must maintain the cursor perfectly
-  - otherwise, display the formatted text separately from the input field
-- a perfectly cursor-maintained input field may be user-unfriendly
+Before making a dynamically formatted input field, think about whether it
+would help or hinder the user. Are there input sequences that would cause
+destructive formatting? If so, dynamic formatting is not suitable for
+this format. You should either display the formatted text separately from
+the input field, or format the input field on demand. In the latter case,
+the input field formats its content when the user performs a non-editing
+action such as clicking a button or hitting a special key such as Tab
+or Enter.
 
-- despite all the difficulties, the allure remains
-  - an input field that formats on the fly would be magical
+If you are formatting an input field on demand, cursor maintenance is
+not strictly necessary. You can remove the cursor at formatting time and
+require the user to click inside the input field to position the cursor
+and resume editing. However, it would be more convenient to leave the
+cursor in the text, and to do this, you need cursor maintenance. If your
+input field does dynamic formatting, cursor maintenance is essential.
+
 - what formatting can be done dynamically without impeding the user?
-- perhaps we can develop a formalism for reasoning about this
+- what ambiguities arise where layers meet
+- perhaps we can develop a formalism for reasoning about these questions
 - if so, maybe it will lead to systematic configuration of cursor maintenance
 
 for now, I recommend the following strategy
@@ -1006,5 +1023,7 @@ for now, I recommend the following strategy
 - decide on tie-breaking: catch-all layer? left-right?
 - tweak until it works perfectly
 - if you can't get it to work perfectly, bail out
+
+- point to GitHub
 
 
