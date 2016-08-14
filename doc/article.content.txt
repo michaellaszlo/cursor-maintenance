@@ -909,20 +909,21 @@ length `n`.
 
 If you want to implement a dynamically formatted input field with
 cursor maintenance, which approach should you choose? You can achieve
-the highest level of accuracy by coding an ad hoc solution, as long as
-you have the time and expertise to do so. Among the flavors of ad hoc I
-have explored, my preference is for the meta approach because it helps
-you abstract away the cursor calculations. Like every ad hoc approach,
-it depends on detailed knowledge of the formatting operation.
+optimal accuracy by coding an ad hoc solution, as long as you have
+the time and expertise to do so. Among the flavors of ad hoc I have
+explored, my preference is for the meta approach because it provides an
+abstraction layer over the cursor-position calculations. As with every
+ad hoc approach, using it properly depends on detailed knowledge of the
+formatting operation.
 
 At the other end of the spectrum is the retrospective approach with
 a zero-configuration scoring function. Among these I recommend the
 frequency-balancing formula, which positions the cursor correctly much
 of the time. I can't do better than that vague assessment. In order to
 quantify the accuracy of a cursor-maintenance implementation, I would
-have to test it on a corpus of human text-editing actions drawn from
-an application in the wild, and I would need a human judgment of the
-acceptable cursor positions for each formatting instance.
+have to test it on a corpus of human text-editing actions drawn from a
+real-life application, and I would need a human judgment of the acceptable
+cursor positions for each formatting instance.
 
 It may not be worthwhile to conduct such a study. I would argue that
 the only acceptable cursor-maintenance algorithm is one that places
@@ -934,27 +935,26 @@ solutions that we can prove to be completely accurate.
 
 In the spectrum of approaches from fully customized to configuration-free,
 the layer approach occupies a sweet spot. It requires little configuration
-compared to the ad hoc approaches. For certain formatting operations,
-it can be made completely accurate. This is not to say that coming up
-with a correct configuration is a straightforward process. It is still
-necessary to think through configuration choices and how they affect
-cursor positioning, especially in edge cases.
+compared to the ad hoc approaches, and for certain formatting operations,
+it can be made completely accurate. This is not to say that configuring
+it is a straightforward process. It is necessary to think through
+configuration choices and how they affect cursor positioning, especially
+in edge cases.
 
 For example, should we define a fallback layer that matches characters
 that were not matched by earlier layers? Or should we have a catchall
 layer that matches all possible characters? Each of these options may
 or may not work well with a given formatting operation.
 
-In case of `commatize`, it is tempting to define a comma layer, as we
-did in the example above, but this makes for less consistent cursor
-positioning than if we reduce the configuration to a single layer that
-matches digits. Then if we break ties toward the left, we ensure that
-when the cursor and a comma are adjacent, the cursor is always placed
-to the left of the comma.
+In the case of `commatize`, it is tempting to define a comma layer,
+as we did in the example above, but for consistent cursor positioning
+it is better to reduce the configuration to a single layer that matches
+digits. Breaking ties toward the left ensures that when the cursor and a
+comma are adjacent, the cursor is always placed to the left of the comma.
 
 Even if we achieve reliable cursor maintenance for a given formatting
-operation, we have to ask ourselves whether it makes sense to dynamically
-format the input. In some cases, doing so makes the input field unusable.
+operation, we have to ask whether it makes sense to dynamically format
+the input. In some cases, doing so makes the input field unusable.
 
 Consider a formatting operation that strips all whitespace from both
 ends of the input. If an input field applied this format dynamically,
@@ -963,11 +963,23 @@ input `Hello, ` would be instantly formatted to `Hello,`, effectively
 deleting the space each time the user attempted to type it.
 
 Our definition of `trimify` avoids this problem by allowing a single
-space at the right end of the input. However, this may mean that the
-input as shown in the input field is not in its final form because a
-postprocessing format will remove all whitespace from the right end.
+space at the right end of the input. However, in some applications this
+may mean that the input as shown in the input field is not in its final
+form because a post-input formatting process will strip that space from
+the right end.
 
-- problem: the user types "123," in a commatized field
+There is also a hitch in our definition of `commatize`. Let's say we
+have a dynamically `commatized` input field into which a user wants to
+enter the number `250,000`. Suppose the user begins by typing `250,`. The
+input field instantly applies `commatize`, effectively deleting the comma:
+
+  `250,` -> `250`
+
+The user may repeatedly attempt to type a comma and see it deleted each
+time. The comma ends up in the intended location only after the user has
+typed the remaining digits of the number. Such an input field, although
+it formats the text correctly after each keystroke, might confuse users
+who are unaccustomed to dynamic formatting.
 
 - problem: removal of zero-padding
 
