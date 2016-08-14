@@ -1008,21 +1008,21 @@ If you are formatting an input field on demand, cursor maintenance is
 not strictly necessary. You can remove the cursor at formatting time and
 require the user to click inside the input field to position the cursor
 and resume editing. However, it would be more convenient to leave the
-cursor in the text, and to do this, you need cursor maintenance. If your
-input field does dynamic formatting, cursor maintenance is essential.
+cursor in the text, and to do this, you need cursor maintenance. If you
+opt for dynamic formatting, cursor maintenance is essential.
 
-- what formatting can be done dynamically without impeding the user?
-- what ambiguities arise where layers meet
-- perhaps we can develop a formalism for reasoning about these questions
-- if so, maybe it will lead to systematic configuration of cursor maintenance
+I recommend that you try the layer approach first. Analyze the format
+and see if you can decompose it into distinct character classes. Use
+those to define your layers. Look at situations in which the cursor is
+positioned where one layer ends and another begins. These tend to be the
+trickiest cases. Consider tie-breaking with a fallback layer to resolve
+these cases consistently.
 
-for now, I recommend the following strategy
-- if cursor maintenance worked perfectly, would your input field be usable?
-  - if not, can you modify the formatting operation to fix this problem?
-- if so, analyze the f.o. and break it down into layers
-- decide on tie-breaking: catch-all layer? left-right?
-- tweak until it works perfectly
-- if you can't get it to work perfectly, bail out
+You can be satisfied with your layer configuration when you can prove
+that it leads to flawless cursor maintenance. If you can't, consider
+writing an ad hoc cursor maintainer or abandoning the idea of cursor
+maintenance. It would be better to remove the cursor at formatting time
+than to have an inconsistently maintained cursor.
 
 - point to GitHub
 
