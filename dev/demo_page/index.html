@@ -25,11 +25,11 @@
 
 <div class="notes">
 
-<p> This page demonstrates two approaches to maintaining cursor position
+<p> This page demonstrates three approaches to maintaining cursor position
 in a text input field that formats its contents in real time. Whenever
-a formatting operation alters the text, the cursor position must be
-reconsidered. The goal of cursor maintenance is to place the cursor in
-a position that minimizes user surprise.
+the text is formatted, the cursor position must be reconsidered. The
+goal of cursor maintenance is to place the cursor in a position that
+minimizes user surprise.
 
 <p> The problem of cursor maintenance is discussed in an
 <a href="">article</a>. Source code is available in a <a
@@ -43,17 +43,17 @@ href="">repository</a>.
 
 <div class="notes">
 
-<p> In the meta approach, we reimplement a text formatting operation by
-applying elementary operations to a text-with-cursor object. The object
-moves the cursor in a predictable manner for each elementary operation.
+<p> In the meta approach, we reimplement a format by applying elementary
+operations to a text-with-cursor object. The object moves the cursor in
+a predictable manner for each elementary operation.
 
-<p> Below we demonstrate the meta approach with two formatting operations,
+<p> Below we demonstrate the meta approach with two formats,
 <em>commatize</em> and <em>trimify</em>.
 
 <p> Commatize is defined for text consisting of digits and commas. Input
-strings containing other characters are rejected by a validation
-function that runs before the formatting operation. Commatize displays
-a non-negative integer with commas separating groups of three digits.
+strings containing other characters are rejected by a validation function
+that runs before the formatter. Commatize displays a non-negative integer
+with commas separating groups of three digits.
 
 <p> Trimify is applicable to any text. The input is not validated before
 formatting. Trimify removes whitespace from the beginning of the text,
@@ -79,14 +79,13 @@ then condenses all other whitespace sequences to one space each.
 
 <p> In retrospective cursor maintenance, we calculate a cursor position by
 comparing the formatted text to the original text and cursor position. We
-only consider the current instance of text formatting. Thus, there is
-no need to modify the formatting operation or even to know what it does
-in general.
+only consider the current instance of formatting. Thus, there is no need
+to modify the formatter or even to know what it does in general.
 
-<p> You can define a formatting operation to be used in the following
-input field by inserting a JavaScript function into the editable code
-box below. To serve as a formatting operation, the function must take
-a string argument and return a string.
+<p> You can define a format to be used in the following input field by
+inserting a JavaScript function into the editable code box below. To
+serve as a formatter, the function must take a string argument and return
+a string.
 
 <p> The retrospective scoring formula used here is called <em>balanced
 frequencies</em>. It computes the ratios of individual character
