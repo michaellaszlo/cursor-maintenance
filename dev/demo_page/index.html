@@ -77,10 +77,11 @@ then condenses all other whitespace sequences to one space each.
 
 <div class="notes">
 
-<p> In retrospective cursor maintenance, we calculate a cursor position by
-comparing the formatted text to the original text and cursor position. We
-only consider the current instance of formatting. Thus, there is no need
-to modify the formatter or even to know what it does in general.
+<p> In retrospective cursor maintenance, we calculate a new cursor
+position by comparing the formatted text to the original text and cursor
+position. We only consider the current instance of formatting. Thus,
+there is no need to modify the formatter or even to know what it does
+in general.
 
 <p> You can define a format to be used in the following input field by
 inserting a JavaScript function into the editable code box below. To
@@ -108,24 +109,21 @@ least-squares fit.
 
 <div class="notes">
 
-<p> In the layer approach, we define one or more character layers. Given
-a layer and a piece of text, we count the number of characters in the
-text that belong to the layer. For a given cursor position, we count
-the layer characters to the left of the cursor and divide this number
-by the total number of layer characters. The result is what we call the
-layer ratio at that cursor position in the text.
+<p> In the layer approach, we define one or more character classes for
+a given format. These character classes, called layers, are ranked by
+priority. At each position in a piece of text, we can compute a ratio
+that expresses the position with respect to a given layer. To wit, this
+ratio is the number of layer characters to the left of the position
+divided by the total number of layer characters found in the text.
 
-<p> The layer-based cursor-maintenance algorithm seeks the cursor
-position in the formatted text whose layer ratio comes closest to that
-of the original cursor in the original text. In the event of a tie,
-the algorithm moves on to the next layer and compares the layer ratios
-of the tied cursor positions. This continues until either the range of
-optimal cursor positions is reduced to one or there are no more layers.
+<p> We want to find a position in the formatted text where the ratio
+with respect to the first layer is as close as possible to the ratio of
+the cursor in the original text. If several positions are equally close,
+we shrink the range of candidate positions and consider the next layer.
 
-<p> If the algorithm runs out of layers and there are still several
-optimal cursor positions, it chooses the leftmost by default. We can
-optionally specify that the rightmost cursor position is to be picked
-in all such cases.
+<p> If all layers are exhausted, we choose either the leftmost or
+rightmost position in the final candidate range. The choice of left or
+right is part of the layer approach's configuration for a given format.
 
 </div>
 
