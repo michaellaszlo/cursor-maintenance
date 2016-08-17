@@ -84,7 +84,7 @@ there is no need to modify the formatter or even to know what it does
 in general.
 
 <p> You can define a format to be used in the following input field by
-inserting a JavaScript function into the editable code box below. To
+inserting a JavaScript function into the editable code area below. To
 serve as a formatter, the function must take a string argument and return
 a string.
 
@@ -111,19 +111,23 @@ least-squares fit.
 
 <p> In the layer approach, we define one or more character classes for
 a given format. These character classes, called layers, are ranked by
-priority. At each position in a piece of text, we can compute a ratio
-that expresses the position with respect to a given layer. To wit, this
-ratio is the number of layer characters to the left of the position
-divided by the total number of layer characters found in the text.
+priority. For a given layer in a given text, we calculate the number of
+layer characters to the left of each text position divided by the total
+number of layer characters in the text.
 
 <p> We want to find a position in the formatted text where the ratio
-with respect to the first layer is as close as possible to the ratio of
-the cursor in the original text. If several positions are equally close,
-we shrink the range of candidate positions and consider the next layer.
+in the first layer is as close as possible to the ratio of the cursor
+position in the first layer in the original text. If several positions
+are equally close, we shrink the range of candidate positions and move
+on to the next layer. If all layers are exhausted, we choose either the
+leftmost or rightmost position in the final candidate range. The choice
+of breaking ties toward left or right is part of the configuration for
+a given format.
 
-<p> If all layers are exhausted, we choose either the leftmost or
-rightmost position in the final candidate range. The choice of left or
-right is part of the layer approach's configuration for a given format.
+<p> As with the retrospective approach, you can define your own format
+in the code area below. You can modify the layer definitions and the
+tie-breaking direction in the fields between the input area and the code
+area. Each layer definition is a JavaScript regular expression.
 
 </div>
 
@@ -132,7 +136,7 @@ right is part of the layer approach's configuration for a given format.
 
 <textarea id="layerInput" spellcheck="false" class="text"></textarea>
 
-layers:
+<div class="layerLabel">layers:</div>
 <div id="testerBox"></div>
 
 <div id="preferRightBox">

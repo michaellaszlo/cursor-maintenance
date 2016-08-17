@@ -76,6 +76,7 @@ input {
 }
 
 .toggle {
+  display: inline-block;
   margin: -10px 0 5px;
   font-size: 14px;
   color: #aa0202;
@@ -130,8 +131,18 @@ textarea.tester {
   opacity: 0.3;
 }
 
+.layerLabel {
+  margin: 5px 0;
+}
+#testerBox {
+  margin: 5px 0;
+}
+#testerBox .tester {
+  margin-top: 5px;
+}
 #preferRightBox {
   width: auto;
+  margin-bottom: 10px;
 }
 #preferRightBox input {
   display: inline;
