@@ -72,10 +72,9 @@ var CursorMaintenanceComparison = (function () {
           cursor = input.selectionStart,
           result = CM[approach][operation](text, cursor),
           container = scores[operation],
-          item,
           activeButton = activeButtons[operation],
           parts = [],
-          i, output;
+          i, item, output, score;
       container.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
         item = make('div', { parent: container, className: 'scoreItem' });
@@ -87,8 +86,11 @@ var CursorMaintenanceComparison = (function () {
                 result.text.substring(0, i) + '<span class="cursor"></span>' +
                 result.text.substring(i) });
         output.style.width = '250px';
-        make('span', { parent: item, className: 'score',
-            innerHTML: ' ' + result.scores[i] });
+        score = ' ' + result.scores[i];
+        if (score.indexOf('.') != -1) {
+          score = score.substring(0, score.indexOf('.') + 6);
+        }
+        make('span', { parent: item, className: 'score', innerHTML: score });
       }
       if (activeButton && activeButton != button) {
         activeButton.className =
@@ -128,7 +130,7 @@ var CursorMaintenanceComparison = (function () {
         scoreRow = document.getElementById('scores'),
         operations = [ 'commatize', 'trimify' ],
         i, row, cells,
-        approach, isRetrospective;
+        approach;
     operations.forEach(function (operation) {
       outputs[operation] = {};
       scores[operation] = make('div', { className: 'scoreList', parent:
@@ -141,7 +143,6 @@ var CursorMaintenanceComparison = (function () {
         continue;
       }
       cells = row.getElementsByTagName('td');
-      isRetrospective = (row.className.indexOf('retrospective') != -1);
       approach = makeApproachName(cells[0].innerHTML);
       operations.forEach(function (operation) {
         var button,
@@ -155,7 +156,7 @@ var CursorMaintenanceComparison = (function () {
           output.className += ' original';
           cell.style.minWidth = cellMinWidths[operation] + 'px';
         }
-        if (isRetrospective) {
+        if (row.className.indexOf('retrospective') != -1) {
           button = make('button', { innerHTML: 'scores', parent: cell });
           enableScoreButton(button, operation, approach);
           output.button = button;

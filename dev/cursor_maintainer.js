@@ -397,9 +397,6 @@ var CursorMaintainer = (function () {
             }
           }
         }
-        //print();
-        //print(original, '->', formatted);
-        //print('original:', originalCount, '/', originalTotal);
         // Bail out if the original text has no layer characters.
         if (originalTotal == 0) {
           continue;
@@ -436,9 +433,6 @@ var CursorMaintainer = (function () {
             bestLeft = bestRight = pos;
           }
         }
-        //print('originalRatio', originalRatio);
-        //print('bestFormattedRatio', bestFormattedRatio);
-        //print('[' + bestLeft + ', ' + bestRight + ']');
         if (bestLeft == bestRight) {
           break;
         }

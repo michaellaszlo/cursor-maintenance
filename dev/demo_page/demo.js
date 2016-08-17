@@ -306,7 +306,7 @@ var CursorMaintenanceDemo = (function () {
 
     // The page position may have been changed by focus events as the input
     //  fields were initialized. Let's reset to the upper left corner.
-    //scrollTo(0, 0);
+    scrollTo(0, 0);
 
     // Add expander widgets to note sections. Notes are collapsed by default.
     NoteExpander.enableByTagAndClass(document, 'div', 'notes');
