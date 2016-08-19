@@ -1,14 +1,15 @@
-# Maintaining cursor position across formatting operations
+# Maintaining cursor position across formatting
 
-This article is for developers who are building text input widgets that
-process the user's input to show it in a standard format. If you want
-to do real-time formatting and update the text in the input field while
-the user is editing it, this article is especially for you.
+This article is for developers who are building text input fields that
+format the user's input and display it in the same field. Whether the
+format is applied instantly after each keystroke or only after a special
+user action, you have to decide where to place the cursor after the text
+has been transformed by the format.
 
-If you are well acquainted with the problem of maintaining cursor
-position, you can try out my live demo and look at the GitHub
-documentation if you want to use my code in your own project. In this
-article, I analyze the problem and describe my quest for a solution.
+If you are familiar with cursor maintenance, you may want to go straight
+to my live demo or to my source code. In this article, I analyze
+the problem of maintaining cursor position and describe my quest for
+a solution.
 
 
 ## Here is the problem
