@@ -1,25 +1,26 @@
-# Maintaining cursor position across formatting
+# Maintaining cursor position in same-field formatting
 
 This article is for developers who are building text input fields that
-format the user's input and display it in the same field. Whether the
-format is applied instantly after each keystroke or only after a special
-user action, you have to decide where to place the cursor after the text
-has been transformed by the format.
+format the user's text and display it in the same field where the user
+edits the text. Whether the format is applied after every keystroke or
+only after a special user action, you have to decide where to place the
+editing cursor after the text has been formatted.
 
 If you are familiar with cursor maintenance, you may want to go straight
-to my live demo or to my source code. In this article, I analyze
-the problem of maintaining cursor position and describe my quest for
-a solution.
+to my live demo or to my source code. In this article, I give a gentle
+introduction to the problem of cursor maintenance and describe my quest
+for a solution.
 
 
 ## Here is the problem
 
-Suppose you're coding an input field that requires the user to enter the
-population of a city. The input field automatically formats this number
-with commas separating groups of three digits.
+Suppose we're building an input field that expects the user to enter the
+population of a city. The only keystrokes accepted by the input field are
+the number keys and the backspace keys. After every keystroke, the input
+field formats the number into three-digit groups separated by commas.
 
-For example, if the user enters `112500`, the input field instantly
-changes it to `112,500`.
+For example, if the user types in `1125`, the input field formats it to
+`1,125`.
 
 The user has a cursor in the input field, which we'll represent with
 ^. Here the cursor is at the right end of the input text:
@@ -29,23 +30,23 @@ The user has a cursor in the input field, which we'll represent with
 There are seven characters to the left of the cursor, so we say that
 the cursor is at position 7.
 
-We have to update the cursor position after formatting the input. The
-cursor is currently at the right end of the input field, and we want to
-keep it there after formatting the text.
+We have to update the cursor position after the format is applied. If
+the cursor is at the right end of the input field before formatting,
+we want it to be at the right end after formatting.
 
 Suppose the user enters a `0`:
 
   112,5000^
 
 With the newly entered character, the cursor has moved to position 8. The
-input field immediately formats the text `112,5000` to `1,125,000`. Now
-there are nine characters, so we move the cursor to position 9:
+input field formats the text `112,5000` to `1,125,000`. Now there are
+nine characters, so we move the cursor to position 9:
 
   1,125,000^
 
 There is a concise formula for maintaining the cursor at the right end
 of the input field: when the text field contains `n` characters, we put
-the cursor at position `n`.
+the cursor in position `n`.
 
 Things get complicated when the user places the cursor elsewhere in
 the text.
@@ -60,7 +61,7 @@ position 3:
   1,1^5,000
 
 The input field formats `1,15,000` to `115,000`. Where should we put
-the cursor? This is what happens if we keep it at position 3:
+the cursor? This is what happens if we keep it in position 3:
 
   115^,000
 
@@ -72,37 +73,35 @@ user. The user expects the cursor to remain between the `1` and the `5`:
 This is obvious to a human observer. It's less obvious how to compute
 a cursor position that matches the user's expectations.
 
-The root of the problem is that our text formatting does not involve the
+The root of the problem is that text formatting does not involve the
 cursor. Although the cursor is visually displayed in the text, it is not
 logically part of the text. It is an interface element that assists the
-user with manual text editing by indicating a position in the text. The
-automatic text formatting that is performed by the input field operates
-on a string, which is a sequence of characters without any representation
-of the cursor. After the text has been transformed by formatting, we
-have to place the cursor in a position that minimizes user surprise.
+user with editing by indicating a position in the text. The format that
+is applied by the input field operates on a string, which is a sequence
+of characters without any representation of the cursor. After the text
+has been transformed by formatting, we want to place the cursor in a
+position that minimizes user surprise.
 
-In a few cases, the answer is obvious. If the formatting operation leaves
-the text unchanged, we leave the cursor position unchanged. If the cursor
-is at the leftmost or rightmost position prior to formatting, we place
-it respectively leftmost or rightmost after formatting. In other cases,
-we have to examine the characters surrounding the cursor before the
-formatting operation. We want to place the cursor in a similar context
-after formatting.
+In a few cases, the answer is obvious. If the format leaves the text
+unchanged, we leave the cursor position unchanged. If the cursor is
+at the leftmost or rightmost position prior to formatting, we place it
+respectively leftmost or rightmost after formatting. In other cases, we
+have to examine the characters surrounding the cursor before formatting
+and attempt to place it in a similar context after formatting.
 
 
 # The status quo
 
-Think about the last time you used an automated teller machine (ATM). When
-you enter a dollar amount into an ATM, there is no movable cursor, not
-even on the most recent models with high-resolution touchscreens. You
-are limited to inserting and deleting digits at the right end of the
-input field.
+When you use an automated teller machine (ATM), you do not have the luxury
+of a movable cursor. Even on the most recent models with high-resolution
+touchscreens, you are limited to inserting and deleting digits at the
+right end of the input field.
 
-Look at banking applications on the web and on mobile devices. Many
-will let you move a cursor around the input field when you're entering
-a dollar amount, but they don't format the value directly in the input
-field. Instead they'll display the formatted value in a separate,
-non-editable text field.
+Web apps and mobile apps for banking are only slightly more
+sophisticated. A bank app may let you move a cursor around the input
+field when you're entering a dollar value, but it won't format the value
+directly in the input field. Instead it displays the formatted value in
+a separate, non-editable text field.
 
 [screenshot: PC Financial bill payment]
 
@@ -131,30 +130,30 @@ convenient position.
 
 Other kinds of formatting would also benefit from cursor
 maintenance. Let's say you're editing a large document in a word
-processing application. There are currently two spaces after every
-period, and you execute a formatting operation that reduces all of
-these to one space. The document gets repaginated as the whitespace
-is reduced, so the line you were editing ends up on a different page
-after formatting. You have to hunt through the text to find your place
-again. Ideally the application would reformat the document while keeping
-the cursor position constant with respect to the non-whitespace content.
+processing application. There are currently two spaces after every period,
+and you apply a format that reduces all of these to one space. The
+document gets repaginated as the whitespace is reduced, so the line you
+were editing ends up on a different page after formatting. You have to
+hunt through the text to find your place again. Ideally the application
+would reformat the document while keeping the cursor position constant
+with respect to the non-whitespace content.
 
 [image: hypothetical word processor doing space reduction]
 
 How can we develop input elements that maintain the cursor in a
 user-friendly position while applying various kinds of formatting? Should
 we break down the formatting case by case, or is there a general approach
-that works for all possible formatting operations?
+that works for every possible format?
 
 
 ## Defining the problem
 
-In this article, I use the phrase *formatting operation* to mean a
-programmatic text-transforming process that is applied to a piece of
-text provided by the user. Whenever the user modifies the content of
-an input field, we have a new piece of text to pass to the formatting
-operation. To clarify the distinction between the user action and the
-formatting operation, let's go through another example.
+In this article, I use the word *format* to mean a text transformation
+that is applied to a piece of text provided by the user. Whenever the
+user modifies the content of an input field, we have a new piece of
+text to pass to the function that implements the format. To clarify
+the distinction between user editing and formatting, let's go through
+another example.
 
 Suppose our input field contains the text `12,900`, which is already
 formatted correctly. The cursor is currently at position 4:
@@ -175,36 +174,34 @@ the input field in this state:
 The cursor is now at position 4. The user action has changed the text
 in the input field to `12,5900`.
 
-The input field detects that it contains new text. It passes the text to
-the formatting operation, which returns `125,900`. This gets substituted
-into the input field.
+The input field detects that it contains new text. It passes the text
+to the formatter, which returns `125,900`. This gets substituted into
+the input field.
 
 Now the input field must choose a cursor position. This is the problem
 that I call cursor maintenance.
 
 A problem instance consists of three input values:
 
-- the *user text* is the textual content of the input field before the
-formatting operation
+- the *raw text* is the content of the input field before
+formatting
 
-- the *user cursor position* is the location of the cursor in the input
-field before the formatting operation
+- the *raw cursor position* is the cursor position in the raw text
 
-- the *formatted text* is the result of applying the formatting operation to
-the user text
+- the *formatted text* is the result of formatting the user text
 
 In the preceding example, the problem instance is the following:
 
-- user text: `12,5900`
+- raw text: `12,5900`
 
-- user cursor position: 4
+- raw cursor position: 4
 
 - formatted text: `125,900`
 
 To solve the problem, we must determine one output value:
 
 - the *formatted cursor position* is where we place the cursor in the
-input field after the formatting operation
+input field after formatting
 
 If the formatted text is identical to the user text, the formatted cursor
 position must be the same as the user cursor position. In the remaining
@@ -217,8 +214,7 @@ the user's expectations. Where would the user expect to see the cursor
 after the user text has been transformed into the formatted text?
 
 In the example above, position 3 seems to be a reasonable answer. This
-would be the effect of moving the cursor to position 3 after the
-formatting operation:
+would be the effect of moving the cursor to position 3 after formatting:
 
   12,5^900  ->  125^,900
 
@@ -234,13 +230,12 @@ to make the choice in a consistent manner. If we decide an ambiguous
 case in one way, we should decide likewise in all similar cases.
 
 
-## Sample formatting operations
+## Sample formats
 
 In my investigation of cursor maintenance, I ran experiments using
-two formatting operations. The first formats positive integers into
-comma-separated three-digit groups, as in the examples above. I call
-this formatting operation `commatize`. I define it with the following
-JavaScript function.
+two formats. The first formats positive integers into comma-separated
+three-digit groups, as in the examples above. I call this format
+`commatize`. I define it with the following JavaScript function.
 
 ```
 function commatize(s) {                    // s is a string composed of
@@ -256,9 +251,9 @@ function commatize(s) {                    // s is a string composed of
 };
 ```
 
-The other formatting operation, `trimify`, removes all whitespace from
-the beginning of the text, and condenses whitespace sequences elsewhere
-in the text to one character each.
+The other format, `trimify`, removes all whitespace from the beginning
+of the text, and condenses whitespace sequences elsewhere in the text
+to one character each.
 
 For example, the input text
 
@@ -268,7 +263,7 @@ is transformed by `trimify` into:
 
   `how much wood could a woodchuck chuck `
 
-I define this formatting operation in JavaScript as follows.
+I define this format in JavaScript as follows.
 
 ```
 function trimify(s) {          // s is an arbitrary string.
@@ -281,12 +276,12 @@ function trimify(s) {          // s is an arbitrary string.
 
 ## Testing methodology
 
-Some cursor-maintenance involve rewriting your formatting operations. To
-verify that the rewritten version of a formatting operation performs
-the same text transformation as the original version, I ran automated
-tests on the command line. The [batch tester]() is available in a [source
-repository]() together with my [implementations of cursor maintenance]()
-and other code that I will mention in this article.
+Some cursor-maintenance involve rewriting your formats. To verify that
+the rewritten version of a format performs the same text transformation
+as the original version, I ran automated tests on the command line. The
+[batch tester]() is available in a [source repository]() together with
+my [implementations of cursor maintenance]() and other code that I will
+mention in this article.
 
 In addition to verifying the text transformation, the automated
 tests helped me to assess the cursor positions computed by various
@@ -343,24 +338,23 @@ web-based interactive testing.
 
 I made a [comparison page](http://192.168.0.106/comparison/) that
 simultaneously displays the results of six approaches to cursor
-maintenance. The `commatize` and `trimify` formatting operations each
-have their own input field in which you set the user text and user
-cursor position. The cell immediately below the input field displays
-the formatted text. The cells further below display the formatted cursor
-positions computed by various strategies. Some involve numerical scores
-which you can view by clicking on the `scores` button next to the
-corresponding outputs. All of the approaches are explained below.
+maintenance. The `commatize` and `trimify` formats each have their own
+input field in which you set the user text and user cursor position. The
+cell immediately below the input field displays the formatted text. The
+cells further below display the formatted cursor positions computed by
+various strategies. Some involve numerical scores which you can view by
+clicking on the `scores` button next to the corresponding outputs. All
+of the approaches are explained below.
 
 
 ## The ad hoc approach
 
-If we know exactly how a formatting operation transforms the text, we
-may see a convenient way to calculate a new cursor position. Consider
-the effect of `commatize`: it inserts and deletes commas while leaving
-the digit characters alone. It would be desirable to position the cursor
-in such a way that the digits to the left of the cursor remain constant
-across the formatting operation. We can use this idea to write a new
-version of `commatize`:
+If we know exactly how a format transforms the text, we may see a
+convenient way to calculate a new cursor position. Consider the effect
+of `commatize`: it inserts and deletes commas while leaving the digit
+characters alone. It would be desirable to position the cursor in such
+a way that the digits to the left of the cursor remain constant across
+formatting. We can use this idea to write a new version of `commatize`:
 
 ```
 adHoc.commatize = function (s, cursor) {
@@ -394,9 +388,9 @@ qualities of `commatize`.
 
 We can also come up with a special calculation for `trimify`. It stands
 to reason that the cursor should move to the left by one unit for each
-space character that gets deleted to the left of the cursor. But if
-the cursor isn't involved in the formatting operation, how do we decide
-which characters get deleted to the left of it?
+space character that gets deleted to the left of the cursor. But if the
+cursor isn't involved in the format, how do we decide which characters
+get deleted to the left of it?
 
 We can't just look at `trimify(s[:cursor])` because the spaces to the
 immediate left of the cursor may nor may not appear in the formatted text.
@@ -433,9 +427,8 @@ This trickery works in the sense that it calculates reasonable cursor
 positions. The trouble is that it does so in a non-obvious manner.
 
 Ad hoc solutions to cursor maintenance rely on thoroughly understanding
-the formatting operation. It may be difficult to find the necessary
-insights, and there is no guarantee that they will lead to a concise
-calculation.
+the format. It may be difficult to find the necessary insights, and
+there is no guarantee that they will lead to a concise calculation.
 
 
 ## The mock cursor
@@ -454,15 +447,15 @@ The mock cursor could be a caret, `^`, so that the text becomes:
 We can perform cursor maintenance as follows:
 
 - insert the mock cursor at the user cursor position
-- apply a version of the formatting operation that accommodates the mock cursor
+- apply a version of the format that accommodates the mock cursor
 - record the position of the mock cursor in the formatted text
 - remove the mock cursor from the text
 
-The burning question is how to modify the formatting operation to work
-around the cursor. In rewriting `commatize`, we must contend with the
-fact that the mock cursor displaces every comma to its right. Fixing
-this displacement is a laborious process. One way to do it is to chop
-up the text around the displaced commas and glue them back together.
+The burning question is how to modify the format to work around the
+cursor. In rewriting `commatize`, we must contend with the fact that the
+mock cursor displaces every comma to its right. Fixing this displacement
+is a laborious process. One way to do it is to chop up the text around
+the displaced commas and glue them back together.
 
 In my experiment, I chose to scan the characters of the text in reverse,
 placing the digit characters into an array and adding a comma after
@@ -487,10 +480,10 @@ it, we delete that space:
 The mock cursor works well with `trimify` because it causes localized
 formatting errors that are easy to fix.
 
-Using a mock cursor fails to simplify the problem of cursor maintenance
-in general. Although it may help with some formatting operations, it
-is not a systematic remedy. It defers the problem, requiring ad hoc
-computations to correct formatting errors caused by the mock cursor.
+Using a mock cursor fails to simplify the problem of cursor maintenance in
+general. Although it may help with some formats, it is not a systematic
+remedy. It defers the problem, requiring ad hoc computations to correct
+formatting errors caused by the mock cursor.
 
 Many other cursor-maintenance gimmicks are variations of the ad
 hoc approach in disguise. For example, it may seem useful to split
@@ -556,16 +549,15 @@ These insertion and deletion operations suffice to transform any text
 `s` into any other text `t`. At the same time, they modify the cursor
 position in a predictable and reasonable manner.
 
-We can implement any formatting operation in terms of these two
-text-with-cursor operations. In theory we don't even have to rewrite our
-formatting operations. If we were to replace the basic string operations
-of a programming language with our text-with-cursor operations, every
-formatting operation in that language would automatically perform cursor
-maintenance.
+We can implement any format in terms of these two text-with-cursor
+operations. In theory we don't even have to rewrite our formats. If we
+were to replace the basic string operations of a programming language
+with our text-with-cursor operations, every format in that language
+would automatically perform cursor maintenance.
 
 Have we found a foolproof method of cursor maintenance? Not at all. The
 hitch is that the sequence of insertions and deletions that make up a
-formatting operation can easily lead to inconvenient cursor displacement.
+format can easily lead to inconvenient cursor displacement.
 
 For example, an implementation of `commatize` may very well start by
 initializing a new text-with-cursor object and appending characters one
@@ -573,8 +565,8 @@ at a time as it scans the input text. The outcome is that the formatted
 cursor position is always at the right end of the text.
 
 The meta approach is only likely to result in user-friendly cursor
-positions if each formatting operation is implemented as a sequence of
-local changes to the input text.
+positions if each format is implemented as a sequence of local changes
+to the input text.
 
 Here is my cursor-maintaining implementation of `commatize` using a
 `TextWithCursor` class that I wrote for this experiment:
@@ -598,20 +590,19 @@ meta.commatize = function (s, cursor) {
 };
 ```
 
-The notion of performing local operations on a text-with-cursor object
-lends clarity to the effort of cursor maintenance. However, it still
-calls for the reimplementation of formatting operations. The developer
-doing the reimplementation has to thoroughly understand each formatting
-operation and must remain conscious of the cursor displacement caused
-by each insertion and deletion.
+The notion of performing local operations on a text-with-cursor
+object lends clarity to the effort of cursor maintenance. However,
+it still calls for reimplementation of the format. The developer doing
+the reimplementation has to thoroughly understand the format and must
+remain conscious of the cursor displacement caused by each insertion
+and deletion.
 
 
 ## Retrospective approach with edit distance
 
-So far we have attempted to do cursor maintenance by peering into
-the inner workings of formatting operations. Let's see what we can
-accomplish by restricting our attention to the three input values of
-the cursor-maintenance problem:
+So far we have attempted to do cursor maintenance by peering into the
+inner workings of formats. Let's see what we can accomplish by restricting
+our attention to the three input values of the cursor-maintenance problem:
 
 - user text
 - user cursor position
@@ -649,8 +640,7 @@ positions that achieve the lowest scores:
 
 I call that the split Levenshtein formula. In my informal testing,
 it works fairly well. It usually agrees with the results of the ad hoc
-approaches even though it is oblivious to the details of each formatting
-operation.
+approaches even though it is oblivious to the details of each format.
 
 The weakness of split Levenshtein is that it often computes tied
 scores. For example, given the user text and cursor
@@ -715,8 +705,8 @@ we have:
 
   right('l', s, p) = 2
 
-Suppose the text `s` is transformed by some formatting operation into
-the text `t`. If there is a position `q` in `t` such that
+Suppose the text `s` is transformed by some format into the text `t`. If
+there is a position `q` in `t` such that
 
   left('l', t, q) = 1
 
@@ -807,9 +797,9 @@ characters.
 These observations lead to the idea of evaluating cursor positions
 relative to a sequence of character classes that we'll call layers. The
 first step in this approach is to manually define and rank the layers for
-a given formatting operation. For example, we might define two layers
-for `commatize`: the first layer consists of the digit characters `0`
-through `9`, and the second layer consists of the comma character `,`.
+a given format. For example, we might define two layers for `commatize`:
+the first layer consists of the digit characters `0` through `9`, and
+the second layer consists of the comma character `,`.
 
 The text `1,400` has the following characters in each layer:
 
@@ -913,7 +903,7 @@ accuracy by coding an ad hoc solution, as long as you have enough time and
 knowledge. Among the flavors of ad hoc I have explored, my preference is
 for the meta approach because it provides an abstraction layer over the
 cursor calculations. As with every ad hoc approach, using it properly
-depends on detailed knowledge of the formatting operation.
+depends on detailed knowledge of the format.
 
 At the other end of the spectrum is the retrospective approach with
 a zero-configuration scoring function. Among these I recommend the
@@ -934,16 +924,16 @@ solutions that we can prove to be completely accurate.
 
 In the spectrum of approaches from fully customized to configuration-free,
 the layer approach occupies a sweet spot. It requires little configuration
-compared to the ad hoc approaches, and it can be made completely accurate
-for certain formatting operations. This is not to say that configuring
-the layer approach is a straightforward process. It is necessary to think
+compared to the ad hoc approaches, and it can be made completely
+accurate for certain formats. This is not to say that configuring the
+layer approach is a straightforward process. It is necessary to think
 through configuration choices and how they affect cursor positioning,
 especially in edge cases.
 
 For example, should we define a fallback layer that matches characters
 that were not matched by earlier layers? Or should we have a catchall
 layer that matches all possible characters? Each of these options may
-or may not work well with a given formatting operation.
+or may not work well with a given format.
 
 In the case of `commatize`, it is tempting to define a comma layer,
 as we did in the example above, but for consistent cursor positioning
@@ -951,15 +941,15 @@ it is better to reduce the configuration to a single layer that matches
 digits. Breaking ties to the left ensures that when the cursor and a
 comma are adjacent, the cursor is always placed to the left of the comma.
 
-Even if we achieve reliable cursor maintenance for a given formatting
-operation, we have to ask whether it makes sense to dynamically format
-the input. In some cases, doing so makes the input field unusable.
+Even if we achieve reliable cursor maintenance for a given format, we
+have to ask whether it makes sense to dynamically format the input. In
+some cases, doing so makes the input field unusable.
 
-Consider a formatting operation that strips all whitespace from both
-ends of the input. If an input field applied this format dynamically,
-it would be impossible to type a space character at the right end: the
-input `Hello, ` would be instantly formatted to `Hello,`, effectively
-deleting the space each time the user attempted to type it.
+Consider a format that strips all whitespace from both ends of the
+input. If an input field applied this format dynamically, it would be
+impossible to type a space character at the right end: the input `Hello,
+` would be instantly formatted to `Hello,`, effectively deleting the
+space each time the user attempted to type it.
 
 Our definition of `trimify` avoids this problem by allowing a single
 space at the right end of the input. However, in some applications this
