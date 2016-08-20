@@ -1,10 +1,10 @@
 # Maintaining cursor position in same-field formatting
 
-This article is for developers who are building text input fields that
-format the user's text and display it in the same field where the user
-edits the text. Whether the format is applied after every keystroke or
-only after a special user action, you have to decide where to place the
-editing cursor after the text has been formatted.
+This article is for developers who are building text input widgets that
+format the user's text in the same field in which the user edits the
+text. Whether the format is applied after every keystroke or only after
+a special user action, you have to decide where to place the editing
+cursor after the text has been formatted.
 
 If you are familiar with cursor maintenance, you may want to go straight
 to my live demo or to my source code. In this article, I give a gentle
@@ -15,9 +15,9 @@ for a solution.
 ## Here is the problem
 
 Suppose we're building an input field that expects the user to enter the
-population of a city. The only keystrokes accepted by the input field are
-the number keys and the backspace keys. After every keystroke, the input
-field formats the number into three-digit groups separated by commas.
+population of a city. This field only accepts input from the number keys
+and the backspace key. After every keystroke, the input field formats
+its text into groups of three digits separated by commas.
 
 For example, if the user types in `1125`, the input field formats it to
 `1,125`.
@@ -32,15 +32,15 @@ the cursor is at position 7.
 
 We have to update the cursor position after the format is applied. If
 the cursor is at the right end of the input field before formatting,
-we want it to be at the right end after formatting.
+we want it to be at the right end after formatting as well.
 
 Suppose the user enters a `0`:
 
   112,5000^
 
-With the newly entered character, the cursor has moved to position 8. The
-input field formats the text `112,5000` to `1,125,000`. Now there are
-nine characters, so we move the cursor to position 9:
+After this input action, the cursor has moved to position 8. The input
+field formats the text `112,5000` to `1,125,000`. Now there are nine
+characters, so we move the cursor to position 9:
 
   1,125,000^
 
@@ -105,19 +105,20 @@ a separate, non-editable text field.
 
 [screenshot: PC Financial bill payment]
 
-Granted, accurate information is paramount in a financial
+Of course, information clarity is paramount in a financial
 transaction. Showing the user's raw input and the formatted dollar
 amount in separate fields serves to dispel ambiguity. The drawbacks are
 redundancy and complexity. In less critical applications, users would
 probably be happy to accept a small degree of ambiguity in exchange for
 a faster and friendlier interface.
 
-Consider the clunky interface for editing cells in Microsoft Excel
-and Google Sheets. You can make a spreadsheet cell that displays its
-value with currency formatting, but you can't edit the displayed value
-directly. You are restricted to editing an unformatted integer. The
-formatted dollar amount only appears after you remove your cursor from
-the cell by hitting Enter or clicking on another cell.
+Consider the clunky interface for editing cells in spreadsheet
+applications like Google Sheets and Microsoft Excel. You can make a
+spreadsheet cell that displays its value in a dollar format, but you
+can't edit the displayed amount directly. You are restricted to editing
+an unformatted number. The formatted dollar amount only appears after
+you remove your cursor from the cell by hitting Enter or clicking on
+another cell.
 
 [screenshot: Google Sheets data entry]
 
@@ -148,15 +149,36 @@ that works for every possible format?
 
 ## Defining the problem
 
-In this article, I use the word *format* to mean a text transformation
-that is applied to a piece of text provided by the user. Whenever the
-user modifies the content of an input field, we have a new piece of
-text to pass to the function that implements the format. To clarify
-the distinction between user editing and formatting, let's go through
-another example.
+In this article, I use the noun *format* to mean a deterministic
+text transformation. In mathematical terms, a format is a function on
+strings. A *formatter* is a computational process, such as a JavaScript
+function, that implements a format.
 
-Suppose our input field contains the text `12,900`, which is already
-formatted correctly. The cursor is currently at position 4:
+After the user has edited the text in an input field, we have a new
+piece of text to pass to the formatter. Text that has been edited by
+the user but not yet formatted is *raw text*. A formatter takes raw text
+and returns *formatted text*.
+
+Cursor maintenance is a problem that arises in the following interface
+flow:
+
+1. An input field contains formatted text and a movable cursor.
+
+2. The user performs editing actions in the input field and leaves the
+cursor in some position in the raw text.
+
+3. The raw text is passed to a formatter, and the resulting formatted
+text replaces the raw text in the input field.
+
+4. The cursor is moved to some position in the formatted text.
+
+In the last step, we seek to maintain the user's cursor position in
+text that has been transformed. Where should we place the cursor in the
+formatted text? That is the problem of cursor maintenance.
+
+Let's go through an example with an input field that formats its content
+after every editing action. Suppose our input field contains the formatted
+text `12,900`. The cursor is at position 4:
 
   12,9^00
 
@@ -164,31 +186,38 @@ The user moves the cursor to position 3:
 
   12,^900
 
-The text is unchanged, so there is no need for formatting.
+The text is unchanged, so there is no need for formatting yet.
 
-Now the user makes a keystroke that enters the character `5`, leaving
-the input field in this state:
+Now the user enter the character `5`, leaving the input field in this
+state:
 
   12,5^900
 
-The cursor is now at position 4. The user action has changed the text
-in the input field to `12,5900`.
+The cursor is now at position 4. The user action has changed the content
+of the input field to the raw text `12,5900`.
 
-The input field detects that it contains new text. It passes the text
-to the formatter, which returns `125,900`. This gets substituted into
-the input field.
+The input field detects that its content has changed. It passes the raw
+text to the formatter, which returns `125,900`. This replaces the raw
+text in the input field.
 
-Now the input field must choose a cursor position. This is the problem
-that I call cursor maintenance.
+Now the input field must choose a cursor position. We are faced with
+the problem of cursor maintenance.
 
-A problem instance consists of three input values:
+A problem instance consists of three input values: the raw text, the
+cursor position in the raw text, and the formatted text.
 
-- the *raw text* is the content of the input field before
-formatting
+To solve the problem, we must determine one output value: the cursor
+position in the formatted text.
 
-- the *raw cursor position* is the cursor position in the raw text
+For brevity, we'll use *raw cursor position* to mean the position where
+the user has left the cursor in the raw text. The position where we choose
+to put the cursor in the formatted text is the *new cursor position*.
 
-- the *formatted text* is the result of formatting the user text
+Note that the raw text and raw cursor position are the result of user
+actions. The formatted text is the result of applying a given format. The
+new cursor position is not a deterministic by-product of the format,
+but the outcome of some computational process that we devise to handle
+cursor maintenance for the format.
 
 In the preceding example, the problem instance is the following:
 
@@ -198,20 +227,15 @@ In the preceding example, the problem instance is the following:
 
 - formatted text: `125,900`
 
-To solve the problem, we must determine one output value:
-
-- the *formatted cursor position* is where we place the cursor in the
-input field after formatting
-
-If the formatted text is identical to the user text, the formatted cursor
-position must be the same as the user cursor position. In the remaining
+If the formatted text is identical to the raw text, the new cursor
+position must be the same as the raw cursor position. In the remaining
 cases, there is no definitive way to decide whether the problem has
 been solved correctly. This is a fuzzy problem. Our goal is to minimize
 user surprise.
 
-To put it another way, we are seeking to maximize our odds of meeting
-the user's expectations. Where would the user expect to see the cursor
-after the user text has been transformed into the formatted text?
+To put it conversely, we aim to maximize the odds of meeting the user's
+expectations. Where would the user expect to see the cursor after the
+raw text has been transformed into the formatted text?
 
 In the example above, position 3 seems to be a reasonable answer. This
 would be the effect of moving the cursor to position 3 after formatting:
@@ -1011,8 +1035,8 @@ these cases consistently.
 You can be satisfied with your layer configuration when you can prove
 that it leads to flawless cursor maintenance. If you can't, consider
 writing an ad hoc cursor maintainer or abandoning the idea of cursor
-maintenance. It would be better to remove the cursor at formatting time
-than to have an inconsistently maintained cursor.
+maintenance. It would be better to remove the cursor from the input
+field at formatting time than to have an inconsistently maintained cursor.
 
 My GitHub repository for this project contains implementations of the
 layer algorithm and the other approaches described in this article. The

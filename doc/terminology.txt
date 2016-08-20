@@ -2,19 +2,27 @@
 ---
 Nomenclature
 
-formatting operation
+- formatting operation
   -> format, formatter
   - format: the abstract notion of a text transformation
   - formatter: the function or process that implements a format
 
-user text
-  -> raw text
+- text
+  old text -> raw text
+  new text -> formatted text
 
-position
+- cursor position
+  old cursor position -> raw cursor position
+  formatted cursor position -> new cursor position
+
+- formatted cursor position
+  -> new cursor position
+
++ position
   - put in position x, keep in position x
   - is at position x
 
-layer
+- layer
   - layer definition: a set of characters
   - layer: the characters in a text that match a layer definition
 
@@ -22,18 +30,18 @@ layer
 ---
 Concepts
 
-same-field formatting
+- same-field formatting
   - can be real-time or on-demand
   - mostly write about space: editing and formatting in the same field
   - write one section about timing: does real-time formatting make sense?
 
-ad hoc approaches
+- ad hoc approaches
   - anything, mock cursor, meta
   - anything: unstructured calculation
   - mock cursor: a bit of structure
   - meta: more structure
 
-retrospective approaches
+- retrospective approaches
   - Levenshtein, frequency ratios, layer
   - Levenshtein: kludgy and slow
   - frequency ratios: lightweight
