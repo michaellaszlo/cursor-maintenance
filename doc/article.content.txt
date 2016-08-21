@@ -925,10 +925,9 @@ we run out of character sets, we return the left end of the final
 range. Optionally, we can configure the algorithm to return the right
 end of the final range.
 
-The complete set of parameters that we supply to the layer approach
-consists of a list of character sets and a one-bit value indicating
-whether ties should be broken in favor of the left end or right end of
-the final range.
+The parameters that we supply to the layer approach consist of a list
+of character sets and a one-bit value indicating whether ties should be
+broken in favor of the left end or right end of the final range.
 
 It is convenient to implement layer scanning with the help of regular
 expressions, which offer a concise syntax for testing membership in a
@@ -937,35 +936,40 @@ we can find layer 0 of a given text by iterating over its characters
 and testing each one with the regular expression `/[0-9]/` or, even more
 concisely, `/\d/`. We can find layer 1 by testing with `/,/`.
 
-Let's review the formatting instance `14^,00` -> `1,400` using the layer
-approach. We start by scanning the original text and counting its layer
-1 characters. There are four digits in `14^,00` and two of them are to
-the left of the cursor. The target ratio for layer 1 is:
+Let's use the layer approach to find a new cursor position for the
+formatting instance:
+
+  `14^,00` -> `1,400`
+
+We scan layer 0 of the raw text and compute the score at the raw cursor
+position. Layer 0 has two characters to the left of position 2 and four
+characters overall. Thus, the target ratio for layer 0 is:
 
   2 / 4 = 0.5
 
-Now we consider the formatted text. It also contains four layer 1
-characters. The initial candidate range is `[0, 5]`. We count the layer
-1 characters to the left of each cursor position in the candidate range:
+Now we scan layer 0 of the formatted text. The initial candidate range
+is `[0, 5]`. We count the layer 0 characters to the left of each cursor
+position in the candidate range:
 
       formatted text:  1 , 4 0 0
-  layer 1 characters:  1   4 0 0
+             layer 0:  1   4 0 0
      cursor position: 0 1 2 3 4 5
-       layer 1 count: 0 1 1 2 3 4
+       layer 0 count: 0 1 1 2 3 4
 
 At position 3, the ratio is 2 / 4 = 0.5, which is equal to the target
-ratio. No other position achieves this, so we return the result 3:
+ratio. No other position achieves this, so we choose 3 as the new cursor
+position:
 
   1,4^00
 
-Not only has the layer approach succeeded in this case of `commatize`,
-it will always keep the cursor positioned consistently among the digits
-of the text. That's because `commatize` does not delete or insert digits,
-making the top layer equal in the original text and formatted text.
+We have solved this instance of `commatize` successfully. In fact, the
+layer approach always keep the cursor positioned consistently among the
+digits of the text. That's because `commatize` does not delete or insert
+digits, making layer 0 equal in the original text and formatted text.
 
 The layer approach has the same time complexity as the retrospective
 approach with character frequencies, which uses a very similar scoring
-function. In one scan of the text we count the number of layer characters
+function. In one scan of the text, we count the number of layer characters
 to the left of each position. In a second scan of candidate positions,
 we compute the position scores. The overall cost is `O(n)` for text of
 length `n`.
