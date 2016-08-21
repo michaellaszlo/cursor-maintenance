@@ -888,50 +888,54 @@ by computing the ratio:
 
   left(C, s, p) / count(C, s)
 
-When considering the first layer, L_0, we seek a position in the formatted
-text where the score is closest to the score at the user position in
-the user text. That is, given the target
+We scan the text layers one by one, in the order of the character
+sets. When considering the layer induced by the first character set, C_0,
+we seek a position in the formatted text where the score is closest to
+the score achieved by the raw cursor position in the raw text. That is
+to say, given the target
 
-  a_0  =  left(L_0, s, p) / count(L_0, s)
+  a_0  =  left(C_0, s, p) / count(L_0, s)
 
-for layer `L_0` in the user text `s` with the cursor at position `p`,
-we want to minimize the absolute difference
+for character set `C_0` in the raw text `s` at the raw cursor position
+`p`, we are looking for the minimum difference
 
-  abs(left(L_0, t, q) / count(L_0, t) - a_0)
+  abs(left(C_0, t, q) / count(C_0, t) - a_0)
 
 over all positions `t` in the formatted text `q`.
 
-If several positions in the formatted text are equally close to the
-target score, these positions must be adjacent because the scoring
-function increases monotonically from left to right.
+If several positions in the formatted text achieve the minimum difference,
+these positions must be adjacent because the scoring function increases
+monotonically from left to right.
 
-Let's write `[l_0, r_0]` to denote the range of optimal positions found
-for layer `L_0` over the entire formatted text. If `l_0` is equal to
-`r_0`, we stop looking and return `l_0` as our choice of cursor position.
-Otherwise, we proceed to the next layer, `L_1`, and seek to break the
-tie by evaluating the scoring function over the range `[l_0, r_0]`
-in the formatted text.
+Let's write `[l_0, r_0]` to denote the range of optimal positions
+found for character set `C_0` over the entire formatted text. If `l_0`
+is equal to `r_0`, we stop looking and return `l_0` as our choice
+of cursor position.  Otherwise, we proceed to the next character set,
+`C_1`, and seek to break the tie by evaluating the scoring function over
+the range `[l_0, r_0]` in the formatted text.
 
 We ignore positions outside the range `[l_0, r_0]` even if they achieve
-a closer score in layer `L_1`. The search in the higher-ranked `L_0`
-restricts the range of candidate positions. Thus, the range `[l_1, r_1]`
-must be a subrange of (and possibly equal to) `[l_0, r_0]`.
+a closer score in `C_1`. The search in the higher-ranked `C_0` restricts
+the range of candidate positions. Thus, the range `[l_1, r_1]` must be
+a subrange of (and possibly equal to) `[l_0, r_0]`.
 
-We successively scan layers until the candidate range narrows to a single
-position or no more layers remain. If we run out of layers, we return the
-left end of the final range. Optionally, we can configure the algorithm
-to return the right end of the final range.
+We scan the layers induced by each character set until the candidate
+range narrows to a single position or no more character sets remain. If
+we run out of character sets, we return the left end of the final
+range. Optionally, we can configure the algorithm to return the right
+end of the final range.
 
 The complete set of parameters that we supply to the layer approach
-consists of a sequence of layer definitions and a one-bit value indicating
-whether the final tie-breaker should be the left end or right end of the
-range. Each layer can be defined with a regular expression that matches
-single characters belonging to the layer.
+consists of a list of character sets and a one-bit value indicating
+whether ties should be broken in favor of the left end or right end of
+the final range.
 
-We can define the layers for `commatize` with these regular expressions:
-
-  layer 1: /[0-9]/
-  layer 2: /,/
+It is convenient to implement layer scanning with the help of regular
+expressions, which offer a concise syntax for testing membership in a
+character set. Given the character sets defined earlier for `commatize`,
+we can find layer 0 of a given text by iterating over its characters
+and testing each one with the regular expression `/[0-9]/` or, even more
+concisely, `/\d/`. We can find layer 1 by testing with `/,/`.
 
 Let's review the formatting instance `14^,00` -> `1,400` using the layer
 approach. We start by scanning the original text and counting its layer
