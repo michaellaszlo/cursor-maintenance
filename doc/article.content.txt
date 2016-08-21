@@ -259,9 +259,10 @@ we should decide likewise in all similar cases.
 
 ## Real-time versus on-demand formatting
 
-Formatting the user's text in real time after every keystroke is
-aesthetically pleasing, but it may have unintended effects. With some
-formats, real-time formatting makes the input field unusable.
+Althought formatting the content of the input field in real time after
+every keystroke may seem aesthetically pleasing, it can have unintended
+effects. With some formats, real-time formatting makes the input field
+unusable.
 
 Consider a format that strips all whitespace from both ends of the
 input. If an input field were to apply this format in real time, it
@@ -402,12 +403,12 @@ web-based interactive testing.
 I made a [comparison page](http://192.168.0.106/comparison/) that
 simultaneously displays the results of six approaches to cursor
 maintenance. The `commatize` and `trimify` formats each have their own
-input field in which you set the user text and user cursor position. The
+input field in which you set the raw text and raw cursor position. The
 cell immediately below the input field displays the formatted text. The
-cells further below display the formatted cursor positions computed by
-various strategies. Some involve numerical scores which you can view by
-clicking on the `scores` button next to the corresponding outputs. All
-of the approaches are explained below.
+cells further below display the new cursor positions computed by various
+strategies. Some involve numerical scores which you can view by clicking
+on the `scores` button next to the corresponding outputs. All of the
+approaches are explained below.
 
 
 ## The ad hoc approach
@@ -506,7 +507,7 @@ The mock cursor could be a caret, `^`, so that the text becomes:
 
 We can perform cursor maintenance as follows:
 
-- insert the mock cursor at the user cursor position
+- insert the mock cursor at the raw cursor position
 - apply a version of the format that accommodates the mock cursor
 - record the position of the mock cursor in the formatted text
 - remove the mock cursor from the text
@@ -664,34 +665,36 @@ So far we have attempted to do cursor maintenance by peering into the
 inner workings of formats. Let's see what we can accomplish by restricting
 our attention to the three input values of the cursor-maintenance problem:
 
-- user text
-- user cursor position
+- raw text
+- raw cursor position
 - formatted text
 
-To compute a formatted cursor position, let's try to answer this question:
+To compute a new cursor position, let's try to answer this question:
 
-What position in the formatted text resembles the user cursor position
-in the user text?
+What position in the formatted text resembles the raw cursor position
+in the raw text?
 
 To make it computationally feasible, the resemblance should be a
 quantitative measure that somehow agrees with human perception of the
 cursor's place in the text. I call this the retrospective approach
 because it chooses a cursor position in the formatted text by looking
-back at the cursor in the user text.
+back at the cursor in the raw text.
 
-One idea for measuring resemblance begins with the observation that the
-cursor splits the text into left and right parts. It can be argued that
-the left part of the old text should be similar to the left part of the
-new text, and the old right part should be similar to the new right part.
+One idea for measuring resemblance begins with the observation that
+the cursor splits the text into left and right parts. It can be argued
+that the left part of the raw text should resemble the left part of the
+formatted text, and the right part of the raw text should resemble the
+right part of the formatted text.
 
-The similarity of two strings can be expressed by their edit distance,
+Maximizing resemblance is the same as minimizing difference. The
+difference between two strings can be expressed by their edit distance,
 which is the number of elementary operations required to transform one
 string into another. One such measure is the Levenshtein distance,
 in which each elementary operation is the insertion, deletion, or
 replacement of a character.
 
 Suppose the Levenshtein distance is implemented with a JavaScript function
-called `levenshtein`. Given the user text `s` and user cursor position
+called `levenshtein`. Given the raw text `s` and raw cursor position
 `p`, we can assign a score to each position `q` in the formatted text
 `t` by computing the following sum and choosing positions that achieve
 the lowest scores:
@@ -704,7 +707,7 @@ it works fairly well. It usually agrees with the results of the ad hoc
 approaches even though it is oblivious to the details of each format.
 
 The weakness of split Levenshtein is that it often computes tied
-scores. For example, given the user text and cursor
+scores. For example, given the raw text and cursor
 
   14,^00
 
@@ -712,7 +715,7 @@ with the formatted text
 
   1,400
 
-the following scores are computed for each formatted cursor position:
+the following scores are computed for each new cursor position:
 
   ^1,400 6
   1^,400 4
@@ -773,13 +776,13 @@ is a position `q` in `t` such that
 
   right('l', t, q) = 2
 
-we may conjecture that `q` is a good choice of formatted cursor
-position with respect to the character `l`. There may be several such
-cursor positions, or there may be none. Then there are the left-right
-frequencies of characters other than `l`. How do we achieve a balance
-among the various characters?
+we may conjecture that `q` is a good choice of new cursor position with
+respect to the character `l`. There may be several such cursor positions,
+or there may be none. Then there are the left-right frequencies of
+characters other than `l`. How do we achieve a balance among the various
+characters?
 
-Given position `p` in the user text `s`, let us compute the ratio
+Given position `p` in the raw text `s`, let us compute the ratio
 
   a = left(c, s, p) / (left(c, s, p) + right(c, s, p))
 
@@ -829,9 +832,9 @@ For the formatting instance `14^,00` -> `1,400`, the scores are:
   1,40^0 1.25
   1,400^ 2
 
-The minimal score is a tie between `1^,400` and `1,4^00`, both of which
-score 1 with the character-ratio formula. By comparing these to the
-original state `14^,00`, we can see that `1^,400` scores 1 because the
+The minimal score is a tie between `1^,400` and `1,4^00`, both of
+which score 1 with the character-ratio formula. By comparing these to
+the raw state `14^,00`, we can see that `1^,400` scores 1 because the
 `4` was previously to the left of the cursor and here is to the right.
 Similarly, `1,4^00` scores 1 because the `,` has moved from the right
 to the left. The formula doesn't know, as humans do, that it's more
@@ -963,9 +966,9 @@ position:
   1,4^00
 
 We have solved this instance of `commatize` successfully. In fact, the
-layer approach always keep the cursor positioned consistently among the
-digits of the text. That's because `commatize` does not delete or insert
-digits, making layer 0 equal in the original text and formatted text.
+layer approach always keep the cursor positioned consistently among
+digits. That's because `commatize` does not delete or insert digits,
+making layer 0 equal in the raw text and formatted text.
 
 The layer approach has the same time complexity as the retrospective
 approach with character frequencies, which uses a very similar scoring
