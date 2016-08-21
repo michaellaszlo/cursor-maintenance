@@ -15,35 +15,25 @@ Nomenclature
   old cursor position -> raw cursor position
   formatted cursor position -> new cursor position
 
-- formatted cursor position
-  -> new cursor position
-
-+ position
-  - put in position x, keep in position x
-  - is at position x
-
 - layer
-  - layer definition: a set of characters
-  - layer: the characters in a text that match a layer definition
+  - layer definitions: a list of character sets
+  - layer: the characters in a text that are in a character set
 
 
 ---
 Concepts
 
-- same-field formatting
++ same-field formatting
   - can be real-time or on-demand
   - mostly write about space: editing and formatting in the same field
-  - write one section about timing: does real-time formatting make sense?
+  - write one section about timing: is real-time formatting usable?
 
 - ad hoc approaches
-  - anything, mock cursor, meta
-  - anything: unstructured calculation
-  - mock cursor: a bit of structure
-  - meta: more structure
+  - make it clear that meta is an ad hoc approach
 
 - retrospective approaches
   - Levenshtein, frequency ratios, layer
-  - Levenshtein: kludgy and slow
   - frequency ratios: lightweight
   - layer: frequency ratios on semantic layers
+  - make it clear that layer is a retrospective approach
 

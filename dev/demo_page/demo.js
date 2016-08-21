@@ -299,7 +299,7 @@ var CursorMaintenanceDemo = (function () {
         "}";
     setPreference('left');
     addTesterButtons();
-    addTester('/\\d+/');
+    addTester('/\\d/');
     document.getElementById('layerInput').value = "716";
     document.getElementById('layerInput').click();
     document.getElementById('layerInput').blur();

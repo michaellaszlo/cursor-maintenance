@@ -1,10 +1,11 @@
 # Maintaining cursor position in same-field formatting
 
-This article is for developers who are building text input widgets that
-format the text and allow the user to edit the text with a movable cursor
-in the same field. Whether the format is applied after every keystroke
-or after a special user action, you have to decide where to place the
-cursor after the text has been formatted.
+This article is for developers who are building text input elements
+that offer manual editing and automatic formatting in the same field. In
+other words, you allow the user to edit the text with a movable cursor
+and you apply a format to the text in the same field. Whether the format
+is applied after every keystroke or after a special user action, you
+have to decide where to put the cursor after the text has been formatted.
 
 If you are familiar with cursor maintenance, you may want to go straight
 to my live demo or to my source code. In this article, I introduce the
@@ -16,7 +17,7 @@ problem of cursor maintenance and describe my quest for a solution.
 Suppose we're building an input field that expects the user to enter the
 population of a city. This field only accepts input from the number keys
 and the backspace key. After every keystroke, the input field formats
-its text into groups of three digits separated by commas.
+the text into groups of three digits separated by commas.
 
 For example, if the user types in `1125`, the input field formats it to
 `1,125`.
@@ -44,7 +45,7 @@ characters, so we move the cursor to position 9:
   1,125,000^
 
 There is a concise formula for maintaining the cursor at the right end
-of the input field: when the text field contains `n` characters, we put
+of the input field: if the text field contains `n` characters, we put
 the cursor in position `n`.
 
 Things get complicated when the user moves the cursor elsewhere in
@@ -64,22 +65,22 @@ the cursor? This is what happens if we keep it in position 3:
 
   115^,000
 
-The cursor has jumped across the `5` character, which surprises the
-user. The user expects the cursor to remain between the `1` and the `5`:
+The cursor has jumped across the `5` character, which is surprising
+and inconvenient. The user expects the cursor to remain between the `1`
+and the `5`:
 
   11^5,000
 
 This is obvious to a human observer. It is much less obvious how to
-compute a cursor position that matches the user's expectations.
+compute a cursor position that meets the user's expectations.
 
 The root of the problem is that text formatting does not involve the
 cursor. Although the cursor is visually displayed in the text, it is not
 logically part of the text. It is an interface element that assists the
-user with editing by indicating a position in the text. The format that
-is applied by the input field operates on a string, which is a sequence
-of characters without any representation of the cursor. After the text
-has been transformed by formatting, we want to place the cursor in a
-position that minimizes user surprise.
+user with editing by indicating a position in the text. The format is
+applied to a sequence of characters without any representation of the
+cursor. After the text has been transformed by formatting, we want to
+place the cursor in a position that minimizes user surprise.
 
 In a few cases, the answer is obvious. If the format leaves the text
 unchanged, we leave the cursor position unchanged. If the cursor is
@@ -122,12 +123,12 @@ after you move to another cell.
 
 [screenshot: Google Sheets data entry]
 
-It would be more convenient to insert your cursor into the formatted
-text and edit it directly. The edited text could be reformatted whenever
-you hit a special key, but you would remain in the input field and your
-cursor position would be maintained even as the text changes around
-it. For certain formats, your text could be instantly formatted after
-every keystroke and the cursor would continue to be where you expect it.
+It would be more convenient to insert your cursor into the formatted text
+and edit it directly. The edited text could be reformatted whenever you
+hit a special key, but you would remain in the input field and your cursor
+position would be maintained even as the text changes around it. For
+certain formats, your text could be instantly formatted after every
+keystroke and the cursor would be kept in a position where you expect it.
 
 Larger formatting interfaces would also benefit from cursor
 maintenance. Let's say you're editing a document of many pages in a word
@@ -173,9 +174,9 @@ text replaces the raw text in the input field.
 4. The cursor maintainer moves the cursor to some position in the
 formatted text.
 
-In the last step, we seek to keep the cursor's position the same in some
-sense that agrees with human perception, even though the text around
-it has changed. How do we choose a new cursor position in the formatted
+In the last step, we seek to keep the cursor's position the same in
+some sense that agrees with human perception even though the text
+has changed. How do we choose a new cursor position in the formatted
 text? That is the problem of cursor maintenance.
 
 Let's go through an example with an input field that formats its content
@@ -263,7 +264,7 @@ aesthetically pleasing, but it may have unintended effects. With some
 formats, real-time formatting makes the input field unusable.
 
 Consider a format that strips all whitespace from both ends of the
-input. If an input field were to apply this format dynamically, it
+input. If an input field were to apply this format in real time, it
 would be impossible to type a space character at the right end of the
 text. The input text `Hello, ` would be instantly formatted to `Hello,`,
 effectively deleting the space each time the user attempted to type it.
@@ -286,9 +287,10 @@ user clicks a button or hits a special key. At this point, the easiest
 way of dealing with the cursor would be to remove it from the input
 field. The user would then be required to click inside the input field to
 reposition the cursor and resume editing. It would be more user-friendly
-to automatically move the cursor to a position in the formatted text where
-the user expects to find it. Therefore, cursor maintenance is desirable
-regardless of whether formatting is done in real time or on demand.
+to automatically move the cursor to a position in the formatted text
+where the user expects to find it. Therefore, cursor maintenance is
+desirable regardless of whether same-field formatting is done in real
+time or on demand.
 
 
 ## Sample formats
@@ -738,7 +740,7 @@ Levenshtein for cursor maintenance takes time on the order of `10^9`
 computational steps.
 
 
-## Retrospective approach with character frequencies
+## Retrospective approach with character ratios
 
 Another way to retroactively evaluate cursor positions is to count
 character frequencies on each side of the cursor.
@@ -764,8 +766,8 @@ we have:
 
   right('l', s, p) = 2
 
-Suppose the text `s` is transformed by some format into the text `t`. If
-there is a position `q` in `t` such that
+Suppose text `s` is transformed by some format into text `t`. If there
+is a position `q` in `t` such that
 
   left('l', t, q) = 1
 
@@ -781,7 +783,7 @@ Given position `p` in the user text `s`, let us compute the ratio
 
   a = left(c, s, p) / (left(c, s, p) + right(c, s, p))
 
-for each character `c` that occurs in both `s` and `t`.
+for each character `c` that occurs in both `s` and `t`. We'll
 
 Observe that `left(c, s, p) + right(c, s, p)` is always equal to the total
 frequency of the character `c` in `s`. By denoting the total frequency as
@@ -814,8 +816,11 @@ For the formatting instance `14,^00` -> `1,400`, the scores are:
 
 Here the cursor position with the lowest score is indeed optimal.
 
-There are still cases that the character-frequency formula gets wrong. For
-the formatting instance `14^,00` -> `1,400`, the scores are:
+We'll call this the retrospective approach with character ratios. It
+succeeds in some problem instances where the Levenshtein formula fails. In
+other cases, the character-ratio formula doesn't work well.
+
+For the formatting instance `14^,00` -> `1,400`, the scores are:
 
   ^1,400 2
   1^,400 1
@@ -825,14 +830,14 @@ the formatting instance `14^,00` -> `1,400`, the scores are:
   1,400^ 2
 
 The minimal score is a tie between `1^,400` and `1,4^00`, both of which
-score 1 with the character-frequency formula. By comparing these to the
+score 1 with the character-ratio formula. By comparing these to the
 original state `14^,00`, we can see that `1^,400` scores 1 because the
 `4` was previously to the left of the cursor and here is to the right.
 Similarly, `1,4^00` scores 1 because the `,` has moved from the right
 to the left. The formula doesn't know, as humans do, that it's more
 important to keep the digits disposed properly around the cursor.
 
-When it comes to computational cost, the character-frequency formula is
+When it comes to computational cost, the character-ratio formula is
 distinctly superior to the Levenshtein-based formula. Given a fixed set
 of characters in a text of size `n`, we can count the `left` frequencies
 at every position with one scan in `O(n)` time. The rightmost `left`
@@ -844,36 +849,44 @@ length of the text.
 
 ## The layer approach
 
-A weakness of the preceding retrospective formulas is that they treat all
-characters equally, whereas users do not. The way in which we discriminate
-among characters depends on the text format. In a `commatize`d input
-field, the user primarily looks at the cursor's position with respect to
-the digit characters. It would make sense to position the cursor among
-the digits in the text before considering commas. For `trimify`, the
-user's primary concern is the cursor's positioning among non-whitespace
-characters.
+A weakness of the Levenshtein and character-ratio formulas is that
+they treat all characters equally, whereas users do not. The way in which
+a user discriminates among characters depends on the text format. In
+a `commatize`d input field, the user primarily looks at the cursor's
+position with respect to the digit characters. It would make sense to
+position the cursor among the digits in the text before considering
+commas. For `trimify`, the user's primary concern is the cursor's
+positioning among non-whitespace characters.
 
 These observations lead to the idea of evaluating cursor positions
-relative to subsequences of charactes that we'll call layers. The first
-step in this approach is to manually define and rank the layers for a
-given format. For example, we might define two layers for `commatize`:
-the first layer consists of the digit characters `0` through `9`, and
-the second layer consists of the comma character `,`.
+relative to text subsequences that we'll call layers. For example,
+we could define two layers for `commatize`, the first consisting of
+digits and the second consisting of commas. Thus, the text `1,400`
+has the following layers:
 
-The text `1,400` has the following characters in each layer:
+       text: 1,400
+    layer 0: 1 400
+    layer 1:  ,
 
-  full text: 1,400
-    layer 1: 1 400
-    layer 2:  ,
+More formally, layers are induced by character sets. We are using the
+following character sets for `commatize`:
 
-For a given layer `L`, we assign a score to cursor position `p` in text
-`s` by computing the ratio
+  character set 0: { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }
+  character set 1: { ',' }
 
-  left(L, s, p) / count(L, s)
+The idea of evaluating a cursor position by counting character frequencies
+around the cursor can be adapted to the layers induced by character sets.
 
-where `left` yields the number of characters to the left of `p` that
-belong to layer `L`, and `count` tells us how many characters in `s`
-belong to `L`.
+Let's define a new function `left(C, s, p)` that yields the number of
+characters of `s` to the left of `p` that are in `C`. Let's also define
+a new function `count(C, s)` that yields the total number of characters
+of `s` that are in `C`, noting that `count` is easily expressed using
+`left` and the length of `s`.
+
+For a character set `C` and text `s`, we assign a score to position `p`
+by computing the ratio:
+
+  left(C, s, p) / count(C, s)
 
 When considering the first layer, L_0, we seek a position in the formatted
 text where the score is closest to the score at the user position in
@@ -956,11 +969,11 @@ length `n`.
 
 ## Next steps
 
-If you want to implement a dynamically formatted input field with cursor
-maintenance, which approach should you choose? You can achieve optimal
-accuracy by coding an ad hoc solution, as long as you have enough time and
+If you want to implement same-field formatting with cursor maintenance,
+which approach should you choose? You can achieve optimal accuracy
+by coding an ad hoc solution as long as you have enough time and
 knowledge. Among the flavors of ad hoc I have explored, my preference is
-for the meta approach because it provides an abstraction layer over the
+for the meta approach because it forms a layer of abstraction over the
 cursor calculations. As with every ad hoc approach, using it properly
 depends on detailed knowledge of the format.
 
@@ -1007,13 +1020,13 @@ positioned where one layer ends and another begins. These tend to be the
 trickiest cases. Consider tie-breaking with a fallback layer to resolve
 these cases consistently.
 
-You can be satisfied with your layer configuration when you can prove that
-it leads to flawless cursor maintenance. If you can't, consider using an
-ad hoc approach such as the meta approach. Also consider the option of
-abandoning cursor maintenance. It would be better to remove the cursor
-from the input field at formatting time, or to display the formatted
-text separately from the input field, than to have an inconsistently
-maintained cursor.
+You shouldn't be entirely satisfied with your layer configuration until
+you can prove that it leads to flawless cursor maintenance. If you can't,
+consider using an ad hoc approach such as the meta approach. Also
+consider the option of abandoning cursor maintenance. It would be
+better to remove the cursor from the input field at formatting time,
+or to display the formatted text separately from the input field, than
+to have an inconsistently maintained cursor.
 
 My GitHub repository for this project contains implementations of the
 layer algorithm and the other approaches described in this article. The
