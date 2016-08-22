@@ -974,10 +974,9 @@ making layer 0 equal in the raw text and formatted text.
 In fact, we would be better off without layer 1. If we have two candidate
 positions after processing layer 0, they must be to the left and right of
 a comma. Leaving the decision to layer 1 would result in sometimes going
-left and sometimes right. By deleting layer 1 from the configuration and
-always going to the left of a comma, we achieve a consistency that is
-proably appreciated by most users. Thus, we see that two layers aren't
-necessarily better than one.
+left and sometimes right. By deleting layer 1 from the configuration
+and always going to the left of a comma, we achieve a consistency that
+is probably appreciated by most users.
 
 The layer approach has the same time complexity as the retrospective
 approach with character frequencies, which uses a very similar scoring
@@ -1021,17 +1020,19 @@ say that arriving at a good layer configuration is straightforward. It
 is necessary to think through configuration choices and how they affect
 cursor positioning, especially in edge cases.
 
-For example, should we define a fallback layer that matches characters
-that were not matched by earlier layers? Or should we have a catchall
-layer that matches all possible characters? Each of these options may
-or may not work well with a given format.
+We saw in the previous section that reducing the number of layers may
+result in more predictable cursor positioning. With other formats, the
+contrary may be true. There is always a question of what the last layer
+should look like. Should we define a fallback character set that matches
+characters that were not matched by earlier layers? Or should we have a
+character set that matches all possible characters? We may need extensive
+experimentation and case analysis to find a reasonable configuration.
 
 I recommend that you try the layer approach first. Analyze the format
-and see if you can decompose it into distinct character classes. Use
-those to define your layers. Look at situations in which the cursor is
-positioned where one layer ends and another begins. These tend to be the
-trickiest cases. Consider tie-breaking with a fallback layer to resolve
-these cases consistently.
+and see if you can decompose it into semantically significant character
+sets. Look at situations in which the cursor is positioned where one layer
+ends and another begins. These tend to be the trickiest cases. Consider
+tie-breaking with a fallback layer to resolve these cases consistently.
 
 You shouldn't be entirely satisfied with your layer configuration until
 you can prove that it leads to flawless cursor maintenance. If you can't,
