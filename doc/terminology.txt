@@ -8,8 +8,8 @@ Nomenclature
   - formatter: the function or process that implements a format
 
 + text
-  - old text -> raw text
-  - new text -> formatted text
+  old text -> raw text
+  new text -> formatted text
 
 + cursor position
   old cursor position -> raw cursor position

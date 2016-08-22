@@ -174,14 +174,14 @@ text replaces the raw text in the input field.
 4. The cursor maintainer moves the cursor to some position in the
 formatted text.
 
-In the last step, we seek to keep the cursor's position the same in
-some sense that agrees with human perception even though the text
-has changed. How do we choose a new cursor position in the formatted
-text? That is the problem of cursor maintenance.
+After the last step, we want the user to perceive the cursor position
+as unchanged even though the text has changed. To that end, how do we
+choose a cursor position in the formatted text? That is the problem of
+cursor maintenance.
 
-Let's go through an example with an input field that formats its content
-after every editing action. Suppose our input field contains the formatted
-text `12,900`. The cursor is at position 4:
+Let's go through an example with an input field that instantly formats
+its text after every editing action. Suppose our input field contains
+the formatted text `12,900`. The cursor is at position 4:
 
   12,9^00
 
@@ -189,10 +189,10 @@ The user moves the cursor to position 3:
 
   12,^900
 
-The text is unchanged, so there is no need for formatting yet.
+The text is unchanged, so there is no need for formatting.
 
-Now the user enter the character `5`, leaving the input field in this
-state:
+Next, the user enters the character `5`, leaving the input field in
+this state:
 
   12,5^900
 
@@ -217,10 +217,10 @@ has left the cursor in the raw text. The position where the input field
 places the cursor in the formatted text is the *new cursor position*.
 
 Note that the raw text and raw cursor position are the result of user
-actions. The formatted text is the result of applying a fixed format. The
-new cursor position is not an automatic by-product of the format, but
-the outcome of some computational process that we devise to handle cursor
-maintenance for the format.
+actions. The formatted text is the result of applying a format that was
+specified for the input field. The new cursor position is not an automatic
+by-product of the format, but the outcome of some computational process
+that we devise to handle cursor maintenance for the format.
 
 In the preceding example, the problem instance is the following:
 
@@ -249,12 +249,12 @@ Position 4 also seems reasonable:
 
   12,5^900  ->  125,^900
 
-It isn't clear which of these new cursor positions would be preferred by a
-majority of users. However, these are clearly the two best answers. What
-matters is that we choose one of these rather than a cursor position
-that would be less convenient for the user. We also want to make the
-choice in a consistent manner. If we decide an ambiguous case in one way,
-we should decide likewise in all similar cases.
+It isn't clear which of these new cursor positions would be preferred
+by a majority of users. However, these are clearly the two best
+answers. What matters is that we choose one of these rather than a
+less user-friendly cursor position. We also want to make the choice in
+a consistent manner. In ambiguous cases that are similar to this one,
+we want to make a similar decision each time.
 
 
 ## Real-time versus on-demand formatting
@@ -273,21 +273,21 @@ effectively deleting the space each time the user attempted to type it.
 Other formats would be more amenable to real-time formatting, yet
 susceptible to destructive formatting. Consider a numerical input field
 that automatically strips zero digits from the left end. If you paste in
-`0040001`, it gets formatted to `40001`. So far, so good. Now let's say
-you want to change this number to `50001`, so you backspace over the
-`4`. This is what happens in the input field:
+`0040001`, it gets formatted to `40001`, which seems reasonable. But if
+you decide to change this number to `50001`, and you backspace over the
+`4`, this is what happens in the input field:
 
   `0001` -> `1`
 
 Now instead of typing `5` as you had intended, you have to type `5000`
 because the input field deleted the leading zeros.
 
-In cases like this, you can still format the text in the same field
-if you do it on demand. This means that you delay formatting until the
-user clicks a button or hits a special key. At this point, the easiest
-way of dealing with the cursor would be to remove it from the input
-field. The user would then be required to click inside the input field to
-reposition the cursor and resume editing. It would be more user-friendly
+In cases like this, you can still format the text in the same field if
+you do so on demand. This means that you delay formatting until the user
+clicks a button or hits a special key. At this point, the easiest way of
+dealing with the cursor would be to remove it from the input field. The
+user would then be required to click inside the input field to reposition
+the cursor and resume editing. However, it would be more user-friendly
 to automatically move the cursor to a position in the formatted text
 where the user expects to find it. Therefore, cursor maintenance is
 desirable regardless of whether same-field formatting is done in real
@@ -621,9 +621,9 @@ hitch is that the sequence of insertions and deletions that make up a
 format can easily lead to inconvenient cursor displacement.
 
 For example, an implementation of `commatize` may very well start by
-initializing a new text-with-cursor object and appending characters one
-at a time as it scans the input text. The outcome is that the formatted
-cursor position is always at the right end of the text.
+initializing a new text-with-cursor object and appending characters
+one at a time as it scans the input text. Consequently, the new cursor
+position is always at the right end of the text.
 
 The meta approach is only likely to result in user-friendly cursor
 positions if each format is implemented as a sequence of local changes
@@ -924,20 +924,21 @@ a subrange of (and possibly equal to) `[l_0, r_0]`.
 
 We scan the layers induced by each character set until the candidate
 range narrows to a single position or no more character sets remain. If
-we run out of character sets, we return the left end of the final
-range. Optionally, we can configure the algorithm to return the right
-end of the final range.
+we run out of character sets, we return the left end of the final range
+by default. We can optionally configure the algorithm to return the
+right end of the final range.
 
-The parameters that we supply to the layer approach consist of a list
-of character sets and a one-bit value indicating whether ties should be
-broken in favor of the left end or right end of the final range.
+In sum, the parameters that we supply to the layer approach are a list
+of character sets and a one-bit value indicating whether the tie-breaker
+should be the left end or right end of the final range.
 
 It is convenient to implement layer scanning with the help of regular
-expressions, which offer a concise syntax for testing membership in a
-character set. Given the character sets defined earlier for `commatize`,
-we can find layer 0 of a given text by iterating over its characters
-and testing each one with the regular expression `/[0-9]/` or, even more
-concisely, `/\d/`. We can find layer 1 by testing with `/,/`.
+expressions, which offer a concise syntax for specifying character sets,
+which are called character classes in the regex world. With the character
+sets defined earlier for `commatize`, we can find layer 0 in a given text
+by iterating over its characters and testing each one with the regular
+expression `/[0-9]/` or, even more concisely, `/\d/`. We can find layer
+1 by testing with `/,/`.
 
 Let's use the layer approach to find a new cursor position for the
 formatting instance:
