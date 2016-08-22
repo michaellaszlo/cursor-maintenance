@@ -2,7 +2,7 @@
 ---
 Nomenclature
 
-- formatting operation
++ formatting operation
   -> format, formatter
   - format: the abstract notion of a text transformation
   - formatter: the function or process that implements a format

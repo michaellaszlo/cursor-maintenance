@@ -971,6 +971,14 @@ layer approach always keep the cursor positioned consistently among
 digits. That's because `commatize` does not delete or insert digits,
 making layer 0 equal in the raw text and formatted text.
 
+In fact, we would be better off without layer 1. If we have two candidate
+positions after processing layer 0, they must be to the left and right of
+a comma. Leaving the decision to layer 1 would result in sometimes going
+left and sometimes right. By deleting layer 1 from the configuration and
+always going to the left of a comma, we achieve a consistency that is
+proably appreciated by most users. Thus, we see that two layers aren't
+necessarily better than one.
+
 The layer approach has the same time complexity as the retrospective
 approach with character frequencies, which uses a very similar scoring
 function. In one scan of the text, we count the number of layer characters
@@ -1007,23 +1015,16 @@ of a cursor-maintenance algorithm, I believe that we should look for
 solutions that we can prove to be completely accurate.
 
 In the spectrum of approaches from fully customized to configuration-free,
-the layer approach occupies a sweet spot. It requires little configuration
-compared to the ad hoc approaches, and it can be made completely
-accurate for certain formats. This is not to say that configuring the
-layer approach is a straightforward process. It is necessary to think
-through configuration choices and how they affect cursor positioning,
-especially in edge cases.
+the layer approach occupies a sweet spot. It can be made completely
+accurate for certain formats with a small configuration. This is not to
+say that arriving at a good layer configuration is straightforward. It
+is necessary to think through configuration choices and how they affect
+cursor positioning, especially in edge cases.
 
 For example, should we define a fallback layer that matches characters
 that were not matched by earlier layers? Or should we have a catchall
 layer that matches all possible characters? Each of these options may
 or may not work well with a given format.
-
-In the case of `commatize`, it is tempting to define a comma layer,
-as we did in the example above, but for consistent cursor positioning
-it is better to reduce the configuration to a single layer that matches
-digits. Breaking ties to the left ensures that when the cursor and a
-comma are adjacent, the cursor is always placed to the left of the comma.
 
 I recommend that you try the layer approach first. Analyze the format
 and see if you can decompose it into distinct character classes. Use
