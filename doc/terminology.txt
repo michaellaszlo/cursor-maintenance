@@ -19,6 +19,9 @@ Nomenclature
   - character set: induces a layer in a given text
   - layer: the characters in a text that are in a character set
 
+- balanced frequencies
+  -> character ratios? frequency ratios? character frequency ratios?
+
 
 ---
 Concepts
