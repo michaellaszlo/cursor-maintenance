@@ -32,11 +32,10 @@ Concepts
   - write one section about timing: is real-time formatting usable?
 
 - ad hoc approaches
-  - make it clear that meta is an ad hoc approach
+  - explain why the meta approach is a variety of ad hoc
 
 - retrospective approaches
   - Levenshtein, frequency ratios, layer
   - frequency ratios: lightweight
   - layer: frequency ratios on semantic layers
-  - make it clear that layer is a retrospective approach
 

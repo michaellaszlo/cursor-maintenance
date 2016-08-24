@@ -284,14 +284,13 @@ because the input field deleted the leading zeros.
 
 In cases like this, you can still format the text in the same field if
 you do so on demand. This means that you delay formatting until the user
-clicks a button or hits a special key. At this point, the easiest way of
-dealing with the cursor would be to remove it from the input field. The
-user would then be required to click inside the input field to reposition
-the cursor and resume editing. However, it would be more user-friendly
-to automatically move the cursor to a position in the formatted text
-where the user expects to find it. Therefore, cursor maintenance is
-desirable regardless of whether same-field formatting is done in real
-time or on demand.
+clicks a button or hits a special key. At that point, the easiest way of
+dealing with the cursor would be to remove it from the input field and
+require the user to click inside the input field to reposition the cursor
+and resume editing. It would be more user-friendly to automatically move
+the cursor to a position in the formatted text where the user expects
+to find it. Therefore, cursor maintenance is desirable regardless of
+whether same-field formatting is done in real time or on demand.
 
 
 ## Sample formats
@@ -557,18 +556,18 @@ into unspecified computations.
 ## The meta approach
 
 What if we were to maintain cursor position by closely following the
-text transformation required by the format? If we can decompose the text
-transformation into small steps and follow the cursor at each step,
-we will know exactly where the cursor is positioned in the formatted
+text transformation required by the format? If we can decompose the
+text transformation into small steps and follow the cursor at each
+step, we will know exactly where the cursor is located in the formatted
 text. Representing the cursor with a special character was only a feint
 toward this idea because we still transformed the text with ordinary
 string operations that didn't track the cursor position.
 
 To maintain the cursor exactly, we must transform the text with
 cursor-aware operations. I call this the meta approach because it
-systematically manipulates more than text. The idea is to operate on an
-object that represents text with a cursor. To do so, we define operations
-to insert and delete characters in a text-with-cursor object.
+manipulates more than text. The idea is to operate on an object that
+represents text with a cursor. To do so, we define operations to insert
+and delete characters in a text-with-cursor object.
 
 Consider what should happen to the cursor when we insert a character
 into the text. If the character is inserted to the right of the cursor,
@@ -653,12 +652,16 @@ meta.commatize = function (s, cursor) {
 };
 ```
 
-The notion of performing local operations on a text-with-cursor
-object lends clarity to the effort of cursor maintenance. However,
-it still calls for reimplementation of the format. The developer doing
-the reimplementation has to thoroughly understand the format and must
-remain conscious of the cursor displacement caused by each insertion
-and deletion.
+The notion of performing local operations on a text-with-cursor object
+allows a more structured approach to cursor maintenance than the previous
+ad hoc approaches. Nonetheless, it is probably best to think of the
+meta approach as a member of the ad hoc family because it requires
+the format to be reimplemented and prescribes no particular way to do
+so. Although the text-with-cursor object hides the bookkeeping of cursor
+calculations, it doesn't eliminate the necessity of thinking about the
+cursor. The developer doing the reimplementation has to understand the
+format thoroughly and think carefully about the cursor displacement
+caused by each insertion and deletion.
 
 
 ## Retrospective approach with edit distance
@@ -854,8 +857,8 @@ length of the text.
 
 ## The layer approach
 
-A weakness of the Levenshtein and character-ratio formulas is that
-they treat all characters equally, whereas users do not. The way in which
+A weakness of the Levenshtein and character-ratio formulas is that they
+treat all characters equally, whereas users do not. The way in which
 a user discriminates among characters depends on the text format. In
 a `commatize`d input field, the user primarily looks at the cursor's
 position with respect to the digit characters. It would make sense to
@@ -990,10 +993,10 @@ length `n`.
 
 ## Next steps
 
-If you want to implement same-field formatting with cursor maintenance,
-which approach should you choose? You can achieve optimal accuracy
-by coding an ad hoc solution as long as you have enough time and
-knowledge. Among the flavors of ad hoc I have explored, my preference is
+So you want to implement same-field formatting with cursor maintenance.
+Which approach should you choose? If you have enough time and you know the
+format well enough, you can achieve optimal accuracy by coding an ad hoc
+solution. Among the varieties of ad hoc I have explored, my preference is
 for the meta approach because it forms a layer of abstraction over the
 cursor calculations. As with every ad hoc approach, using it properly
 depends on detailed knowledge of the format.
@@ -1001,11 +1004,12 @@ depends on detailed knowledge of the format.
 At the other end of the spectrum is the retrospective approach with
 a zero-configuration scoring function. Among these I recommend the
 frequency-balancing formula, which positions the cursor correctly much
-of the time. I can't do better than that vague assessment. In order to
-quantify the accuracy of a cursor-maintenance implementation, I would
-have to test it on a corpus of human text-editing actions drawn from a
-real-life application, and I would need a human judgment of the acceptable
-cursor positions for each formatting instance.
+of the time. That is a subjective impression, to be sure, but I lack the
+data to make a quantitative assessment. In order to measure the accuracy
+of a cursor-maintenance implementation, I would have to test it on a
+corpus of human text-editing actions drawn from a real-life application,
+and I would need a human judgment of the acceptable cursor positions
+for each formatting instance.
 
 It may not be worthwhile to conduct such a study. I would argue that
 the only acceptable cursor-maintenance algorithm is one that places
@@ -1050,7 +1054,6 @@ repository includes a comparison page that shows six approaches applied
 in parallel to `commatize` and `trimify`. I also have a demo page that
 shows more elaborate user interfaces for the meta, retrospective, and
 layer approaches. The retrospective and layer demos allow you to specify
-a format of your choosing on the web page. You can also specify your
-own layer configuration in the layer demo.
-
+a format of your choosing on the web page. You can also customize the
+layer configuration in the layer demo.
 
