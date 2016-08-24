@@ -4,8 +4,8 @@ Nomenclature
 
 + formatting operation
   -> format, formatter
-  - format: the abstract notion of a text transformation
-  - formatter: the function or process that implements a format
+  format: the abstract notion of a text transformation
+  formatter: the function or process that implements a format
 
 + text
   old text -> raw text
@@ -16,11 +16,11 @@ Nomenclature
   formatted cursor position -> new cursor position
 
 + layer
-  - character set: induces a layer in a given text
-  - layer: the characters in a text that are in a character set
+  character set: induces a layer in a given text
+  layer: the characters in a text that are in a character set
 
-- balanced frequencies
-  -> character ratios? frequency ratios? character frequency ratios?
++ balanced frequencies
+  -> frequency ratios
 
 
 ---
@@ -31,7 +31,7 @@ Concepts
   - mostly write about space: editing and formatting in the same field
   - write one section about timing: is real-time formatting usable?
 
-- ad hoc approaches
++ ad hoc approaches
   - explain why the meta approach is a variety of ad hoc
 
 - retrospective approaches
