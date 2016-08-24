@@ -34,8 +34,7 @@ Concepts
 + ad hoc approaches
   - explain why the meta approach is a variety of ad hoc
 
-- retrospective approaches
-  - Levenshtein, frequency ratios, layer
-  - frequency ratios: lightweight
-  - layer: frequency ratios on semantic layers
++ the layer approach is not retrospective
+  - there is a similarity to the frequency-ratio scoring formula
+  - however, the layer approach is not format-oblivious; it is customized
 

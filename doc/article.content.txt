@@ -709,7 +709,7 @@ the lowest scores:
 
 I call that the split Levenshtein formula. In my informal testing,
 it works fairly well. It usually agrees with the results of the ad hoc
-approaches even though it is oblivious to the details of each format.
+approaches even though it is oblivious to the details of the format.
 
 The weakness of split Levenshtein is that it often computes tied
 scores. For example, given the raw text and cursor
@@ -742,10 +742,10 @@ to compute the Levenshtein distance for a pair of strings of length
 to solve one instance of the cursor-maintenance problem.
 
 Although cubic time isn't a burden for small input fields, it becomes
-problematic for document-scale formatting. If the text consists of one
-thousand characters, which is about two hundred English words, the cost
-of using Levenshtein for one instance of cursor maintenance is on the
-order of one billion computational steps.
+problematic for document-scale formatting. If the text consists of `10^3`
+characters, which is about 200 words in English, the cost of using
+Levenshtein for one instance of cursor maintenance is on the order of
+`10^9` computational steps.
 
 
 ## Retrospective approach with frequency ratios
@@ -763,24 +763,25 @@ cursor and twice to its right.
 Let's define a pair of character-frequency functions, `left` and `right`,
 that each take a character, a string, and a position. They return
 the frequency of the character to the left and right of the position,
-respectively. In the situation above, we have:
+respectively. In the above state, if we call the raw text `s`, we have:
 
-  left('l', '  later,  alligator  ', 9) = 1
+  left('l', s, 9) = 1
 
-  right('l', '  later,  alligator  ', 9) = 2
+  right('l', s, 9) = 2
 
-Suppose a text `s` is transformed by some format into text `t`. If there
-is a position `q` in `t` such that
+Suppose `s` gets formatted, resulting in text `t`. If there is a position
+`q` in `t` such that
 
   left('l', t, q) = 1
 
   right('l', t, q) = 2
 
-we may conjecture that `q` is a good choice of new cursor position with
-respect to the character `l`. There may be several such cursor positions,
-or there may be none. Then there are the left and right frequencies
-of characters other than `l`. How do we achieve a balance among the
-various characters?
+we might view it as evidence that `q` is a good choice of new cursor
+position because it preserves the left and right frequencies of the
+character `l`. There is no guarantee that we will find such a position
+or that it will be unique. Indeed, in our example there is a range of
+positions that preserve the frequencies of `l`. We should try to take into
+account the frequencies of all the characters that appear in the text.
 
 Given position `p` in the raw text `s`, let us compute the frequency ratio
 
@@ -788,27 +789,27 @@ Given position `p` in the raw text `s`, let us compute the frequency ratio
 
 for each character `c` that occurs in both `s` and `t`.
 
-Observe that `left(c, s, p) + right(c, s, p)` is always equal to the total
+Observe that `left(c, s, p) + right(c, s, p)` is equal to the total
 frequency of the character `c` in `s`. By denoting the total frequency as
 `count(c, s)`, we can write the formula more concisely:
 
   a = left(c, s, p) / count(c, s)
 
-Similarly, at each position `q` in the formatted text `t`, we calculate
+Likewise, at each position `q` in the formatted text `t`, we calculate
 
   b = left(c, t, q) / count(c, t)
 
 for each character `c` that occurs in both `s` and `t`.
 
-Then we take the square of the absolute difference between `a` and `b`:
+For each character, we take the square of the absolute difference between
+`a` and `b`:
 
   cost(c, q) = abs(a - b) ** 2
 
 We calculate a score for position `q` by taking the sum of the values
-`cost(c, q)` over all characters `c` that occur in both `s` and `t`. We
-choose the position that achieves the minimum score. If there are several,
-we choose the leftmost. Let's call this retrospective approach with
-frequency ratios.
+`cost(c, q)` over all characters `c` that occur in both `s` and `t`. The
+cursor is set to the position that achieves the minimum score. If there
+are several, we choose the leftmost.
 
 For the formatting instance `14,^00` -> `1,400`, the scores are:
 
@@ -821,9 +822,9 @@ For the formatting instance `14,^00` -> `1,400`, the scores are:
 
 Here the cursor position with the lowest score is indeed optimal.
 
-The retrospective approach with frequency ratios succeeds in some
-problem instances where split Levenshtein fails. In other cases, it does
-no better.
+This is the retrospective approach with frequency ratios. It succeeds
+in some problem instances where split Levenshtein fails. In other cases,
+it does no better.
 
 For the formatting instance `14^,00` -> `1,400`, the scores computed by
 the frequency-ratio formula are:
@@ -838,9 +839,9 @@ the frequency-ratio formula are:
 We have a tie between `1^,400` and `1,4^00`. By comparing these to
 the raw state `14^,00`, we can see that `1^,400` scores 1 because the
 `4` was previously to the left of the cursor and here is to the right.
-Conversely, `1,4^00` scores 1 because the `,` has moved from the right
-to the left. The formula isn't aware, as humans are, that it's more
-important to keep the digit character on the right side of the cursor.
+Conversely, `1,4^00` scores 1 because the `,` has moved from the right to
+the left. The formula isn't aware, as humans are, that digit characters
+are more important than commas when it comes to positioning the cursor.
 
 When it comes to computational cost, the frequency-ratio formula is
 distinctly superior to the split-Levenshtein formula. Given a fixed set
@@ -854,14 +855,14 @@ length of the text.
 
 ## The layer approach
 
-A weakness of the Levenshtein and frequency-ratio formulas is that they
-treat all characters equally, whereas users do not. The way in which
-a user discriminates among characters depends on the text format. In
-a `commatize`d input field, the user primarily looks at the cursor's
-position with respect to the digit characters. It would make sense to
-position the cursor among the digits in the text before considering
-commas. For `trimify`, the user's primary concern is the cursor's
-positioning among non-whitespace characters.
+A weakness of the split-Levenshtein and frequency-ratio formulas is that
+they treat all characters equally, whereas users do not. A human user
+attaches different meanings to various characters in accordance with
+the format. In a `commatize`d input field, the user primarily looks at
+the cursor's position with respect to the digit characters. It would
+make sense to position the cursor among the digits in the text before
+considering commas. For `trimify`, the user's primary concern is the
+cursor's positioning among non-whitespace characters.
 
 These observations lead to the idea of evaluating cursor positions
 relative to text subsequences that we'll call layers. For example,
@@ -899,7 +900,7 @@ we seek a position in the formatted text where the score is closest to
 the score achieved by the raw cursor position in the raw text. That is
 to say, given the target
 
-  a_0  =  left(C_0, s, p) / count(L_0, s)
+  a_0  =  left(C_0, s, p) / count(C_0, s)
 
 for character set `C_0` in the raw text `s` at the raw cursor position
 `p`, we are looking for the minimum difference
@@ -934,9 +935,9 @@ In sum, the parameters that we supply to the layer approach are a list
 of character sets and a one-bit value indicating whether the tie-breaker
 should be the left end or right end of the final range.
 
-It is convenient to implement layer scanning with the help of regular
-expressions, which offer a concise syntax for specifying character sets,
-which are called character classes in the regex world. With the character
+It is convenient to implement layer scanning with regular expressions
+because they offer a concise syntax for specifying character sets, which
+are known as character classes in the regex world. With the character
 sets defined earlier for `commatize`, we can find layer 0 in a given text
 by iterating over its characters and testing each one with the regular
 expression `/[0-9]/` or, even more concisely, `/\d/`. We can find layer
@@ -968,55 +969,61 @@ position:
 
   1,4^00
 
-We have solved this instance of `commatize` successfully. In fact, the
-layer approach always keep the cursor positioned consistently among
+We have solved this instance of `commatize` successfully. In fact,
+the layer approach always keep the cursor positioned correctly among
 digits. That's because `commatize` does not delete or insert digits,
 making layer 0 equal in the raw text and formatted text.
 
-In fact, we would be better off without layer 1. If we have two candidate
-positions after processing layer 0, they must be to the left and right of
-a comma. Leaving the decision to layer 1 would result in sometimes going
-left and sometimes right. By deleting layer 1 from the configuration
-and always going to the left of a comma, we achieve a consistency that
-is probably appreciated by most users.
+It turns out that we would be better off without layer 1. If we have
+two candidate positions after processing layer 0, they must be to the
+left and right of a comma. Leaving the decision to layer 1 would result
+in sometimes going left and sometimes right. By deleting layer 1 from
+the configuration and always going to the left of a comma, we achieve
+a desirable consistency of cursor positioning.
 
-The layer approach has the same time complexity as the retrospective
-approach with frequency ratios, which uses a very similar scoring
-function. In one scan of the text, we count the number of layer characters
-to the left of each position. In a second scan of candidate positions,
-we compute the position scores. The overall cost is `O(n)` for text of
-length `n`.
+The computational cost of the layer approach is asymptotically the same
+as that of the retrospective approach with frequency ratios. We assume
+that the number of character sets is bounded by a constant and that it
+takes constant time to check membership in a character set. For a given
+character set and given text, we scan the text once to count the number
+of layer characters to the left of each position. In a second scan of
+candidate positions, we compute the position scores. The overall cost is
+`O(n)` for text of length `n`.
 
 
 ## Next steps
 
 So you want to implement same-field formatting with cursor maintenance.
-Which approach should you choose? If you have enough time and you know the
-format well enough, you can achieve optimal accuracy by coding an ad hoc
-solution. Among the varieties of ad hoc I have explored, my preference is
-for the meta approach because it forms a layer of abstraction over the
-cursor calculations. As with every ad hoc approach, using it properly
-depends on detailed knowledge of the format.
+Which approach should you choose? If you have enough time and you know
+the format well enough, you can achieve optimal accuracy by coding
+an ad hoc solution. Among the varieties of ad hoc I have explored,
+my preference is for the meta approach because it provides a layer of
+abstraction over the cursor calculations. As with every ad hoc approach,
+using it properly depends on detailed knowledge of the format.
 
-At the other end of the spectrum is the retrospective approach with
-a zero-configuration scoring function. Among these I recommend the
-frequency-ratio formula, which positions the cursor correctly much of the
-time. That is a subjective impression, to be sure, but I lack the data
-to make a quantitative assessment. In order to measure the accuracy of
-a cursor-maintenance implementation, I would have to test it on a corpus
-of human text-editing actions drawn from a real-life application, and I
-would need a human judgment of the acceptable cursor positions for each
-formatting instance.
+At the other end of the spectrum is the retrospective approach. It
+requires the least implementation effort because it is oblivious to
+the format. You do have to choose a retrospective scoring function. I
+recommend the frequency-ratio formula. In my testing, it positioned the
+cursor correctly much of the time.
 
-It may not be worthwhile to conduct such a study. I would argue that
-the only acceptable cursor-maintenance algorithm is one that places
-the cursor consistently and correctly in every instance. If there are
-cases in which the cursor jumps to a surprising position, I consider the
-input field to be broken. Instead of trying to quantify the inaccuracy
-of a cursor-maintenance algorithm, I believe that we should look for
-solutions that we can prove to be completely accurate.
+My impression of the retrospective approach's accuracy is vague because
+I lack the data for a meaningful quantitative assessment. In order to
+measure the real-world accuracy of a cursor-maintenance implementation,
+it would have to be tested on a corpus of human text-editing actions
+sampled without bias from a real-world application, and the test results
+would have to be compared to human judgments of the acceptable cursor
+positions in each formatting instance.
 
-In the spectrum of approaches from fully customized to configuration-free,
+It may not be worthwhile to conduct a study on user data. I contend
+that the only acceptable cursor-maintenance algorithm is one that
+places the cursor correctly and consistently in every instance. If the
+cursor sometimes jumps to a surprising position, I consider the input
+field to be broken. Instead of trying to quantify the inaccuracy of a
+cursor-maintenance algorithm, I believe that we should look for solutions
+that we can prove to be completely accurate.
+
+In the range of customization from fully ad hoc to zero configuration,
 the layer approach occupies a sweet spot. It can be made completely
 accurate for certain formats with a small configuration. This is not to
 say that arriving at a good layer configuration is straightforward. It
@@ -1026,31 +1033,32 @@ cursor positioning, especially in edge cases.
 We saw in the previous section that reducing the number of layers may
 result in more predictable cursor positioning. With other formats, the
 contrary may be true. There is always a question of what the last layer
-should look like. Should we define a fallback character set that matches
-characters that were not matched by earlier layers? Or should we have a
-character set that matches all possible characters? We may need extensive
+should look like. Should you define a fallback character set that matches
+characters that were not matched by earlier layers? Or should you make a
+character set that matches all possible characters? You may need extensive
 experimentation and case analysis to find a reasonable configuration.
 
-I recommend that you try the layer approach first. Analyze the format
-and see if you can decompose it into semantically significant character
-sets. Look at situations in which the cursor is positioned where one layer
-ends and another begins. These tend to be the trickiest cases. Consider
-tie-breaking with a fallback layer to resolve these cases consistently.
+Even so, I recommend that you try the layer approach before anything
+else. Analyze the format and see if you can decompose it into semantically
+significant character sets. Look at situations in which the cursor is
+positioned where one layer ends and another begins. These tend to be the
+trickiest cases. Consider tie-breaking with a fallback layer to resolve
+these cases consistently.
 
-You shouldn't be entirely satisfied with your layer configuration until
-you can prove that it leads to flawless cursor maintenance. If you can't,
-consider using an ad hoc approach such as the meta approach. Also
-consider the option of abandoning cursor maintenance. It would be
-better to remove the cursor from the input field at formatting time,
-or to display the formatted text separately from the input field, than
-to have an inconsistently maintained cursor.
+You shouldn't be entirely satisfied with your layer configuration
+until you can prove that it results in correct and consistent cursor
+maintenance. If you can't, I recommend that you try the meta approach. You
+should also consider the option of abandoning cursor maintenance. It
+would be better to remove the cursor from the input field at formatting
+time, or to display the formatted text separately from the input field,
+than to have a poorly maintained cursor.
 
 My GitHub repository for this project contains implementations of the
-layer algorithm and the other approaches described in this article. The
-repository includes a comparison page that shows six approaches applied
-in parallel to `commatize` and `trimify`. I also have a demo page that
-shows more elaborate user interfaces for the meta, retrospective, and
-layer approaches. The retrospective and layer demos allow you to specify
-a format of your choosing on the web page. You can also customize the
-layer configuration in the layer demo.
+layer approach, the meta approach, and every other approach described
+in this article. The repository includes a comparison page that shows
+six approaches applied in parallel to `commatize` and `trimify`. I also
+have a demo page that shows more elaborate user interfaces for the meta,
+retrospective, and layer approaches. The retrospective and layer demos
+allow you to specify a format of your choosing on the web page. You can
+also customize the layer configuration in the layer demo.
 
