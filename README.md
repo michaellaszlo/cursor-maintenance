@@ -1,4 +1,10 @@
-# Maintaining cursor position
+# Maintaining cursor position in same-field formatting
+
+If you're building a text input element that offers manual editing and
+automatic formatting in the same field, you'll eventually run into a
+problem. After the text is formatted, what do you do with the cursor? The
+easy solution is to remove it from the input field, but that's not
+user-friendly. You'd like to keep the cursor active. Where do you put it?
 
 The problem of maintaining cursor position across formatting operations
 is discussed in an article on my website. The code in this repository
