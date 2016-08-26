@@ -174,8 +174,8 @@ var CursorMaintenanceComparison = (function () {
     inputs.trimify.value = '    \'Twas   brillig,  and  ';
     inputs.trimify.setSelectionRange(10, 10);
     inputs.trimify.click();
-    outputs.commatize.balancedFrequencies.button.click();
-    outputs.trimify.balancedFrequencies.button.click();
+    outputs.commatize.frequencyRatios.button.click();
+    outputs.trimify.frequencyRatios.button.click();
 
     // Add expander to notes (collapsed by default).
     NoteExpander.enableByTagAndClass(document, 'div', 'notes');

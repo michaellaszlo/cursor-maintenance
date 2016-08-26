@@ -234,13 +234,13 @@ var CursorMaintenanceDemo = (function () {
     setMaintainer(document.getElementById('trimifyInput'),
         CursorMaintainer.meta.trimify);
 
-    // Retrospective approach with balanced frequencies applied to a
+    // Retrospective approach with frequency ratios applied to a
     //  user-defined formatting function. No input validation.
     setMaintainer(document.getElementById('retrospectiveInput'),
         CursorMaintainer.retrospective.make(
             makeFormatterFromInput(
                 document.getElementById('retrospectiveCode')),
-            CursorMaintainer.cost.balancedFrequencies));
+            CursorMaintainer.cost.frequencyRatios));
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.

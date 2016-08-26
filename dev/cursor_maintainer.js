@@ -324,7 +324,7 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
-  cost.balancedFrequencies = function (s, sCursor, t, tCursor) {
+  cost.frequencyRatios = function (s, sCursor, t, tCursor) {
     var chars = getCommonChars(s, t),
         sCounts = leftRightCounts(s, sCursor, chars),
         tCounts = leftRightCounts(t, tCursor, chars),
@@ -359,7 +359,7 @@ var CursorMaintainer = (function () {
     };
   };
 
-  [ 'splitLevenshtein', 'balancedFrequencies' ].forEach(function (name) {
+  [ 'splitLevenshtein', 'frequencyRatios' ].forEach(function (name) {
     retrospective[name] = {
       commatize: retrospective.make(format.commatize, cost[name]),
       trimify: retrospective.make(format.trimify, cost[name])
@@ -458,7 +458,7 @@ var CursorMaintainer = (function () {
     mockCursor: mockCursor,
     meta: meta,
     splitLevenshtein: retrospective.splitLevenshtein,
-    balancedFrequencies: retrospective.balancedFrequencies,
+    frequencyRatios: retrospective.frequencyRatios,
     cost: cost,
     retrospective: retrospective,
     layer: layer
