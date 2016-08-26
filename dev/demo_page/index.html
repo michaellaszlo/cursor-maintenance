@@ -78,15 +78,13 @@ then condenses all other whitespace sequences to one space each.
 <div class="notes">
 
 <p> In retrospective cursor maintenance, we calculate a new cursor
-position by comparing the formatted text to the original text and cursor
-position. We only consider the current instance of formatting. Thus,
-there is no need to modify the formatter or even to know what it does
-in general.
+position by comparing the formatted text to the raw text and cursor
+position. We do not reimplement the format or examine what it does in
+general. We only consider the current formatting instance.
 
 <p> You can define a format to be used in the following input field by
-inserting a JavaScript function into the editable code area below. To
-serve as a formatter, the function must take a string argument and return
-a string.
+inserting a JavaScript function into the code area below. The function
+must take a string argument and return a string.
 
 <p> The retrospective scoring formula used here is called <em>frequency
 ratios</em>. It computes the ratios of individual character frequencies
@@ -108,25 +106,24 @@ achieve similar ratios in the formatted text using a least-squares fit.
 
 <div class="notes">
 
-<p> In the layer approach, we define one or more character classes for
-a given format. These character classes, called layers, are ranked by
-priority. For a given layer in a given text, we calculate the number of
-layer characters to the left of each text position divided by the total
-number of layer characters in the text.
+<p> In the layer approach, we define a ranked sequence of character sets
+for a format. We extract a text layer by scanning the text for members of
+a character set. At each text position, we calculate the ratio of layer
+characters to the left of the position divided by the total number of
+layer characters.
 
-<p> We want to find a position in the formatted text where the ratio
-in the first layer is as close as possible to the ratio of the cursor
-position in the first layer in the original text. If several positions
-are equally close, we shrink the range of candidate positions and move
-on to the next layer. If all layers are exhausted, we choose either the
-leftmost or rightmost position in the final candidate range. The choice
-of breaking ties toward left or right is part of the configuration for
-a given format.
+<p> Initially we consider the first layer and try to find a position
+in the formatted text where the ratio is as close as possible to that
+of the cursor in the raw text. If several positions have equally close
+ratios, we shrink the range of candidate positions and move on to the
+next layer. If all layers are exhausted, we choose either the leftmost
+or rightmost position in the final candidate range. The choice of left
+or right is a fixed value in the layer configuration.
 
 <p> As with the retrospective approach, you can define your own format
-in the code area below. You can modify the layer definitions and the
+in the code area below. You can modify the character sets and the
 tie-breaking direction in the fields between the input area and the code
-area. Each layer definition is a JavaScript regular expression.
+area. Each character set is defined by a JavaScript regular expression.
 
 </div>
 

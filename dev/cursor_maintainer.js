@@ -342,10 +342,9 @@ var CursorMaintainer = (function () {
   retrospective.make = function (format, costFunction) {
     return function (raw, cursor) {
       var formatted = format(raw).text,
+          cost, pos,
           bestCost = costFunction(raw, cursor, formatted, 0),
           bestPos = 0,
-          cost,
-          pos,
           scores = [ bestCost ];
       for (pos = 1; pos <= formatted.length; ++pos) {
         cost = costFunction(raw, cursor, formatted, pos);
@@ -367,7 +366,7 @@ var CursorMaintainer = (function () {
   });
 
 
-  //--- Layer: seek the closest cursor ratio in a subset of characters.
+  //--- Layer: seek the closest frequency ratio for a character set.
   layer = {};
 
   layer.make = function (format, testers, preferRight) {
