@@ -10,7 +10,7 @@ var CursorMaintainer = (function () {
       layer;
 
 
-  //--- Plain formatting operations. No cursor involved.
+  //--- Plain formatters: no representation of the cursor.
 
   /* commatize takes a string of digits and commas. It adjusts commas so
      that they separate the digits into groups of three. */
@@ -35,7 +35,7 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Plain formatting operations wrapped for testing: cursor unchanged.
+  //--- Plain formatters wrapped for testing: cursor position unchanged.
   format = {};
 
   format.commatize = function (s, cursor) {
@@ -240,7 +240,7 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Retrospective: compare the old text and cursor to the new text.
+  //--- Retrospective: compare the raw text and cursor to the formatted text.
   retrospective = {};
   cost = {};
 
@@ -340,15 +340,15 @@ var CursorMaintainer = (function () {
   };
 
   retrospective.make = function (format, costFunction) {
-    return function (original, cursor) {
-      var formatted = format(original).text,
-          bestCost = costFunction(original, cursor, formatted, 0),
+    return function (raw, cursor) {
+      var formatted = format(raw).text,
+          bestCost = costFunction(raw, cursor, formatted, 0),
           bestPos = 0,
           cost,
           pos,
           scores = [ bestCost ];
       for (pos = 1; pos <= formatted.length; ++pos) {
-        cost = costFunction(original, cursor, formatted, pos);
+        cost = costFunction(raw, cursor, formatted, pos);
         if (cost < bestCost) {
           bestCost = cost;
           bestPos = pos;
@@ -371,12 +371,12 @@ var CursorMaintainer = (function () {
   layer = {};
 
   layer.make = function (format, testers, preferRight) {
-    return function (original, cursor) {
-      var originalCount, originalTotal, originalRatio,
+    return function (raw, cursor) {
+      var rawCount, rawTotal, rawRatio,
           formattedCounts, formattedTotal, formattedRatio,
           delta, bestDelta, bestFormattedRatio,
           rank, tester, pos,
-          formatted = format(original).text,
+          formatted = format(raw).text,
           left = 0,
           right = formatted.length,
           bestLeft = left, bestRight = right;
@@ -385,24 +385,24 @@ var CursorMaintainer = (function () {
       }
       for (rank = 0; rank < testers.length; ++rank) {
         tester = testers[rank];
-        // Scan the original text, counting current layer characters.
-        originalCount = 0;
-        originalTotal = 0;
-        for (pos = 0; pos < original.length; ++pos) {
-          if (tester.test(original.charAt(pos))) {
-            ++originalTotal;
-            // We only need the ratio for the original cursor position.
+        // Scan the raw text, counting current layer characters.
+        rawCount = 0;
+        rawTotal = 0;
+        for (pos = 0; pos < raw.length; ++pos) {
+          if (tester.test(raw.charAt(pos))) {
+            ++rawTotal;
+            // We only need the ratio for the raw cursor position.
             if (pos < cursor) {
-              ++originalCount;
+              ++rawCount;
             }
           }
         }
-        // Bail out if the original text has no layer characters.
-        if (originalTotal == 0) {
+        // Bail out if the raw text has no layer characters.
+        if (rawTotal == 0) {
           continue;
         }
-        // Compute the original cursor's ratio in the current layer.
-        originalRatio = originalCount / originalTotal;
+        // Compute the raw cursor's ratio in the current layer.
+        rawRatio = rawCount / rawTotal;
         // Scan the formatted text and store the layer count at each position.
         formattedCounts = new Array(formatted.length + 1);
         formattedCounts[0] = 0;
@@ -420,11 +420,11 @@ var CursorMaintainer = (function () {
         // Scan the layer counts to compute the ratio at each cursor position.
         // Keep track of the closest ratio and the indices where it occurs.
         bestFormattedRatio = formattedCounts[left] / formattedTotal;
-        bestDelta = Math.abs(originalRatio - bestFormattedRatio);
+        bestDelta = Math.abs(rawRatio - bestFormattedRatio);
         bestLeft = bestRight = left;
         for (pos = left + 1; pos <= right; ++pos) {
           formattedRatio = formattedCounts[pos] / formattedTotal;
-          delta = Math.abs(originalRatio - formattedRatio);
+          delta = Math.abs(rawRatio - formattedRatio);
           if (delta == bestDelta) {
             bestRight = pos;
           } else if (delta < bestDelta) {

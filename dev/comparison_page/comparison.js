@@ -27,12 +27,12 @@ var CursorMaintenanceComparison = (function () {
 
   function enableInput(input, operation) {
     function react() {
-      var originalText = input.value,
-          originalCursor = input.selectionStart,
-          formattedText = CM.format[operation](originalText).text,
+      var rawText = input.value,
+          rawCursor = input.selectionStart,
+          formattedText = CM.format[operation](rawText).text,
           maintainer;
       // Echo input. Show formatted text without cursor.
-      setOutput(outputs[operation].before, originalText, originalCursor);
+      setOutput(outputs[operation].before, rawText, rawCursor);
       setOutput(outputs[operation].after, formattedText);
       // Show text formatted with cursor maintenance.
       Object.keys(outputs[operation]).forEach(function (approach) {
@@ -42,7 +42,7 @@ var CursorMaintenanceComparison = (function () {
         } else {
           return;
         }
-        result = maintainer(originalText, originalCursor);
+        result = maintainer(rawText, rawCursor);
         setOutput(outputs[operation][approach], result.text, result.cursor);
       });
       if (activeButtons[operation]) {
@@ -153,7 +153,7 @@ var CursorMaintenanceComparison = (function () {
           inputs[operation] = make('input', { parent: cell, type: 'text',
               spellcheck: false,
               maxLength: inputMaxLengths[operation] });
-          output.className += ' original';
+          output.className += ' raw';
           cell.style.minWidth = cellMinWidths[operation] + 'px';
         }
         if (row.className.indexOf('retrospective') != -1) {

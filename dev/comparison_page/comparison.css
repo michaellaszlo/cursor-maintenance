@@ -94,7 +94,7 @@ input {
   background: #eee;
   border-color: #eee;
 }
-.output.original {
+.output.raw {
   background: #fff;
   border: 2px solid #b7c7d8;
   border-radius: 3px;

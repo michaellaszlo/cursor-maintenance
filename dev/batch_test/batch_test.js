@@ -11,11 +11,11 @@ var BatchTestCursorMaintenance = (function () {
     CM = CursorMaintainer;
 
     [ //'format',
-      //'adHoc',
+      'adHoc',
       //'mockCursor',
-      //'meta',
-      'splitLevenshtein',
-      'frequencyRatios',
+      'meta',
+      //'splitLevenshtein',
+      //'frequencyRatios',
       'layer'
     ].forEach(function (approach) {
       print('-----', approach);
@@ -26,21 +26,21 @@ var BatchTestCursorMaintenance = (function () {
   }
 
 
-  function TestCase(originalText, originalCursor,
+  function TestCase(rawText, rawCursor,
       expectedText, expectedCursor) {
     return {
-      original: { text: originalText, cursor: originalCursor },
+      raw: { text: rawText, cursor: rawCursor },
       expected: { text: expectedText, cursor: expectedCursor }
     };
   };
 
 
-  /* Test describes the behavior of a fixed set of formatting operations.
-     It provides test data and a test runner that can be used to verify
-     the formatting operations with or without cursor positioning.
-     The constructor takes an object that implements the operations
-     described by our test data. */
-  function Test(formatter) {
+  /* Test describes the expected behavior of certain formatters.
+     It provides test data and a test runner that can be used to
+     exercise the formatters with or without cursor maintenance.
+     The constructor takes an object that maps a format name to
+     a formatter. */
+  function Test(formatters) {
     var testData = {
       commatize: [
         new TestCase('2500', 1, '2,500', 1),
@@ -94,7 +94,7 @@ var BatchTestCursorMaintenance = (function () {
        the cursor position below it. */
     function showText(label, text, cursor) {
       var parts, i,
-          prefix = '  ' + label + ' "';
+          prefix = '  ' + label + ': "';
       print(prefix + text + '"');
       if (cursor !== undefined) {
         parts = [];
@@ -106,10 +106,9 @@ var BatchTestCursorMaintenance = (function () {
       }
     }
 
-    /* display prints out the test pairs for a specified formatting
-       operation. */
+    /* display prints out the test pairs for a specified format. */
     function display(name, showCursor) {
-      var originalCursor,
+      var rawCursor,
           expectedCursor,
           testCases,
           testCase, i;
@@ -128,22 +127,22 @@ var BatchTestCursorMaintenance = (function () {
       for (i = 0; i < testCases.length; ++i) {
         testCase = testCases[i];
         if (showCursor) {
-          originalCursor = testCase.original.cursor;
+          rawCursor = testCase.raw.cursor;
           expectedCursor = testCase.expected.cursor;
         }
-        showText('original', testCase.original.text, originalCursor);
+        showText('     raw', testCase.raw.text, rawCursor);
         showText('expected', testCase.expected.text, expectedCursor);
         print();
       }
     }
 
-    /* run tests a specified formatting operation or all of them. */
+    /* run tests a specified format or all of them. */
     function run(name, withCursor) {
-      var operation,
+      var format,
           passing,
           testCases,
           testCase, i,
-          original,
+          raw,
           expected,
           received;
       if (withCursor === undefined) {
@@ -158,18 +157,19 @@ var BatchTestCursorMaintenance = (function () {
         return;
       }
       print('Testing ' + name);
-      operation = formatter[name].bind(formatter);
+      format = formatters[name];
       passing = true;
       testCases = testData[name];
       for (i = 0; i < testCases.length; ++i) {
         testCase = testCases[i];
-        original = testCase.original;
+        raw = testCase.raw;
         expected = testCase.expected;
-        received = operation(original.text, original.cursor);
+        received = format(raw.text, raw.cursor);
         if (received.text != expected.text || (withCursor &&
             received.cursor != expected.cursor)) {
-          print('failed', withCursor);
-          showText('original', original.text, original.cursor);
+          //print('failed (with' + (withCursor ? '' : 'out') + ' cursor)');
+          print();
+          showText('     raw', raw.text, raw.cursor);
           showText('expected', expected.text, expected.cursor);
           showText('received', received.text, received.cursor);
           passing = false;
