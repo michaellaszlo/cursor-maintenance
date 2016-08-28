@@ -27,39 +27,35 @@ var CursorMaintenanceComparison = (function () {
         text.substring(cursor);
   }
 
-  function enableInput(input, operation) {
+  function enableInput(input, formatName) {
     function react() {
       var rawText = input.value,
           rawCursor = input.selectionStart,
-          formattedText = CM.format[operation](rawText).text,
-          maintainer;
+          formattedText = CM.format[formatName](rawText).text;
       // Echo input. Show formatted text without cursor.
-      setOutput(outputs[operation].before, rawText, rawCursor);
-      setOutput(outputs[operation].after, formattedText);
+      setOutput(outputs[formatName].before, rawText, rawCursor);
+      setOutput(outputs[formatName].after, formattedText);
       // Show text formatted with cursor maintenance.
-      Object.keys(outputs[operation]).forEach(function (approach) {
+      Object.keys(outputs[formatName]).forEach(function (approach) {
         var result;
         if (approach in CM) {
-          maintainer = CM[approach][operation];
-        } else {
-          return;
+          result = CM[approach][formatName](rawText, rawCursor);
+          setOutput(outputs[formatName][approach], result.text, result.cursor);
         }
-        result = maintainer(rawText, rawCursor);
-        setOutput(outputs[operation][approach], result.text, result.cursor);
       });
-      if (activeButtons[operation]) {
-        activeButtons[operation].click();
+      if (activeButtons[formatName]) {
+        activeButtons[formatName].click();
       }
       if (activeInputMirror) {
         activeInputMirror.className =
             activeInputMirror.className.replace(/\s*active\s*/g, '');
       }
-      activeInputMirror = outputs[operation].before;
+      activeInputMirror = outputs[formatName].before;
       activeInputMirror.className += ' active';
     }
     input.onblur = function () {
-      outputs[operation].before.className =
-          outputs[operation].before.className.replace(/\s*active\s*/g, '');
+      outputs[formatName].before.className =
+          outputs[formatName].before.className.replace(/\s*active\s*/g, '');
     };
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input['on' + eventName] = react;
@@ -67,14 +63,14 @@ var CursorMaintenanceComparison = (function () {
   }
 
   // List all cursor positions and scores for a retrospective approach.
-  function enableScoreButton(button, operation, approach) {
+  function enableScoreButton(button, formatName, approach) {
     button.onclick = function () {
-      var input = inputs[operation],
+      var input = inputs[formatName],
           text = input.value,
           cursor = input.selectionStart,
-          result = CM[approach][operation](text, cursor),
-          container = scores[operation],
-          activeButton = activeButtons[operation],
+          result = CM[approach][formatName](text, cursor),
+          container = scores[formatName],
+          activeButton = activeButtons[formatName],
           parts = [],
           i, item, output, score;
       container.innerHTML = '';
@@ -98,7 +94,7 @@ var CursorMaintenanceComparison = (function () {
         activeButton.className =
             activeButton.className.replace(/\s*active\s*/g, '');
       }
-      activeButtons[operation] = button;
+      activeButtons[formatName] = button;
       button.className += ' active';
     };
   }
@@ -130,12 +126,12 @@ var CursorMaintenanceComparison = (function () {
         rows = table.getElementsByTagName('tr'),
         inputRow = document.getElementById('inputs'),
         scoreRow = document.getElementById('scores'),
-        operations = [ 'commatize', 'trimify' ],
+        formatNames = [ 'commatize', 'trimify' ],
         i, row, cells,
         approach;
-    operations.forEach(function (operation) {
-      outputs[operation] = {};
-      scores[operation] = make('div', { className: 'scoreList', parent:
+    formatNames.forEach(function (formatName) {
+      outputs[formatName] = {};
+      scores[formatName] = make('div', { className: 'scoreList', parent:
           make('td', { parent: scoreRow }) });
     });
     // Traverse rows, adding cells. Insert inputs at top, outputs everywhere.
@@ -146,28 +142,28 @@ var CursorMaintenanceComparison = (function () {
       }
       cells = row.getElementsByTagName('td');
       approach = makeApproachName(cells[0].innerHTML);
-      operations.forEach(function (operation) {
+      formatNames.forEach(function (formatName) {
         var button,
             cell = make('td', { parent: row }),
-            output = outputs[operation][approach] = make('span',
+            output = outputs[formatName][approach] = make('span',
                 { parent: cell, className: 'output' });
         if (approach == 'before') {
-          inputs[operation] = make('input', { parent: cell, type: 'text',
+          inputs[formatName] = make('input', { parent: cell, type: 'text',
               spellcheck: false,
-              maxLength: inputMaxLengths[operation] });
+              maxLength: inputMaxLengths[formatName] });
           output.className += ' raw';
-          cell.style.minWidth = cellMinWidths[operation] + 'px';
+          cell.style.minWidth = cellMinWidths[formatName] + 'px';
         }
         if (row.className.indexOf('retrospective') != -1) {
           button = make('button', { innerHTML: 'scores', parent: cell });
-          enableScoreButton(button, operation, approach);
+          enableScoreButton(button, formatName, approach);
           output.button = button;
         }
       });
     }
     // Attach input handlers.
-    operations.forEach(function (operation) {
-      enableInput(inputs[operation], operation);
+    formatNames.forEach(function (formatName) {
+      enableInput(inputs[formatName], formatName);
     });
     // Insert prefabricated data.
     inputs.commatize.value = '129,00';
