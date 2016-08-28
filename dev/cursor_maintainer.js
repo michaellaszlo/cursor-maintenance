@@ -1,3 +1,7 @@
+/* The CursorMaintainer module implements several approaches to the problem
+   of cursor maintenance: the user has a cursor in an input field; after
+   formatting the text in the input field and displaying it in the same
+   field, where do you put the cursor?
 var CursorMaintainer = (function () {
   'use strict';
 

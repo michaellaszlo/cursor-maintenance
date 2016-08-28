@@ -1,4 +1,6 @@
 var CursorMaintenanceComparison = (function () {
+  'use strict';
+
   var CM = CursorMaintainer,
       inputMaxLengths = {
         commatize: 15,

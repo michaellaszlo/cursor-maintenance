@@ -1,7 +1,7 @@
 
 bullet  meaning
-  +       done in article
-  *       done in code
+  +       updated the article
+  *       also updated all code
 
 ---
 Nomenclature
@@ -39,6 +39,7 @@ Concepts
   - explain why the meta approach is a variety of ad hoc
 
 + the layer approach is not retrospective
-  - there is a similarity to the frequency-ratio scoring formula
+  - position scoring is similar to that of frequency ratios
   - however, the layer approach is not format-oblivious; it is customized
+
 
