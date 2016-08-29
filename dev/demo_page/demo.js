@@ -96,14 +96,14 @@ var CursorMaintenanceDemo = (function () {
     return /^[0-9,]*$/.test(text);
   }
 
-  // makeFormatterFromInput reads user input from codeBox and evaluates it
+  // makeFormatFromInput reads user input from codeBox and evaluates it
   //  as JavaScript. It is generally thought to be unwise to evaluate
   //  user-provided code. In our case, the code is evaluated in the
   //  browser session in which the user entered the code. This incurs the
   //  same level of risk as the user executing arbitrary code in the
   //  browser's JavaScript console. In both cases, the code is entered
   //  voluntarily by the user and is executed only in the user's browser.
-  function makeFormatterFromInput(codeBox) {
+  function makeFormatFromInput(codeBox) {
     var code = '',
         formatter = null,
         result;
@@ -237,17 +237,16 @@ var CursorMaintenanceDemo = (function () {
     // Retrospective approach with frequency ratios applied to a
     //  user-defined formatting function. No input validation.
     setMaintainer(document.getElementById('retrospectiveInput'),
-        CursorMaintainer.retrospective.make(
-            makeFormatterFromInput(
-                document.getElementById('retrospectiveCode')),
+        CursorMaintainer.retrospective.makeWithFormat(
+            makeFormatFromInput(document.getElementById('retrospectiveCode')),
             CursorMaintainer.cost.frequencyRatios));
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
     setMaintainer(document.getElementById('layerInput'),
         function () {
-            return CursorMaintainer.layer.make(
-                makeFormatterFromInput(document.getElementById('layerCode')),
+            return CursorMaintainer.layer.makeWithFormat(
+                makeFormatFromInput(document.getElementById('layerCode')),
                 getTesters(),
                 getPreference() == 'right');
         }, { makeFormat: true });

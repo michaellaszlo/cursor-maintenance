@@ -7,7 +7,7 @@ maintenance, which arises in the following scenario:
 - the user edits the text and leaves the cursor in the text
 - the text is formatted by an automatic process
 - the input field is overwritten with the formatted text
-- where do you insert the cursor in the formatted text?
+- where do you put the cursor?
 
 
 ## How to use the CursorMaintainer module
