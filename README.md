@@ -1,22 +1,28 @@
 # Maintaining cursor position in same-field formatting
 
-This package implements several approaches to the problem of cursor
-maintenance, which arises in the following scenario:
+This package supports several approaches to cursor maintenance, which
+arises in the following scenario:
 
-- the user has a movable cursor in an input field
-- the user edits the text and leaves the cursor in the text
-- the text is formatted by an automatic process
+- the user controls a cursor in an input field
+- the user edits the text
+- the text gets formatted by an automatic process
 - the input field is overwritten with the formatted text
-- where do you put the cursor?
+
+Where do you put the cursor in the formatted text? That is the problem
+of cursor maintenance.
 
 
-## How to use the CursorMaintainer module
+## Format-independent cursor maintenance
 
-A cursor maintainer is a function that takes four arguments:
+You can do cursor maintenance by passing three values to a function:
 
-- the user's *raw text*
-- the user's *raw cursor position*
-- the position of 
+- the *raw text*
+- the *raw cursor position*
+- the *formatted text*
 
-After loading `cursor_maintainer.js`,
+You get back one value:
+
+- a *new cursor position*
+
+
 
