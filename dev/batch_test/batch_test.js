@@ -1,25 +1,26 @@
 var BatchTestCursorMaintenance = (function () {
   'use strict';
 
-  var CM,
+  var CME,
       test;
   main();
 
   function main() {
     // Assuming d8 environment.
     load('../cursor_maintainer.js');
-    CM = CursorMaintainer;
+    load('../cursor_maintainer_experiments.js');
+    CME = CursorMaintainerExperiments;
 
     [ //'format',
       'adHoc',
       //'mockCursor',
       'meta',
       //'splitLevenshtein',
-      //'frequencyRatios',
+      'frequencyRatios',
       'layer'
     ].forEach(function (approach) {
       print('-----', approach);
-      test = new Test(CM[approach]);
+      test = new Test(CME[approach]);
       test.run('trimify');
     });
     //(new Test()).display('commatize', false);
