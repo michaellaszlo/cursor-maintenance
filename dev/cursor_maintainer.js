@@ -3,15 +3,16 @@ var CursorMaintainer = (function () {
 
   var layer,          // A statistical approach configured per format.
       retrospective,  // Format-independent statistical cursor maintenance.
-      cost,           // Cost functions for the retrospective approach.
-  }
+      costFunctions;  // Cost functions for the retrospective approach.
 
 
-  //--- Meta approach: requires reimplementation of format 
+  //--- Meta approach: reimplement the format with elementary operations
+  // on an object that stores text with a cursor.
 
   function TextWithCursor(text, cursor) {
     this.text = text || '';
     this.cursor = cursor || 0;
+  }
    
   TextWithCursor.prototype.read = function (begin, length) {
     if (length === undefined) {
@@ -44,9 +45,11 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Layer approach: configured per format
+  //--- Layer approach: a statistical approach configured per format.
 
-  layer.makeWithFormat = function (format, testers, preferRight) {
+  layer = {};
+
+  layer.augmentFormat = function (format, testers, preferRight) {
     return function (raw, cursor) {
       var rawCount, rawTotal, rawRatio,
           formattedCounts, formattedTotal, formattedRatio,
@@ -121,10 +124,14 @@ var CursorMaintainer = (function () {
       }
       return { text: formatted, cursor: bestLeft };
     };
-  }
+  };
 
 
-  //--- Retrospective approach: format-oblivious
+  //--- Retrospective approach: format-independent statistical cursor
+  // maintenance.
+
+  costFunctions = {};
+  retrospective = { costFunctions: costFunctions };
 
   function levenshtein(s, t) {
     var n = s.length,
@@ -159,9 +166,8 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  cost.splitLevenshtein = function (s, sCursor, t, tCursor) {
-    var cursorChar = chooseCursorChar(s + t),
-        left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
+  costFunctions.splitLevenshtein = function (s, sCursor, t, tCursor) {
+    var left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
         right = levenshtein(s.substring(sCursor), t.substring(tCursor));
     return left + right;
   };
@@ -206,7 +212,7 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
-  cost.frequencyRatios = function (s, sCursor, t, tCursor) {
+  costFunctions.frequencyRatios = function (s, sCursor, t, tCursor) {
     var chars = getCommonChars(s, t),
         sCounts = leftRightCounts(s, sCursor, chars),
         tCounts = leftRightCounts(t, tCursor, chars),
@@ -221,7 +227,7 @@ var CursorMaintainer = (function () {
     return cost;
   };
 
-  retrospective.makeWithFormat = function (format, costFunction) {
+  retrospective.augmentFormat = function (format, costFunction) {
     if (costFunction === undefined) {
       costFunction = cost.frequencyRatios;
     }
@@ -268,8 +274,8 @@ var CursorMaintainerExperiments = (function () {
 
   //--- Plain formatters: no representation of the cursor.
 
-  /* commatize takes a string of digits and commas. It adjusts commas so
-     that they separate the digits into groups of three. */
+  // commatize takes a string of digits and commas. It adjusts commas so
+  //  that they separate the digits into groups of three.
   function commatize(s) {                    // s is a string composed of
     var start, groups, i;                    //  digits and commas.
     s = s.replace(/,/g, '');                 // Remove all commas.
@@ -282,8 +288,8 @@ var CursorMaintainerExperiments = (function () {
     return s;
   };
 
-  /* trimify removes all whitespace from the beginning of the string and
-     reduces other whitespace sequences to a single space each. */
+  // trimify removes all whitespace from the beginning of the string and
+  //  reduces other whitespace sequences to a single space each.
   function trimify(s) {          // s is an arbitrary string.
     s = s.replace(/^\s+/, '');   // Remove whitespace from the beginning.
     s = s.replace(/\s+/g, ' ');  // Condense remaining whitespace sequences
@@ -292,6 +298,7 @@ var CursorMaintainerExperiments = (function () {
 
 
   //--- Plain formatters wrapped for testing: cursor position unchanged.
+
   format = {};
 
   format.commatize = function (s, cursor) {
@@ -306,8 +313,9 @@ var CursorMaintainerExperiments = (function () {
   //--- Ad hoc: idiosyncratic cursor calculations.
   adHoc = {};
 
-  /* count returns the number of occurrences (possibly overlapping) of the
-     string sub in the string s. */
+  // count returns the number of occurrences (possibly overlapping) of the
+  //  string sub in the string s.
+
   function count(s, sub) {
     var count = 0,
         searchedTo = -1;
@@ -345,10 +353,11 @@ var CursorMaintainerExperiments = (function () {
 
 
   //--- Mock cursor: incorporate the cursor into the text, format, fix.
+
   mockCursor = {};
 
-  /* chooseCursorChar tests a set of favored characters, then all printable
-     ASCII characters, until it finds one that does not occur in the text. */
+  // chooseCursorChar tests a set of favored characters, then all printable
+  //  ASCII characters, until it finds one that does not occur in the text.
   function chooseCursorChar(s) {
     var usedChars = {},
         seekChars = '|^_#',
@@ -422,6 +431,7 @@ var CursorMaintainerExperiments = (function () {
 
 
   //--- Meta: local operations on a text-with-cursor object.
+
   meta = {};
 
   meta.commatize = function (s, cursor) {
@@ -462,23 +472,25 @@ var CursorMaintainerExperiments = (function () {
 
 
   //--- Retrospective: compare the raw text and cursor to the formatted text.
+
   retrospective = {};
-  cost = {};
 
   [ 'splitLevenshtein', 'frequencyRatios' ].forEach(function (name) {
+    var costFunction = CM.retrospective.costFunctions[name];
     retrospective[name] = {
-      commatize: retrospective.makeWithFormat(format.commatize, cost[name]),
-      trimify: retrospective.makeWithFormat(format.trimify, cost[name])
+      commatize: CM.retrospective.augmentFormat(format.commatize, costFunction),
+      trimify: CM.retrospective.augmentFormat(format.trimify, costFunction)
     };
   });
 
 
   //--- Layer: seek the closest frequency ratio for a character set.
+
   layer = {};
 
-  layer.commatize = layer.makeWithFormat(format.commatize, [ /\d/ ]);
+  layer.commatize = CM.layer.augmentFormat(format.commatize, [ /\d/ ]);
 
-  layer.trimify = layer.makeWithFormat(format.trimify, [ /\S/ ], true);
+  layer.trimify = CM.layer.augmentFormat(format.trimify, [ /\S/ ], true);
 
 
   return {
@@ -486,10 +498,9 @@ var CursorMaintainerExperiments = (function () {
     adHoc: adHoc,
     mockCursor: mockCursor,
     meta: meta,
+    retrospective: retrospective,
     splitLevenshtein: retrospective.splitLevenshtein,
     frequencyRatios: retrospective.frequencyRatios,
-    cost: cost,
-    retrospective: retrospective,
     layer: layer
   };
 })();

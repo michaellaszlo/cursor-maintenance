@@ -1,7 +1,7 @@
 var CursorMaintenanceComparison = (function () {
   'use strict';
 
-  var CM = CursorMaintainer,
+  var CME = CursorMaintainerExperiments,
       inputMaxLengths = {
         commatize: 15,
         trimify: 60
@@ -31,15 +31,15 @@ var CursorMaintenanceComparison = (function () {
     function react() {
       var rawText = input.value,
           rawCursor = input.selectionStart,
-          formattedText = CM.format[formatName](rawText).text;
+          formattedText = CME.format[formatName](rawText).text;
       // Echo input. Show formatted text without cursor.
       setOutput(outputs[formatName].before, rawText, rawCursor);
       setOutput(outputs[formatName].after, formattedText);
       // Show text formatted with cursor maintenance.
       Object.keys(outputs[formatName]).forEach(function (approach) {
         var result;
-        if (approach in CM) {
-          result = CM[approach][formatName](rawText, rawCursor);
+        if (approach in CME) {
+          result = CME[approach][formatName](rawText, rawCursor);
           setOutput(outputs[formatName][approach], result.text, result.cursor);
         }
       });
@@ -68,7 +68,7 @@ var CursorMaintenanceComparison = (function () {
       var input = inputs[formatName],
           text = input.value,
           cursor = input.selectionStart,
-          result = CM[approach][formatName](text, cursor),
+          result = CME[approach][formatName](text, cursor),
           container = scores[formatName],
           activeButton = activeButtons[formatName],
           parts = [],
