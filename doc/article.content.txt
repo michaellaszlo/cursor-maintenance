@@ -750,8 +750,8 @@ Levenshtein for one instance of cursor maintenance is on the order of
 
 ## Retrospective approach with frequency ratios
 
-Another way to retroactively evaluate cursor positions is to count
-character frequencies on each side of the cursor.
+Another way to evaluate cursor positions is to count character frequencies
+on each side of the cursor.
 
 For example, in the state
 
@@ -778,14 +778,15 @@ Suppose `s` gets formatted, resulting in text `t`. If there is a position
 
 we might view it as evidence that `q` is a good choice of new cursor
 position because it preserves the left and right frequencies of the
-character `l`. There is no guarantee that we will find such a position
-or that it will be unique. Indeed, in our example there is a range of
-positions that preserve the frequencies of `l`. We should try to take into
-account the frequencies of all the characters that appear in the text.
+character `l`. There is no guarantee that we will find such a position or
+that it will be unique. Indeed, in our example there are several positions
+that preserve the left and right frequencies of `l`. We should try to
+take into account the frequencies of all the characters that appear in
+the text.
 
 Given position `p` in the raw text `s`, let us compute the frequency ratio
 
-  a = left(c, s, p) / (left(c, s, p) + right(c, s, p))
+  a(p) = left(c, s, p) / (left(c, s, p) + right(c, s, p))
 
 for each character `c` that occurs in both `s` and `t`.
 
@@ -793,20 +794,22 @@ Observe that `left(c, s, p) + right(c, s, p)` is equal to the total
 frequency of the character `c` in `s`. By denoting the total frequency as
 `count(c, s)`, we can write the expression more concisely:
 
-  a = left(c, s, p) / count(c, s)
+  a(p) = left(c, s, p) / count(c, s)
 
-Likewise, at each position `q` in the formatted text `t`, we calculate
+At each position `q` in the formatted text `t`, we likewise calculate
 
-  b = left(c, t, q) / count(c, t)
+  b(q) = left(c, t, q) / count(c, t)
 
 for each character `c` that occurs in both `s` and `t`.
 
 For each character, we take the square of the absolute difference between
-`a` and `b`:
+`a(p)` and `b(q)`:
 
-  cost(c, q) = abs(a - b) ** 2
+  cost(c, q) = abs(a(p) - b(q)) ** 2
 
-We calculate a score for position `q` by taking the sum of the values
+Note that `p`, the raw cursor position, stays constant, while we vary `q`
+over every possible cursor position in the formatted text. We calculate
+a score for each candidate position `q` by taking the sum of the values
 `cost(c, q)` over all characters `c` that occur in both `s` and `t`. The
 cursor is set to the position that achieves the minimum score. If there
 are several, we choose the leftmost.
@@ -971,7 +974,7 @@ position:
   1,4^00
 
 We have solved this instance of `commatize` successfully. In fact,
-the layer approach always keep the cursor positioned correctly among
+the layer approach always keeps the cursor positioned correctly among
 digits. That's because `commatize` does not delete or insert digits,
 making layer 0 equal in the raw text and formatted text.
 

@@ -184,31 +184,6 @@ var CursorMaintainer = (function () {
     return scores;
   };
 
-  // getCounts is used by leftRightCounts. It scans a string for the
-  //  frequencies of given characters.
-  function getCounts(s, chars) {
-    var counts = {},
-        i, ch;
-    for (i = 0; i < chars.length; ++i) {
-      counts[chars[i]] = 0;
-    }
-    for (i = 0; i < s.length; ++i) {
-      ch = s.charAt(i);
-      if (ch in counts) {
-        counts[ch] += 1;
-      }
-    }
-    return counts;
-  }
-
-  // leftRightCounts is used by frequencyRatios to get separate
-  //  character-frequency counts for the left and right parts of a string.
-  function leftRightCounts(s, cursor, chars) {
-    var countLeft = getCounts(s.substring(0, cursor), chars),
-        countRight = getCounts(s.substring(cursor), chars);
-    return { left: countLeft, right: countRight };
-  }
-
   // getCommonChars is used by frequencyRatios. Given two strings, it finds
   //  the set of characters that appear in both.
   function getCommonChars(s, t) {
@@ -230,19 +205,48 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
+  function getLeftCounts(s, chars) {
+    var counts = new Array(s.length + 1),
+        pos, i, ch;
+    counts[0] = {};
+    for (i = 0; i < chars.length; ++i) {
+      counts[0][chars[i]] = 0;
+    }
+    for (pos = 1; pos <= s.length; ++pos) {
+      counts[pos] = {};
+      for (i = 0; i < chars.length; ++i) {
+        counts[pos][chars[i]] = counts[pos - 1][chars[i]];
+      }
+      ch = s.charAt(pos - 1);
+      if (ch in counts[pos]) {
+        counts[pos][ch] += 1;
+      }
+    }
+    return counts;
+  }
+
   costFunctions.frequencyRatios = function (s, sCursor, t) {
     var chars = getCommonChars(s, t),
-        sCounts = leftRightCounts(s, sCursor, chars),
-        tCounts = leftRightCounts(t, tCursor, chars),
-        cost = 0,
-        i, ch, a, b;
-    for (i = 0; i < chars.length; ++i) {
-      ch = chars[i];
-      a = sCounts.left[ch] / (sCounts.left[ch] + sCounts.right[ch]);
-      b = tCounts.left[ch] / (tCounts.left[ch] + tCounts.right[ch]);
-      cost += Math.pow(Math.abs(a - b), 2);
+        sCounts = getLeftCounts(s, chars),
+        sCountsHere = sCounts[sCursor],  // the raw cursor is fixed
+        sTotals = sCounts[s.length],
+        tCounts = getLeftCounts(t, chars),
+        tCountsHere,  // we'll examine each position in the formatted text
+        tTotals = tCounts[t.length],
+        scores = new Array(t.length + 1),
+        tCursor, i, ch, a, b, cost;
+    for (tCursor = 0; tCursor <= t.length; ++tCursor) {
+      tCountsHere = tCounts[tCursor];
+      cost = 0;
+      for (i = 0; i < chars.length; ++i) {
+        ch = chars[i];
+        a = sCountsHere[ch] / sTotals[ch];
+        b = tCountsHere[ch] / tTotals[ch];
+        cost += Math.pow(Math.abs(a - b), 2);
+      }
+      scores[tCursor] = cost;
     }
-    return cost;
+    return scores;
   };
 
   retrospective.augmentFormat = function (format, costFunction) {
