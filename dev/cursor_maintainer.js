@@ -6,8 +6,8 @@ var CursorMaintainer = (function () {
       costFunctions;  // Cost functions for the retrospective approach.
 
 
-  //--- Meta approach: reimplement the format with elementary operations
-  // on an object that stores text with a cursor.
+  //--- Meta approach: requires reimplementation of the format with
+  //  elementary operations on a text-with-cursor object.
 
   function TextWithCursor(text, cursor) {
     this.text = text || '';
@@ -45,7 +45,8 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Layer approach: a statistical approach configured per format.
+  //--- Layer approach: a statistical approach that looks at layers of text
+  //  induced by character sets specified for a format.
 
   layer = {};
 
@@ -127,12 +128,14 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Retrospective approach: format-independent statistical cursor
-  // maintenance.
+  //--- Retrospective approach: a format-independent statistical approach
+  //  to cursor maintenance.
 
   costFunctions = {};
   retrospective = { costFunctions: costFunctions };
 
+  // levenshtein implements the well-known Levenshtein distance. We use
+  //  it in our "split Levenshtein" retrospective formula.
   function levenshtein(s, t) {
     var n = s.length,
         m = t.length,
@@ -166,12 +169,23 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  costFunctions.splitLevenshtein = function (s, sCursor, t, tCursor) {
-    var left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor)),
-        right = levenshtein(s.substring(sCursor), t.substring(tCursor));
-    return left + right;
+  // splitLevenshtein splits the raw text and formatted text at their
+  //  respective cursors, computes the Levenshtein distance between the
+  //  left parts, then between the right parts, and takes the sum.
+  costFunctions.splitLevenshtein = function (s, sCursor, t) {
+    var tCursor,
+        left, right,
+        scores = new Array(t.length + 1);
+    for (tCursor = 0; tCursor <= t.length; ++tCursor) {
+      left = levenshtein(s.substring(0, sCursor), t.substring(0, tCursor));
+      right = levenshtein(s.substring(sCursor), t.substring(tCursor));
+      scores[tCursor] = left + right;
+    }
+    return scores;
   };
 
+  // getCounts is used by leftRightCounts. It scans a string for the
+  //  frequencies of given characters.
   function getCounts(s, chars) {
     var counts = {},
         i, ch;
@@ -187,12 +201,16 @@ var CursorMaintainer = (function () {
     return counts;
   }
 
+  // leftRightCounts is used by frequencyRatios to get separate
+  //  character-frequency counts for the left and right parts of a string.
   function leftRightCounts(s, cursor, chars) {
     var countLeft = getCounts(s.substring(0, cursor), chars),
         countRight = getCounts(s.substring(cursor), chars);
     return { left: countLeft, right: countRight };
   }
 
+  // getCommonChars is used by frequencyRatios. Given two strings, it finds
+  //  the set of characters that appear in both.
   function getCommonChars(s, t) {
     var sCharSet = {},
         tCharSet = {},
@@ -212,7 +230,7 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
-  costFunctions.frequencyRatios = function (s, sCursor, t, tCursor) {
+  costFunctions.frequencyRatios = function (s, sCursor, t) {
     var chars = getCommonChars(s, t),
         sCounts = leftRightCounts(s, sCursor, chars),
         tCounts = leftRightCounts(t, tCursor, chars),
@@ -234,16 +252,15 @@ var CursorMaintainer = (function () {
     return function (raw, cursor) {
       var formatted = format(raw).text,
           cost, pos,
-          bestCost = costFunction(raw, cursor, formatted, 0),
-          bestPos = 0,
-          scores = [ bestCost ];
+          scores = costFunction(raw, cursor, formatted, 0),
+          bestCost = scores[0],
+          bestPos = 0;
       for (pos = 1; pos <= formatted.length; ++pos) {
-        cost = costFunction(raw, cursor, formatted, pos);
+        cost = scores[pos];
         if (cost < bestCost) {
           bestCost = cost;
           bestPos = pos;
         }
-        scores.push(cost);
       }
       return { text: formatted, cursor: bestPos, scores: scores };
     };

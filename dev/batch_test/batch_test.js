@@ -15,8 +15,8 @@ var BatchTestCursorMaintenance = (function () {
       'adHoc',
       //'mockCursor',
       'meta',
-      //'splitLevenshtein',
-      'frequencyRatios',
+      'splitLevenshtein',
+      //'frequencyRatios',
       'layer'
     ].forEach(function (approach) {
       print('-----', approach);

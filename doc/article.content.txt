@@ -707,7 +707,7 @@ the lowest scores:
   levenshtein(s.substring(0, p), t.substring(0, q)) +
   levenshtein(s.substring(p), t.substring(q))
 
-I call that the split Levenshtein formula. In my informal testing,
+I call that the split Levenshtein cost function. In my informal testing,
 it works fairly well. It usually agrees with the results of the ad hoc
 approaches even though it is oblivious to the details of the format.
 
@@ -791,7 +791,7 @@ for each character `c` that occurs in both `s` and `t`.
 
 Observe that `left(c, s, p) + right(c, s, p)` is equal to the total
 frequency of the character `c` in `s`. By denoting the total frequency as
-`count(c, s)`, we can write the formula more concisely:
+`count(c, s)`, we can write the expression more concisely:
 
   a = left(c, s, p) / count(c, s)
 
@@ -827,7 +827,7 @@ in some problem instances where split Levenshtein fails. In other cases,
 it does no better.
 
 For the formatting instance `14^,00` -> `1,400`, the scores computed by
-the frequency-ratio formula are:
+the frequency-ratio cost function are:
 
   0 ^1,400 2
   1 1^,400 1
@@ -839,27 +839,28 @@ the frequency-ratio formula are:
 We have a tie between `1^,400` and `1,4^00`. By comparing these to
 the raw state `14^,00`, we can see that `1^,400` scores 1 because the
 `4` was previously to the left of the cursor and here is to the right.
-Conversely, `1,4^00` scores 1 because the `,` has moved from the right to
-the left. The formula isn't aware, as humans are, that digit characters
-are more important than commas when it comes to positioning the cursor.
+Conversely, `1,4^00` scores 1 because the `,` has moved from the right
+to the left. The cost function isn't aware, as humans are, that digit
+characters are more important than commas when it comes to positioning
+the cursor.
 
-When it comes to computational cost, the frequency-ratio formula is
-distinctly superior to the split-Levenshtein formula. Given a fixed set
-of characters in a text of size `n`, we can count the `left` frequencies
-at every position with one scan in `O(n)` time. The rightmost `left`
-frequency gives us the `count` value. With a second scan through the
-`left` frequencies, we compute the ratio of `left` to `count` at each
-position. The overall time complexity is linear with respect to the
-length of the text.
+When it comes to computational cost, the frequency-ratio cost function
+is distinctly superior to the split Levenshtein cost function. Given a
+fixed set of characters in a text of size `n`, we can count the `left`
+frequencies at every position with one scan in `O(n)` time. The rightmost
+`left` frequency gives us the `count` value. With a second scan through
+the `left` frequencies, we compute the ratio of `left` to `count` at
+each position. The overall time complexity is linear with respect to
+the length of the text.
 
 
 ## The layer approach
 
-A weakness of the split-Levenshtein and frequency-ratio formulas is that
-they treat all characters equally, whereas users do not. A human user
-attaches different meanings to various characters in accordance with
-the format. In a `commatize`d input field, the user primarily looks at
-the cursor's position with respect to the digit characters. It would
+A weakness of the split Levenshtein and frequency-ratio cost functions
+is that they treat all characters equally, whereas users do not. A human
+user attaches different meanings to various characters in accordance
+with the format. In a `commatize`d input field, the user primarily looks
+at the cursor's position with respect to the digit characters. It would
 make sense to position the cursor among the digits in the text before
 considering commas. For `trimify`, the user's primary concern is the
 cursor's positioning among non-whitespace characters.
@@ -1002,9 +1003,9 @@ abstraction over the cursor calculations. As with every ad hoc approach,
 using it properly depends on detailed knowledge of the format.
 
 At the other end of the spectrum is the retrospective approach. It
-requires the least implementation effort because it is oblivious to
-the format. You do have to choose a retrospective scoring function. I
-recommend the frequency-ratio formula. In my testing, it positioned the
+requires the least implementation effort because it is oblivious to the
+format. You do have to choose a retrospective cost function. I recommend
+the frequency-ratio cost function. In my testing, it positioned the
 cursor correctly much of the time.
 
 My impression of the retrospective approach's accuracy is vague because
