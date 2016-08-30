@@ -1,9 +1,11 @@
 var CursorMaintenanceDemo = (function () {
   'use strict';
 
-  // This module requires CursorMaintainer and NoteExpander.
+  // requires: CursorMaintainer, CursorMaintainerExperiments, NoteExpander
 
-  var messages = {
+  var CM = CursorMaintainer,
+      CME = CursorMaintainerExperiments,
+      messages = {
         formatting: {
           off: '<span class="icon">&#x25a1;</span>formatting off',
           on: '<span class="icon">&#x25a0;</span>formatting on'
@@ -228,24 +230,24 @@ var CursorMaintenanceDemo = (function () {
 
     // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
-        CursorMaintainer.meta.commatize, { validate: commatizeValidator });
+        CME.meta.commatize, { validate: commatizeValidator });
 
     // Meta version of trimify. No input validation.
     setMaintainer(document.getElementById('trimifyInput'),
-        CursorMaintainer.meta.trimify);
+        CME.meta.trimify);
 
     // Retrospective approach with frequency ratios applied to a
     //  user-defined formatting function. No input validation.
     setMaintainer(document.getElementById('retrospectiveInput'),
-        CursorMaintainer.retrospective.makeWithFormat(
+        CM.retrospective.augmentFormat(
             makeFormatFromInput(document.getElementById('retrospectiveCode')),
-            CursorMaintainer.cost.frequencyRatios));
+            CM.retrospective.costFunctions.frequencyRatios));
 
     // Layer approach applied to a user-defined formatting function.
     //  No input validation.
     setMaintainer(document.getElementById('layerInput'),
         function () {
-            return CursorMaintainer.layer.makeWithFormat(
+            return CM.layer.augmentFormat(
                 makeFormatFromInput(document.getElementById('layerCode')),
                 getTesters(),
                 getPreference() == 'right');
