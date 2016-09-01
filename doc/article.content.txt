@@ -888,10 +888,11 @@ The idea of evaluating a cursor position by counting character frequencies
 around the cursor can be adapted to the layers induced by character sets.
 
 Let's define a new function `left(C, s, p)` that yields the number of
-characters of `s` to the left of `p` that are in `C`. Let's also define
-a new function `count(C, s)` that yields the total number of characters
-of `s` that are in `C`, noting that `count` is easily expressed using
-`left` and the length of `s`.
+characters of text `s` to the left of position `p` that are in character
+set `C`. Let's also define a new function `count(C, s)` that yields the
+total number of characters of text `s` that are in character set `C`,
+noting that `count` is easily expressed using `left` and the length of
+`s`.
 
 For a character set `C` and text `s`, we assign a score to position `p`
 by computing the ratio:
@@ -914,7 +915,7 @@ for character set `C_0` in the raw text `s` at the raw cursor position
 over all positions `t` in the formatted text `q`.
 
 If several positions in the formatted text achieve the minimum difference,
-these positions must be adjacent because the scoring function increases
+these positions must be contiguous because the scoring function increases
 monotonically from left to right.
 
 Let's write `[l_0, r_0]` to denote the range of optimal positions
@@ -941,18 +942,18 @@ should be the left end or right end of the final range.
 
 It is convenient to implement layer scanning with regular expressions
 because they offer a concise syntax for specifying character sets, which
-are known as character classes in the regex world. With the character
+are known as character classes in the regex culture. With the character
 sets defined earlier for `commatize`, we can find layer 0 in a given text
 by iterating over its characters and testing each one with the regular
 expression `/[0-9]/` or, even more concisely, `/\d/`. We can find layer
 1 by testing with `/,/`.
 
-Let's use the layer approach to find a new cursor position for the
+Let's use the layer approach to find a new cursor position for this
 formatting instance:
 
   `14^,00` -> `1,400`
 
-We scan layer 0 of the raw text and compute the score at the raw cursor
+We scan layer 0 of the raw text and evaluate the raw cursor
 position. Layer 0 has two characters to the left of position 2 and four
 characters overall. Thus, the target ratio for layer 0 is:
 
@@ -983,7 +984,7 @@ two candidate positions after processing layer 0, they must be to the
 left and right of a comma. Leaving the decision to layer 1 would result
 in sometimes going left and sometimes right. By deleting layer 1 from
 the configuration and always going to the left of a comma, we achieve
-a desirable consistency of cursor positioning.
+consistent cursor positioning.
 
 The computational cost of the layer approach is asymptotically the same
 as that of the retrospective approach with frequency ratios. We assume
@@ -1027,7 +1028,7 @@ field to be broken. Instead of trying to quantify the inaccuracy of a
 cursor-maintenance algorithm, I believe that we should look for solutions
 that we can prove to be completely accurate.
 
-In the range of customization from fully ad hoc to zero configuration,
+In the range of customization, from fully ad hoc to zero configuration,
 the layer approach occupies a sweet spot. It can be made completely
 accurate for certain formats with a small configuration. This is not to
 say that arriving at a good layer configuration is straightforward. It
@@ -1050,18 +1051,18 @@ trickiest cases. Consider tie-breaking with a fallback layer to resolve
 these cases consistently.
 
 You shouldn't be entirely satisfied with your layer configuration
-until you can prove that it results in correct and consistent cursor
-maintenance. If you can't, I recommend that you try the meta approach. You
-should also consider the option of abandoning cursor maintenance. It
-would be better to remove the cursor from the input field at formatting
-time, or to display the formatted text separately from the input field,
-than to have a poorly maintained cursor.
+until you can prove that it results in correct and consistent
+cursor maintenance. If you can't, I recommend that you try the meta
+approach. You should also consider building the text element without
+cursor maintenance. It would be better to remove the cursor from the input
+field at formatting time, or to display the formatted text separately
+from the input field, than to have a poorly maintained cursor.
 
 My GitHub repository for this project contains implementations of the
-layer approach, the meta approach, and every other approach described
+layer approach, the meta approach, and the other approaches described
 in this article. The repository includes a comparison page that shows
 six approaches applied in parallel to `commatize` and `trimify`. I also
-have a demo page that shows more elaborate user interfaces for the meta,
+have a demo page that shows more elaborate implementation of the meta,
 retrospective, and layer approaches. The retrospective and layer demos
 allow you to specify a format of your choosing on the web page. You can
 also customize the layer configuration in the layer demo.

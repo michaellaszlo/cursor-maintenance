@@ -169,8 +169,8 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  // splitLevenshtein splits the raw text and formatted text at their
-  //  respective cursors, computes the Levenshtein distance between the
+  // splitLevenshtein splits the raw text and formatted text at respective
+  //  cursor positions, computes the Levenshtein distance between the
   //  left parts, then between the right parts, and takes the sum.
   costFunctions.splitLevenshtein = function (s, sCursor, t) {
     var tCursor,
@@ -249,14 +249,10 @@ var CursorMaintainer = (function () {
     return scores;
   };
 
-  retrospective.augmentFormat = function (format, costFunction) {
-    if (costFunction === undefined) {
-      costFunction = cost.frequencyRatios;
-    }
-    return function (raw, cursor) {
-      var formatted = format(raw).text,
-          cost, pos,
-          scores = costFunction(raw, cursor, formatted, 0),
+  retrospective.makeMaintainer = function (costFunction) {
+    return function (raw, cursor, formatted) {
+      var cost, pos,
+          scores = costFunction(raw, cursor, formatted),
           bestCost = scores[0],
           bestPos = 0;
       for (pos = 1; pos <= formatted.length; ++pos) {
@@ -266,7 +262,21 @@ var CursorMaintainer = (function () {
           bestPos = pos;
         }
       }
-      return { text: formatted, cursor: bestPos, scores: scores };
+      return { cursor: bestPos, scores: scores };
+    };
+  };
+
+  retrospective.augmentFormat = function (format, costFunction) {
+    var maintainer;
+    if (costFunction === undefined) {
+      costFunction = cost.frequencyRatios;
+    }
+    maintainer = retrospective.makeMaintainer(costFunction);
+    return function (raw, cursor) {
+      var formatted = format(raw).text,
+          result = maintainer(raw, cursor, formatted);
+      result.text = formatted;
+      return result;
     };
   };
 
