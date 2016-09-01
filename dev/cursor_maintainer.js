@@ -56,7 +56,7 @@ var CursorMaintainer = (function () {
           formattedCounts, formattedTotal, formattedRatio,
           delta, bestDelta, bestFormattedRatio,
           rank, tester, pos,
-          formatted = format(raw).text,
+          formatted = format(raw),
           left = 0,
           right = formatted.length,
           bestLeft = left, bestRight = right;
@@ -273,7 +273,7 @@ var CursorMaintainer = (function () {
     }
     maintainer = retrospective.makeMaintainer(costFunction);
     return function (raw, cursor) {
-      var formatted = format(raw).text,
+      var formatted = format(raw),
           result = maintainer(raw, cursor, formatted);
       result.text = formatted;
       return result;
