@@ -134,7 +134,7 @@ var CursorMaintenanceDemo = (function () {
         }
       }
       if (formatter === null) {
-        result =  text;
+        result = text;
       } else {
         result = formatter(text);
         if (typeof result !== 'string') {
@@ -143,7 +143,7 @@ var CursorMaintenanceDemo = (function () {
           result = text;
         }
       }
-      return { text: result };
+      return result;
     };
   }
 
