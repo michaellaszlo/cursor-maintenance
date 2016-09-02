@@ -250,6 +250,9 @@ var CursorMaintainer = (function () {
   };
 
   retrospective.makeMaintainer = function (costFunction) {
+    if (costFunction === undefined) {
+      costFunction = costFunctions.frequencyRatios;
+    }
     return function (raw, cursor, formatted) {
       var cost, pos,
           scores = costFunction(raw, cursor, formatted),
@@ -269,7 +272,7 @@ var CursorMaintainer = (function () {
   retrospective.augmentFormat = function (format, costFunction) {
     var maintainer;
     if (costFunction === undefined) {
-      costFunction = cost.frequencyRatios;
+      costFunction = costFunctions.frequencyRatios;
     }
     maintainer = retrospective.makeMaintainer(costFunction);
     return function (raw, cursor) {
