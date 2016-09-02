@@ -50,13 +50,12 @@ var CursorMaintainer = (function () {
 
   layer = {};
 
-  layer.augmentFormat = function (format, testers, preferRight) {
-    return function (raw, cursor) {
+  layer.makeMaintainer = function (testers, preferRight) {
+    return function (raw, cursor, formatted) {
       var rawCount, rawTotal, rawRatio,
           formattedCounts, formattedTotal, formattedRatio,
           delta, bestDelta, bestFormattedRatio,
           rank, tester, pos,
-          formatted = format(raw),
           left = 0,
           right = formatted.length,
           bestLeft = left, bestRight = right;
@@ -121,9 +120,19 @@ var CursorMaintainer = (function () {
         right = bestRight;
       }
       if (preferRight) {
-        return { text: formatted, cursor: bestRight };
+        return { cursor: bestRight };
       }
-      return { text: formatted, cursor: bestLeft };
+      return { cursor: bestLeft };
+    };
+  };
+
+  layer.augmentFormat = function (format, testers, preferRight) {
+    var maintainer = layer.makeMaintainer(testers, preferRight);
+    return function (raw, cursor) {
+      var formatted = format(raw),
+          result = maintainer(raw, cursor, formatted);
+      result.text = formatted;
+      return result;
     };
   };
 
