@@ -13,14 +13,25 @@ var CursorMaintainer = (function () {
     this.text = text || '';
     this.cursor = cursor || 0;
   }
+
+  TextWithCursor.prototype.length = function () {
+    return this.text.length;
+  };
    
+  // The read method reads one character by default, several if specified.
   TextWithCursor.prototype.read = function (begin, length) {
     if (length === undefined) {
       length = 1;
     }
+    if (length <= 0) {
+      return;
+    }
     return this.text.substring(begin, begin + length);
   };
 
+  // The insert method inserts text and shifts the cursor if needed.
+  //  The cursor is unchanged if it is at the insertion point or to the
+  //  left of it.
   TextWithCursor.prototype.insert = function (begin, subtext) {
     this.text = this.text.substring(0, begin) + subtext +
         this.text.substring(begin);
@@ -29,9 +40,15 @@ var CursorMaintainer = (function () {
     }
   };
 
+  // The delete method deletes one character by default, several if
+  //  specified, then shifts the cursor if needed. The cursor is unchanged
+  //  if it is to the left of the deleted characters.
   TextWithCursor.prototype.delete = function (begin, length) {
     if (length === undefined) {
       length = 1;
+    }
+    if (length <= 0) {
+      return;
     }
     this.text = this.text.substring(0, begin) +
         this.text.substring(begin + length);
@@ -40,16 +57,22 @@ var CursorMaintainer = (function () {
     }
   };
 
-  TextWithCursor.prototype.length = function () {
-    return this.text.length;
-  };
-
 
   //--- Layer approach: a statistical approach that looks at layers of text
   //  induced by character sets specified for a format.
 
   layer = {};
 
+  // layer.makeMaintainer returns a function that solves the
+  //  cursor-maintenance problem, returning an object containing the new
+  //  cursor position computed by the layer approach. The resulting cursor
+  //  maintainer does not check for equality of the formatted text and
+  //  raw text. The caller should perform this check and only call the
+  //  cursor maintainer if the formatted text differs from the raw text.
+  // testers: An array of objects, each with a test() method that takes a
+  //  character and returns a Boolean value. A regex is such an object.
+  // preferRight: A Boolean value. If this argument is omitted, ties are
+  //  broken to the left, i.e., preferRight is false by default.
   layer.makeMaintainer = function (testers, preferRight) {
     return function (raw, cursor, formatted) {
       var rawCount, rawTotal, rawRatio,
@@ -126,6 +149,8 @@ var CursorMaintainer = (function () {
     };
   };
 
+  // layer.augmentFormat returns a function that applies the specified format
+  //  and also performs cursor maintenance with the layer approach.
   layer.augmentFormat = function (format, testers, preferRight) {
     var maintainer = layer.makeMaintainer(testers, preferRight);
     return function (raw, cursor) {
@@ -143,8 +168,8 @@ var CursorMaintainer = (function () {
   costFunctions = {};
   retrospective = { costFunctions: costFunctions };
 
-  // levenshtein implements the well-known Levenshtein distance. We use
-  //  it in our "split Levenshtein" retrospective formula.
+  // levenshtein implements the well-known Levenshtein distance. It is
+  //  called by the costFunctions.splitLevenshtein.
   function levenshtein(s, t) {
     var n = s.length,
         m = t.length,
@@ -178,9 +203,12 @@ var CursorMaintainer = (function () {
     return current[m];
   }
 
-  // splitLevenshtein splits the raw text and formatted text at respective
-  //  cursor positions, computes the Levenshtein distance between the
-  //  left parts, then between the right parts, and takes the sum.
+  // costFunctions.splitLevenshtein splits the raw text and formatted text
+  //  at respective cursor positions, computes the Levenshtein distance
+  //  between the left parts, then between the right parts, and takes the
+  //  sum. The raw cursor position is passed to this function. It is compared
+  //  to all positions in the formatted text, and the resulting scores
+  //  are returned in an array.
   costFunctions.splitLevenshtein = function (s, sCursor, t) {
     var tCursor,
         left, right,
@@ -193,8 +221,8 @@ var CursorMaintainer = (function () {
     return scores;
   };
 
-  // getCommonChars is used by frequencyRatios. Given two strings, it finds
-  //  the set of characters that appear in both.
+  // getCommonChars finds the set of characters that appear in both of the
+  //  given strings. It is called by costFunctions.frequencyRatios.
   function getCommonChars(s, t) {
     var sCharSet = {},
         tCharSet = {},
@@ -214,18 +242,26 @@ var CursorMaintainer = (function () {
     return chars;
   }
 
+  // getLeftCounts is given an arbitrary string and an array containing a
+  //  set of characters. It returns an array containing, for each position
+  //  in the string, an object that maps each character in the set to the
+  //  number of times the character appears to the left of the position.
   function getLeftCounts(s, chars) {
     var counts = new Array(s.length + 1),
         pos, i, ch;
+    // Initialize all character frequencies to zero.
     counts[0] = {};
     for (i = 0; i < chars.length; ++i) {
       counts[0][chars[i]] = 0;
     }
+    // Iterate over string positions, dealing with set characters in parallel.
     for (pos = 1; pos <= s.length; ++pos) {
       counts[pos] = {};
+      // Copy the previous character frequencies.
       for (i = 0; i < chars.length; ++i) {
         counts[pos][chars[i]] = counts[pos - 1][chars[i]];
       }
+      // Update the frequency of one character at the most.
       ch = s.charAt(pos - 1);
       if (ch in counts[pos]) {
         counts[pos][ch] += 1;
@@ -234,30 +270,57 @@ var CursorMaintainer = (function () {
     return counts;
   }
 
+  // costFunctions.frequencyRatios takes the set of characters that are
+  //  common to the raw text and formatted text. At each position in the
+  //  formatted text, for each character in the common set, it computes the
+  //  square of the difference between the frequency ratios in the raw text
+  //  and the formatted text at this position. The frequency ratio of a
+  //  character at a position is the character's frequency to the left of
+  //  the position divided by its overall frequency. The sum of the squared
+  //  differences over the common characters is the score for a position.
   costFunctions.frequencyRatios = function (s, sCursor, t) {
     var chars = getCommonChars(s, t),
         sCounts = getLeftCounts(s, chars),
-        sCountsHere = sCounts[sCursor],  // the raw cursor is fixed
+        // We have one set of raw counts because the raw cursor is fixed.
+        sCountsHere = sCounts[sCursor],
         sTotals = sCounts[s.length],
+        sRatios = new Array(chars.length),
         tCounts = getLeftCounts(t, chars),
-        tCountsHere,  // we'll examine each position in the formatted text
+        // The counts in the formatted text vary with the candidate cursor.
+        tCountsHere,
         tTotals = tCounts[t.length],
         scores = new Array(t.length + 1),
-        tCursor, i, ch, a, b, cost;
+        tCursor, i, ch, tRatio, cost;
+    // Precompute the frequency ratios at the raw cursor position.
+    for (i = 0; i < chars.length; ++i) {
+      ch = chars[i];
+      sRatios[ch] = sCountsHere[ch] / sTotals[ch];
+    }
     for (tCursor = 0; tCursor <= t.length; ++tCursor) {
+      // Look up the counts at the current position in the formatted text.
       tCountsHere = tCounts[tCursor];
       cost = 0;
       for (i = 0; i < chars.length; ++i) {
         ch = chars[i];
-        a = sCountsHere[ch] / sTotals[ch];
-        b = tCountsHere[ch] / tTotals[ch];
-        cost += Math.pow(Math.abs(a - b), 2);
+        tRatio = tCountsHere[ch] / tTotals[ch];
+        cost += Math.pow(sRatios[ch] - tRatio, 2);
       }
       scores[tCursor] = cost;
     }
     return scores;
   };
 
+  // retrospective.makeMaintainer returns a function that solves the
+  //  cursor-maintenance problem, returning an object containing the new
+  //  cursor position computed by the layer approach. The resulting cursor
+  //  maintainer does not check for equality of the formatted text and
+  //  raw text. The caller should perform this check and only call the
+  //  cursor maintainer if the formatted text differs from the raw text.
+  // costFunction: A function that is given the raw text, raw cursor
+  //  position, and formatted text. It computes an array of scores for
+  //  every position in the formatted text. Lower scores indicate better
+  //  cursor positions. This module has two built-in cost functions:
+  //  costFunctions.splitLevenshtein and costFunctions.frequencyRatios.
   retrospective.makeMaintainer = function (costFunction) {
     if (costFunction === undefined) {
       costFunction = costFunctions.frequencyRatios;
@@ -278,6 +341,9 @@ var CursorMaintainer = (function () {
     };
   };
 
+  // retrospective.augmentFormat returns a function that applies the
+  //  specified format and also performs cursor maintenance with the
+  //  retrospective approach.
   retrospective.augmentFormat = function (format, costFunction) {
     var maintainer;
     if (costFunction === undefined) {

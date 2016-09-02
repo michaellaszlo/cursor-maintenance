@@ -802,10 +802,10 @@ At each position `q` in the formatted text `t`, we likewise calculate
 
 for each character `c` that occurs in both `s` and `t`.
 
-For each character, we take the square of the absolute difference between
-`a(p)` and `b(q)`:
+For each character, we take the square of the difference between `a(p)`
+and `b(q)`:
 
-  cost(c, q) = abs(a(p) - b(q)) ** 2
+  cost(c, q) = (a(p) - b(q)) ** 2
 
 Note that `p`, the raw cursor position, stays constant, while we vary `q`
 over every possible cursor position in the formatted text. We calculate
@@ -908,7 +908,7 @@ to say, given the target
   a_0  =  left(C_0, s, p) / count(C_0, s)
 
 for character set `C_0` in the raw text `s` at the raw cursor position
-`p`, we are looking for the minimum difference
+`p`, we are looking for the minimum absolute difference
 
   abs(left(C_0, t, q) / count(C_0, t) - a_0)
 
