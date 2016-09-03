@@ -12,17 +12,27 @@ Where do you put the cursor in the formatted text? That is the problem
 of cursor maintenance.
 
 
-## Format-independent cursor maintenance
+# Format-independent cursor maintenance
 
-You can do cursor maintenance by passing three values to a function:
+Load `cursor_maintainer.js` and make a cursor maintainer:
 
-- the *raw text*
-- the *raw cursor position*
-- the *formatted text*
+```
+var maintainer = CursorMaintainer.retrospective.makeMaintainer();
+```
+
+You pass three input values to the maintainer:
+
+- the user's *raw text*
+- the user's *cursor position* in the raw text
+- the *formatted text* obtained from your raw text
 
 You get back one value:
 
 - a *new cursor position*
 
+For example:
 
+```
+var newPosition = maintainer('  2400.015 ', 2, '2,400.02');
+```
 
