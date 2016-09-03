@@ -6,7 +6,7 @@ var CursorMaintainer = (function () {
       costFunctions;  // Cost functions for the retrospective approach.
 
 
-  //--- Meta approach: requires reimplementation of the format with
+  //--- Meta approach: entails reimplementing the format with
   //  elementary operations on a text-with-cursor object.
 
   function TextWithCursor(text, cursor) {
@@ -18,7 +18,7 @@ var CursorMaintainer = (function () {
     return this.text.length;
   };
    
-  // The read method reads one character by default, several if specified.
+  // read gets one character by default, several if specified.
   TextWithCursor.prototype.read = function (begin, length) {
     if (length === undefined) {
       length = 1;
@@ -29,9 +29,9 @@ var CursorMaintainer = (function () {
     return this.text.substring(begin, begin + length);
   };
 
-  // The insert method inserts text and shifts the cursor if needed.
-  //  The cursor is unchanged if it is at the insertion point or to the
-  //  left of it.
+  // insert adds text at the specified insertion point and shifts the cursor
+  //  if needed. The cursor is unchanged if it is at or to the left of the
+  //  insertion point.
   TextWithCursor.prototype.insert = function (begin, subtext) {
     this.text = this.text.substring(0, begin) + subtext +
         this.text.substring(begin);
@@ -40,9 +40,9 @@ var CursorMaintainer = (function () {
     }
   };
 
-  // The delete method deletes one character by default, several if
-  //  specified, then shifts the cursor if needed. The cursor is unchanged
-  //  if it is to the left of the deleted characters.
+  // delete removes one character by default, several if specified, then
+  //  shifts the cursor if needed. The cursor is unchanged if it is at or
+  //  to the left of the deleted characters.
   TextWithCursor.prototype.delete = function (begin, length) {
     if (length === undefined) {
       length = 1;
@@ -63,8 +63,8 @@ var CursorMaintainer = (function () {
 
   layer = {};
 
-  // layer.makeMaintainer returns a function that solves the
-  //  cursor-maintenance problem, returning an object containing the new
+  // layer.makeMaintainer returns a function that takes an instance of the
+  //  cursor-maintenance problem and returns an object containing the
   //  cursor position computed by the layer approach. The resulting cursor
   //  maintainer does not check for equality of the formatted text and
   //  raw text. The caller should perform this check and only call the
@@ -149,8 +149,11 @@ var CursorMaintainer = (function () {
     };
   };
 
-  // layer.augmentFormat returns a function that applies the specified format
-  //  and also performs cursor maintenance with the layer approach.
+  // layer.augmentFormat returns a cursor-maintaining formatter based on a
+  //  given format. A cursor-maintaining formatter takes raw text and a raw
+  //  cursor position; it returns formatted text and a new cursor position.
+  // format: A function that takes raw text and returns formatted text.
+  // testers, preferRight: arguments to layer.makeMaintainer.
   layer.augmentFormat = function (format, testers, preferRight) {
     var maintainer = layer.makeMaintainer(testers, preferRight);
     return function (raw, cursor) {
@@ -310,11 +313,11 @@ var CursorMaintainer = (function () {
     return scores;
   };
 
-  // retrospective.makeMaintainer returns a function that solves the
-  //  cursor-maintenance problem, returning an object containing the new
-  //  cursor position computed by the layer approach. The resulting cursor
-  //  maintainer does not check for equality of the formatted text and
-  //  raw text. The caller should perform this check and only call the
+  // retrospective.makeMaintainer returns a function that takes an instance
+  //  of the cursor-maintenance problem and returns an object containing the
+  //  cursor position computed by the retrospective approach. The resulting
+  //  cursor maintainer does not check for equality of the formatted text
+  //  and raw text. The caller should perform this check and only call the
   //  cursor maintainer if the formatted text differs from the raw text.
   // costFunction: A function that is given the raw text, raw cursor
   //  position, and formatted text. It computes an array of scores for
@@ -341,9 +344,12 @@ var CursorMaintainer = (function () {
     };
   };
 
-  // retrospective.augmentFormat returns a function that applies the
-  //  specified format and also performs cursor maintenance with the
-  //  retrospective approach.
+  // retrospective.augmentFormat returns a cursor-maintaining formatter
+  //  based on a given format. A cursor-maintaining formatter takes raw text
+  //  and a raw cursor position; it returns formatted text and a new cursor
+  //  position.
+  // format: A function that takes raw text and returns formatted text.
+  // costFunction: the argument to retrospective.makeMaintainer.
   retrospective.augmentFormat = function (format, costFunction) {
     var maintainer;
     if (costFunction === undefined) {

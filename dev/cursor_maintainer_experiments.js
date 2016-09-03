@@ -4,6 +4,12 @@ var CursorMaintainerExperiments = (function () {
   var CM = CursorMaintainer,
       TextWithCursor = CM.TextWithCursor;
 
+  // This module defines a collection of cursor-maintaining formatters using
+  //  various approaches. A plain formatter is a function that takes raw text
+  //  and returns formatted text. A cursor-maintaining formatter takes raw
+  //  text and a raw cursor position; it returns formatted text and a new
+  //  cursor position.
+
   var format,         // Built-in formats for demonstration and testing.
       adHoc,          // Reimplementation of formats with cursor maintenance.
       mockCursor,     // Ad hoc approach with the help of a mock cursor.
@@ -37,7 +43,10 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Plain formatters wrapped for testing: cursor position unchanged.
+  //--- Wrapped versions of the plain formatters: these functions have the
+  //  same interface as the cursor-maintained
+  //  the raw cursor are returned in an object. These functions have the
+  //  same interface 
 
   format = {};
 
