@@ -1028,12 +1028,15 @@ field to be broken. Instead of trying to quantify the inaccuracy of a
 cursor-maintenance algorithm, I believe that we should look for solutions
 that we can prove to be completely accurate.
 
-In the range of customization, from fully ad hoc to zero configuration,
-the layer approach occupies a sweet spot. It can be made completely
-accurate for certain formats with a small configuration. This is not to
-say that arriving at a good layer configuration is straightforward. It
-is necessary to think through configuration choices and how they affect
-cursor positioning, especially in edge cases.
+A more accurate solution generally requires more customization for
+the targeted format. Among the approaches that I implemented, ranging
+from fully ad hoc to unconfigured retrospective, the layer approach
+seems to offer the best trade-off between accuracy and complexity
+of configuration. A small configuration can make the layer approach
+completely accurate for certain formats. This is not to say that arriving
+at a good layer configuration is straightforward. It is necessary to think
+through configuration choices and how they affect cursor positioning,
+especially in edge cases.
 
 We saw in the previous section that reducing the number of layers may
 result in more predictable cursor positioning. With other formats, the
