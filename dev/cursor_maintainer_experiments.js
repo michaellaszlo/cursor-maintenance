@@ -4,13 +4,13 @@ var CursorMaintainerExperiments = (function () {
   var CM = CursorMaintainer,
       TextWithCursor = CM.TextWithCursor;
 
-  // This module defines a collection of cursor-maintaining formatters using
-  //  various approaches. A plain formatter is a function that takes raw text
-  //  and returns formatted text. A cursor-maintaining formatter takes raw
-  //  text and a raw cursor position; it returns formatted text and a new
-  //  cursor position.
+  // This module defines two plain formatters and uses them as the basis for
+  //  a collection of cursor-maintaining formatters using various approaches.
+  //  A plain formatter is a function that takes raw text and returns
+  //  formatted text. A cursor-maintaining formatter takes raw text and a raw
+  //  cursor position; it returns formatted text and a new cursor position.
 
-  var format,         // Built-in formats for demonstration and testing.
+  var format,         // Plain formatters for demonstration and testing.
       adHoc,          // Reimplementation of formats with cursor maintenance.
       mockCursor,     // Ad hoc approach with the help of a mock cursor.
       meta,           // Reimplementation on a text-with-cursor object.
@@ -18,10 +18,13 @@ var CursorMaintainerExperiments = (function () {
       layer;          // A statistical approach configured per format.
 
 
-  //--- Plain formatters: no representation of the cursor.
+  //--- Plain formatters: text transformations with no cursor. The same
+  //  two formats, commatize and trimify, are used throughout this module
+  //  as the basis for various approaches to cursor maintenance.
 
-  // commatize takes a string of digits and commas. It adjusts commas so
-  //  that they separate the digits into groups of three.
+  // commatize takes a string of digits and commas. It arranges commas so
+  //  that they separate the digits into groups of three. For example,
+  //  "1,45,,00" gets commatized to "14,500".
   function commatize(s) {                    // s is a string composed of
     var start, groups, i;                    //  digits and commas.
     s = s.replace(/,/g, '');                 // Remove all commas.
@@ -35,7 +38,8 @@ var CursorMaintainerExperiments = (function () {
   };
 
   // trimify removes all whitespace from the beginning of the string and
-  //  reduces other whitespace sequences to a single space each.
+  //  reduces other whitespace sequences to a single space each. For example,
+  //  "  Four score  and  seven  " gets trimified to "Four score and seven ".
   function trimify(s) {          // s is an arbitrary string.
     s = s.replace(/^\s+/, '');   // Remove whitespace from the beginning.
     s = s.replace(/\s+/g, ' ');  // Condense remaining whitespace sequences
@@ -43,10 +47,9 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Wrapped versions of the plain formatters: these functions have the
-  //  same interface as the cursor-maintained
-  //  the raw cursor are returned in an object. These functions have the
-  //  same interface 
+  //--- Wrapped versions of the plain formatters. These functions are
+  //  interface-compatible with cursor-maintaining formatters, but they don't
+  //  do cursor maintenance. They return the raw cursor position as is.
 
   format = {};
 
@@ -59,13 +62,13 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Ad hoc: idiosyncratic cursor calculations.
+  //--- Ad hoc cursor maintenance: reimplement the format in such a way
+  //  that we keep track of the cursor position while transforming the text.
 
   adHoc = {};
 
   // count returns the number of occurrences (possibly overlapping) of the
-  //  string sub in the string s.
-
+  //  string sub in the string s. It is called by adHoc.commatize.
   function count(s, sub) {
     var count = 0,
         searchedTo = -1;
@@ -75,6 +78,9 @@ var CursorMaintainerExperiments = (function () {
     return count;
   }
 
+  // adHoc.commatize counts digits to the left of the cursor in the
+  //  raw state, calls the plain commatizer, then counts off the same
+  //  number of digits in the commatized text.
   adHoc.commatize = function (s, cursor) {
     var pos, ch,
         leftDigitCount = cursor - count(s.substring(0, cursor), ',');
@@ -94,6 +100,11 @@ var CursorMaintainerExperiments = (function () {
     return { text: s, cursor: cursor };
   };
 
+  // adHoc.trimify appends a non-space character to the left part of the
+  //  raw text and trimifies it. This gives us the new cursor position
+  //  unless the entire trimified text ends up shorter than the trimified
+  //  left part, which happens when the cursor is among space characters
+  //  at the right end of the text.
   adHoc.trimify = function (s, cursor) {
     var leftTrimmed = format.trimify(s.substring(0, cursor) + '|').text;
     s = format.trimify(s).text;
