@@ -13,7 +13,7 @@ var BatchTestCursorMaintenance = (function () {
 
     [ //'format',
       'adHoc',
-      //'mockCursor',
+      'mockCursor',
       'meta',
       //'splitLevenshtein',
       'frequencyRatios',

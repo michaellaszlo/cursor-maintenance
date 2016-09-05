@@ -102,9 +102,8 @@ var CursorMaintainerExperiments = (function () {
 
   // adHoc.trimify appends a non-space character to the left part of the
   //  raw text and trimifies it. This gives us the new cursor position
-  //  unless the entire trimified text ends up shorter than the trimified
-  //  left part, which happens when the cursor is among space characters
-  //  at the right end of the text.
+  //  unless the entire trimified text ends up shorter, which will happen
+  //  when the cursor is among space characters at the right end of the text.
   adHoc.trimify = function (s, cursor) {
     var leftTrimmed = format.trimify(s.substring(0, cursor) + '|').text;
     s = format.trimify(s).text;
@@ -113,30 +112,35 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Mock cursor: a variation on the ad hoc approach that inserts a
-  //  special character into the raw text at the cursor position. The format
-  //  is reimplemented in such a way that this mock cursor is preserved during
-  //  the text transformation. Finally, the mock cursor is removed from the
-  //  text and its ultimate position is returned as the new cursor position.
+  //--- Mock cursor: a variation on the ad hoc approach in which we insert a
+  //  special character into the raw text at the cursor position. We then
+  //  reimplement the format in such a way that this special character, the
+  //  mock cursor, is preserved while we transform the text around it.
+  //  Afterward, the mock cursor is removed from the text and its final
+  //  position is returned as the new cursor position.
 
   mockCursor = {};
 
-  // chooseCursorChar tests a set of favored characters, then all printable
-  //  ASCII characters, until it finds one that does not occur in the text.
+  // chooseCursorChar returns a printable ASCII character (numbers 32 through
+  //  126) that does not occur in the given text. If all printable characters
+  //  occur, the return value is null. chooseCursorChar is called by
+  //  mockCursor.augment.
   function chooseCursorChar(s) {
     var usedChars = {},
-        seekChars = '|^_#',
+        seekChars = '|^_#',  // Try these first because we like them best.
         i, ch, code;
     for (i = 0; i < s.length; ++i) {
       usedChars[s.charAt(i)] = true;
     }
+    // Try our favorite characters.
     for (i = 0; i < seekChars.length; ++i) {
       ch = seekChars.charAt(i);
       if (!(ch in usedChars)) {
         return ch;
       }
     }
-    for (code = 32; code < 127; ++code) {
+    // Try all printable ASCII characters.
+    for (code = 32; code <= 126; ++code) {
       ch = String.fromCharCode(code);
       if (!(ch in usedChars)) {
         return ch;
@@ -145,7 +149,15 @@ var CursorMaintainerExperiments = (function () {
     return null;
   }
 
-  function makeMockCursor(format) {
+  // mockCursor.augment takes a formatter that works on text with a mock
+  //  cursor, and returns a cursor-maintaining formatter that uses the
+  //  mock-cursor approach. In other words, mockCursor.augment handles the
+  //  routine work of inserting the mock cursor prior to formatting and
+  //  removing it afterward. The real work of formatting text with a mock
+  //  cursor is done by the input function, which takes two arguments:
+  //  the first is the raw text, the second is the character representing
+  //  the mock cursor; the return value is the formatted text.
+  mockCursor.augment = function (format) {
     return function (s, cursor) {
       var cursorChar = chooseCursorChar(s),
           t = s.substring(0, cursor) + cursorChar + s.substring(cursor),
@@ -156,7 +168,13 @@ var CursorMaintainerExperiments = (function () {
     };
   }
 
-  mockCursor.commatize = makeMockCursor(function (s, cursorChar) {
+  // mockCursor.commatize scans the raw text from right to left, skipping
+  //  commas and counting digits. Groups of non-comma characters that include
+  //  three digits are separated by commas. The leftmost character in such a
+  //  group is always a digit, so the cursor can never be the right-hand
+  //  neighbor of a comma. If the cursor is between digit groups, it must be
+  //  to the left of the comma.
+  mockCursor.commatize = mockCursor.augment(function (s, cursorChar) {
     var groups = [],
         groupChars = [],
         digitCount = 0,
@@ -167,6 +185,7 @@ var CursorMaintainerExperiments = (function () {
         groupChars.push(ch);
         if (ch != cursorChar) {
           if (++digitCount == 3) {
+            // Reverse the group to put the digits in left-to-right order.
             groups.push(groupChars.reverse().join(''));
             groupChars = [];
             digitCount = 0;
@@ -174,17 +193,24 @@ var CursorMaintainerExperiments = (function () {
         }
       }
     }
+    // There may be one or two digits left over in the final group.
     if (groupChars.length > 0) {
       groups.push(groupChars.reverse().join(''));
     }
     s = groups.reverse().join(',');
+    // If the mock cursor ended up on its own in the final group, we
+    //  have a spurious comma. Check for this case and delete the comma.
     if (s.charAt(0) == cursorChar && s.charAt(1) == ',') {
       s = cursorChar + s.substring(2);
     }
     return s;
   });
 
-  mockCursor.trimify = makeMockCursor(function (s, cursorChar) {
+  // mockCursor.trimify calls the plain trimifier on the raw text, then
+  //  fixes the formatting around the mock cursor. There are two cases
+  //  to check for: either the mock cursor is the leftmost character and has
+  //  a space to its right, or it is between exactly two spaces.
+  mockCursor.trimify = mockCursor.augment(function (s, cursorChar) {
     s = format.trimify(s).text;
     if (s.charAt(0) == cursorChar) {
       s = s.replace(cursorChar + ' ', cursorChar);
