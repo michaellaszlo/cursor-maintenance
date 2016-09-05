@@ -113,7 +113,11 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Mock cursor: incorporate the cursor into the text, format, fix.
+  //--- Mock cursor: a variation on the ad hoc approach that inserts a
+  //  special character into the raw text at the cursor position. The format
+  //  is reimplemented in such a way that this mock cursor is preserved during
+  //  the text transformation. Finally, the mock cursor is removed from the
+  //  text and its ultimate position is returned as the new cursor position.
 
   mockCursor = {};
 
