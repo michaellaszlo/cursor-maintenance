@@ -59,7 +59,13 @@ var CursorMaintainer = (function () {
 
 
   //--- Layer approach: a statistical approach that looks at layers of text
-  //  induced by character sets specified for a format.
+  //  induced by character sets specified for a format. Within each layer of
+  //  the formatted text, we seek the cursor position where the proportion
+  //  of ratio characters to the left is closest to the equivalent proportion
+  //  at the raw cursor position in the raw text. If several cursor positions
+  //  are equally close, we move to the next layer. If a tie-breaker is
+  //  needed, we take either the left or right end of the final range,
+  //  as configured for the format. 
 
   layer = {};
 
@@ -153,7 +159,7 @@ var CursorMaintainer = (function () {
   //  given format. A cursor-maintaining formatter takes raw text and a raw
   //  cursor position; it returns formatted text and a new cursor position.
   // format: A function that takes raw text and returns formatted text.
-  // testers, preferRight: arguments to layer.makeMaintainer.
+  //  testers, preferRight: arguments to layer.makeMaintainer.
   layer.augmentFormat = function (format, testers, preferRight) {
     var maintainer = layer.makeMaintainer(testers, preferRight);
     return function (raw, cursor) {
@@ -165,8 +171,11 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Retrospective approach: a format-independent statistical approach
-  //  to cursor maintenance.
+  //--- Retrospective approach: A statistical approach that is not configured
+  //  for any particular format. Instead, we configure it with a cost function
+  //  that computes a score for every position in the formatted text. The
+  //  position with the lowest score is chosen as the new cursor position.
+  //  If several positions are in a tie, the leftmost is chosen.
 
   costFunctions = {};
   retrospective = { costFunctions: costFunctions };

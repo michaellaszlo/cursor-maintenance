@@ -1,8 +1,7 @@
 var CursorMaintainerExperiments = (function () {
   'use strict';
 
-  var CM = CursorMaintainer,
-      TextWithCursor = CM.TextWithCursor;
+  var CM = CursorMaintainer;
 
   // This module defines two plain formatters and uses them as the basis for
   //  a collection of cursor-maintaining formatters using various approaches.
@@ -221,12 +220,13 @@ var CursorMaintainerExperiments = (function () {
   });
 
 
-  //--- The meta approach: We reimplement the format with elementary
-  //  operations (read, write, delete, insert) on a text-with-cursor object.
-  //  Each elementary operation has a predictable effect on the cursor. We
-  //  want to keep these effects in mind as we implement the formatter so
-  //  that we control the overall movement of the cursor and make it
-  //  predictable to the end user, too.
+  //--- Meta approach: We reimplement the format with elementary operations
+  //  (read, write, delete, insert) on a text-with-cursor object. The
+  //  CursorMaintainer module defines TextWithCursor for this purpose. Each
+  //  elementary operation has a predictable effect on the cursor. We want
+  //  to keep these effects in mind as we implement the formatter so that
+  //  we control the overall movement of the cursor and make it predictable
+  //  to the end user, too.
 
   meta = {};
 
@@ -235,7 +235,7 @@ var CursorMaintainerExperiments = (function () {
   //  counted three digits, we insert a comma to the right of this digit
   //  and set the digit count to one.
   meta.commatize = function (s, cursor) {
-    var t = new TextWithCursor(s, cursor),
+    var t = new CM.TextWithCursor(s, cursor),
         digitCount = 0,
         pos;
     for (pos = t.length() - 1; pos >= 0; --pos) {
@@ -255,7 +255,7 @@ var CursorMaintainerExperiments = (function () {
   //  space except the leftmost space in each contiguous space sequence.
   //  Finally, if the leftmost character is a space, it is deleted.
   meta.trimify = function (s, cursor) {
-    var t = new TextWithCursor(s, cursor),
+    var t = new CM.TextWithCursor(s, cursor),
         spaceCount = 0,
         pos;
     for (pos = t.length() - 1; pos >= 0; --pos) {
@@ -274,7 +274,10 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Retrospective: compare the raw text and cursor to the formatted text.
+  //--- Retrospective approach: An open-ended statistical approach that
+  //  relies on a cost function. The CursorMaintainer module defines two
+  //  cost functions, which we use here to instantiate a pair of
+  //  cursor-maintaining formatters for commatize and trimify.
 
   retrospective = {};
 
@@ -287,7 +290,7 @@ var CursorMaintainerExperiments = (function () {
   });
 
 
-  //--- Layer: seek the closest frequency ratio for a character set.
+  //--- Layer approach: seek the closest frequency ratio for a character set.
 
   layer = {};
 
