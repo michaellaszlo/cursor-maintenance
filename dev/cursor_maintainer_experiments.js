@@ -18,7 +18,7 @@ var CursorMaintainerExperiments = (function () {
       layer;          // A statistical approach configured per format.
 
 
-  //--- Plain formatters: text transformations with no cursor. The same
+  //--- Plain formatters: Text transformations with no cursor. The same
   //  two formats, commatize and trimify, are used throughout this module
   //  as the basis for various approaches to cursor maintenance.
 
@@ -62,7 +62,7 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Ad hoc cursor maintenance: reimplement the format in such a way
+  //--- Ad hoc cursor maintenance: Reimplementing the format in such a way
   //  that we keep track of the cursor position while transforming the text.
 
   adHoc = {};
@@ -112,7 +112,7 @@ var CursorMaintainerExperiments = (function () {
   };
 
 
-  //--- Mock cursor: a variation on the ad hoc approach in which we insert a
+  //--- Mock cursor: A variation on the ad hoc approach in which we insert a
   //  special character into the raw text at the cursor position. We then
   //  reimplement the format in such a way that this special character, the
   //  mock cursor, is preserved while we transform the text around it.
@@ -221,7 +221,12 @@ var CursorMaintainerExperiments = (function () {
   });
 
 
-  //--- Meta: local operations on a text-with-cursor object.
+  //--- The meta approach: Reimplementing the format with elementary
+  //  operations (read, write, delete, insert) on a text-with-cursor object.
+  //  Each elementary operation has a predictable effect on the cursor. The
+  //  idea is to keep these effects in mind as we implement the formatter
+  //  so that we control the overall movement of the cursor, making it
+  //  predictable to the end user as well.
 
   meta = {};
 
