@@ -275,9 +275,10 @@ var CursorMaintainerExperiments = (function () {
 
 
   //--- Retrospective approach: An open-ended statistical approach that
-  //  relies on a cost function. The CursorMaintainer module defines two
-  //  cost functions, which we use here to instantiate a pair of
-  //  cursor-maintaining formatters for commatize and trimify.
+  //  relies on a cost function. The CursorMaintainer module defines a
+  //  retrospective format augmenter and two cost functions, which we use
+  //  here to instantiate cursor-maintaining formatters for commatize and
+  //  trimify.
 
   retrospective = {};
 
@@ -289,8 +290,18 @@ var CursorMaintainerExperiments = (function () {
     };
   });
 
+  //  The retrospective.splitLevenshtein and retrospective.frequencyRatios
+  //  objects each contain cursor-maintaining formatters for commatize and
+  //  trimify. Thus, they have the same interface as format, adHoc,
+  //  mockCursor, meta, and layer.
 
-  //--- Layer approach: seek the closest frequency ratio for a character set.
+
+  //--- Layer approach: A statistical approach that scans text layers induced
+  //  by character sets. To configure this approach for a format, we define
+  //  a sequence of character sets and optionally specify whether ties should
+  //  should be broken by choosing the leftmost or rightmost candidate (the
+  //  default is leftmost). Here we build cursor-maintaining formatters for
+  //  commatize and trimify using the layer facilities of CursorMaintainer.
 
   layer = {};
 
@@ -304,7 +315,6 @@ var CursorMaintainerExperiments = (function () {
     adHoc: adHoc,
     mockCursor: mockCursor,
     meta: meta,
-    retrospective: retrospective,
     splitLevenshtein: retrospective.splitLevenshtein,
     frequencyRatios: retrospective.frequencyRatios,
     layer: layer
