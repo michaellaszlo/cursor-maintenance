@@ -170,7 +170,7 @@ var CursorMaintainerExperiments = (function () {
 
   // mockCursor.commatize scans the raw text from right to left, skipping
   //  commas and counting digits. Groups of non-comma characters that include
-  //  three digits are separated by commas. The leftmost character in such a
+  //  three digits are joined with commas. The leftmost character in such a
   //  group is always a digit, so the cursor can never be the right-hand
   //  neighbor of a comma. If the cursor is between digit groups, it must be
   //  to the left of the comma.
@@ -221,15 +221,19 @@ var CursorMaintainerExperiments = (function () {
   });
 
 
-  //--- The meta approach: Reimplementing the format with elementary
+  //--- The meta approach: We reimplement the format with elementary
   //  operations (read, write, delete, insert) on a text-with-cursor object.
-  //  Each elementary operation has a predictable effect on the cursor. The
-  //  idea is to keep these effects in mind as we implement the formatter
-  //  so that we control the overall movement of the cursor, making it
-  //  predictable to the end user as well.
+  //  Each elementary operation has a predictable effect on the cursor. We
+  //  want to keep these effects in mind as we implement the formatter so
+  //  that we control the overall movement of the cursor and make it
+  //  predictable to the end user, too.
 
   meta = {};
 
+  // meta.commatize scans the raw text from right to left, deleting commas
+  //  and counting digits. If we come upon a digit when we have already
+  //  counted three digits, we insert a comma to the right of this digit
+  //  and set the digit count to one.
   meta.commatize = function (s, cursor) {
     var t = new TextWithCursor(s, cursor),
         digitCount = 0,
@@ -247,21 +251,24 @@ var CursorMaintainerExperiments = (function () {
     return t;
   };
 
+  // meta.trimify scans the raw text from right to left, deleting every
+  //  space except the leftmost space in each contiguous space sequence.
+  //  Finally, if the leftmost character is a space, it is deleted.
   meta.trimify = function (s, cursor) {
     var t = new TextWithCursor(s, cursor),
         spaceCount = 0,
         pos;
     for (pos = t.length() - 1; pos >= 0; --pos) {
       if (t.read(pos) != ' ') {
-        spaceCount = 0;
+        spaceCount = 0;     // We are not in a space sequence.
       } else if (spaceCount == 0) {
-        spaceCount = 1;
+        spaceCount = 1;     // We are at the rightmost space in a sequence.
       } else {
-        t.delete(pos + 1);
+        t.delete(pos + 1);  // There is a space to the right; delete it.
       }
     }
     if (t.read(0) == ' ') {
-      t.delete(0);
+      t.delete(0);  // Check for a single space remaining at the left end.
     }
     return t;
   };
