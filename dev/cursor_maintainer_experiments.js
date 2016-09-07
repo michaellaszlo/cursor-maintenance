@@ -1,10 +1,12 @@
 var CursorMaintainerExperiments = (function () {
   'use strict';
 
+  // requires: cursor_maintainer.js
   var CM = CursorMaintainer;
 
-  // This module defines two plain formatters and uses them as the basis for
-  //  a collection of cursor-maintaining formatters using various approaches.
+  // The CursorMaintainerExperiments module defines two plain formatters and
+  //  uses them as the basis for a collection of cursor-maintaining formatters
+  //  using various approaches.
   //  A plain formatter is a function that takes raw text and returns
   //  formatted text. A cursor-maintaining formatter takes raw text and a raw
   //  cursor position; it returns formatted text and a new cursor position.
@@ -308,7 +310,6 @@ var CursorMaintainerExperiments = (function () {
   layer.commatize = CM.layer.augmentFormat(commatize, [ /\d/ ]);
 
   layer.trimify = CM.layer.augmentFormat(trimify, [ /\S/ ], true);
-
 
   return {
     format: format,

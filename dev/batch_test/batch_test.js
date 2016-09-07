@@ -1,34 +1,95 @@
 var BatchTestCursorMaintenance = (function () {
   'use strict';
 
+  // BatchTestCursorMaintenance is a command-line testing module for the
+  //  cursor-maintenance algorithms implemented in cursor_maintainer.js
+  //  and cursor_maintainer_experiments.js, which should be in the parent
+  //  directory above this script. You can execute this script with d8,
+  //  the command-line environment bundled with the V8 JavaScript engine.
+
   var CME,
+      data,
       test;
-  main();
 
-  function main() {
-    // Assuming d8 environment.
-    load('../cursor_maintainer.js');
-    load('../cursor_maintainer_experiments.js');
-    CME = CursorMaintainerExperiments;
+  load('../cursor_maintainer.js');
+  load('../cursor_maintainer_experiments.js');
+  CME = CursorMaintainerExperiments;
+  data = makeTestData();
+  print(Object.keys(data));
 
-    [ //'format',
-      'adHoc',
-      'mockCursor',
-      'meta',
-      //'splitLevenshtein',
-      'frequencyRatios',
-      'layer'
-    ].forEach(function (approach) {
-      print('-----', approach);
-      test = new Test(CME[approach]);
-      test.run('trimify');
-    });
-    //(new Test()).display('commatize', false);
-  }
+  [ //'format',
+    'adHoc',
+    'mockCursor',
+    'meta',
+    //'splitLevenshtein',
+    'frequencyRatios',
+    'layer'
+  ].forEach(function (approach) {
+    print('-----', approach);
+    test = new Test(CME[approach], data);
+    test.run('trimify');
+  });
+  //(new Test()).display('commatize', false);
+ 
+  // makeTestData defines all the test cases that are used in this module.
+  function makeTestData() {
+    return {
+      commatize: [
+        [ '2500', 1, '2,500', 1 ],
+        [ '12500', 3, '12,500', 4 ],
+        [ '5,4990000', 9, '54,990,000', 10 ],
+        [ '1,,8,,,', 3, '18', 1 ],
+        [ '1,0,0,000', 3, '100,000', 2 ],
+        [ '1,0,000', 2, '10,000', 1 ],
+        [ '1,,000', 2, '1,000', 1 ],
+        [ '1,00', 2, '100', 1 ],
+        [ '1234', 1, '1,234', 1 ],
+        [ '1,0234', 3, '10,234', 2 ],
+        [ '10,00', 4, '1,000', 4 ],
+        [ '900', 0, '900', 0 ],
+        [ ',900', 1, '900', 0 ],
+        [ '123,900', 0, '123,900', 0 ],
+        [ ',123,900', 0, '123,900', 0 ]
+      ].map(tupleToTestCase),
+      trimify: [
+        [ '  hello  ', 8, 'hello ', 6 ],
+        [ '  hello  ', 1, 'hello ', 0 ],
+        [ 'Hello,  friends.', 7, 'Hello, friends.', 7 ],
+        [ 'Hello,  friends.', 8, 'Hello, friends.', 7 ],
+        [ '  whirled    peas  now  ', 9, 'whirled peas now ', 7 ],
+        [ '  whirled    peas  now  ', 10, 'whirled peas now ', 8 ],
+        [ '  whirled    peas  now  ', 11, 'whirled peas now ', 8 ],
+        [ '  whirled    peas  now  ', 12, 'whirled peas now ', 8 ],
+        [ '  whirled    peas  now  ', 13, 'whirled peas now ', 8 ],
+        [ '     ', 3, '', 0 ],
+        [ ' th', 3, 'th', 2 ],
+        [ 'the', 3, 'the', 3 ],
+        [ 'the ', 4, 'the ', 4 ],
+        [ 'the  ', 5, 'the ', 4 ],
+        [ 'the   ', 6, 'the ', 4 ],
+        [ 'the q', 5, 'the q', 5 ],
+        [ 'the q ', 6, 'the q ', 6 ],
+        [ 'the q  ', 7, 'the q ', 6 ],
+        [ 'the q   ', 7, 'the q ', 6 ],
+        [ 'the q   ', 8, 'the q ', 6 ],
+        [ 'the q    ', 7, 'the q ', 6 ],
+        [ ' the q', 6, 'the q', 5 ],
+        [ ' the q ', 7, 'the q ', 6 ],
+        [ ' the q  ', 8, 'the q ', 6 ],
+        [ ' the q   ', 8, 'the q ', 6 ],
+        [ ' the q   ', 9, 'the q ', 6 ],
+        [ ' the q    ', 8, 'the q ', 6 ]
+      ].map(tupleToTestCase)
+    };
+  };
 
-
-  function TestCase(rawText, rawCursor,
-      expectedText, expectedCursor) {
+  // tupleToTestCase takes a four-element array which serves as a terse
+  //  representation of a test case and turns it into a verbose object.
+  function tupleToTestCase(tuple) {
+    var rawText = tuple[0],
+        rawCursor = tuple[1],
+        expectedText = tuple[2],
+        expectedCursor = tuple[3];
     return {
       raw: { text: rawText, cursor: rawCursor },
       expected: { text: expectedText, cursor: expectedCursor }
@@ -41,55 +102,7 @@ var BatchTestCursorMaintenance = (function () {
      exercise the formatters with or without cursor maintenance.
      The constructor takes an object that maps a format name to
      a formatter. */
-  function Test(formatters) {
-    var testData = {
-      commatize: [
-        new TestCase('2500', 1, '2,500', 1),
-        new TestCase('12500', 3, '12,500', 4),
-        new TestCase('5,4990000', 9, '54,990,000', 10),
-        new TestCase('1,,8,,,', 3, '18', 1),
-        new TestCase('1,0,0,000', 3, '100,000', 2),
-        new TestCase('1,0,000', 2, '10,000', 1),
-        new TestCase('1,,000', 2, '1,000', 1),
-        new TestCase('1,00', 2, '100', 1),
-        new TestCase('1234', 1, '1,234', 1),
-        new TestCase('1,0234', 3, '10,234', 2),
-        new TestCase('10,00', 4, '1,000', 4),
-        new TestCase('900', 0, '900', 0),
-        new TestCase(',900', 1, '900', 0),
-        new TestCase('123,900', 0, '123,900', 0),
-        new TestCase(',123,900', 0, '123,900', 0),
-      ],
-      trimify: [
-        new TestCase('  hello  ', 8, 'hello ', 6),
-        new TestCase('  hello  ', 1, 'hello ', 0),
-        new TestCase('Hello,  friends.', 7, 'Hello, friends.', 7),
-        new TestCase('Hello,  friends.', 8, 'Hello, friends.', 7),
-        new TestCase('  whirled    peas  now  ', 9, 'whirled peas now ', 7),
-        new TestCase('  whirled    peas  now  ', 10, 'whirled peas now ', 8),
-        new TestCase('  whirled    peas  now  ', 11, 'whirled peas now ', 8),
-        new TestCase('  whirled    peas  now  ', 12, 'whirled peas now ', 8),
-        new TestCase('  whirled    peas  now  ', 13, 'whirled peas now ', 8),
-        new TestCase('     ', 3, '', 0),
-        new TestCase(' th', 3, 'th', 2),
-        new TestCase('the', 3, 'the', 3),
-        new TestCase('the ', 4, 'the ', 4),
-        new TestCase('the  ', 5, 'the ', 4),
-        new TestCase('the   ', 6, 'the ', 4),
-        new TestCase('the q', 5, 'the q', 5),
-        new TestCase('the q ', 6, 'the q ', 6),
-        new TestCase('the q  ', 7, 'the q ', 6),
-        new TestCase('the q   ', 7, 'the q ', 6),
-        new TestCase('the q   ', 8, 'the q ', 6),
-        new TestCase('the q    ', 7, 'the q ', 6),
-        new TestCase(' the q', 6, 'the q', 5),
-        new TestCase(' the q ', 7, 'the q ', 6),
-        new TestCase(' the q  ', 8, 'the q ', 6),
-        new TestCase(' the q   ', 8, 'the q ', 6),
-        new TestCase(' the q   ', 9, 'the q ', 6),
-        new TestCase(' the q    ', 8, 'the q ', 6),
-      ]
-    };
+  function Test(formatters, testData) {
 
     /* showText prints out a single test string and optionally displays
        the cursor position below it. */
@@ -186,6 +199,6 @@ var BatchTestCursorMaintenance = (function () {
       display: display,
       run: run
     };
-  }  // end Test
+  } // end Test
 
 })();
