@@ -1,12 +1,17 @@
-var BatchTestRunnerCursorMaintenance = (function () {
+var BatchTestCursorMaintenance = (function () {
   'use strict';
 
-  // BatchTestRunnerCursorMaintenance is a command-line testing module for the
-  //  cursor-maintenance algorithms implemented in cursor_maintainer.js
-  //  and cursor_maintainer_experiments.js, which should be in the parent
-  //  directory above this file. You can execute this file with d8,
-  //  the command-line environment bundled with the V8 JavaScript engine.
+  var targetDirectory = '..';
 
+  // BatchTestCursorMaintenance is a command-line testing module for the
+  //  cursor-maintenance algorithms implemented in cursor_maintainer.js
+  //  and cursor_maintainer_experiments.js.
+  //  You can execute this file with d8, the command-line environment
+  //  bundled with the V8 JavaScript engine.
+
+  // main instantiates the test runners with a set of test cases for each
+  //  format, loads the targeted files, and proceeds to test a selection
+  //  of cursor-maintenance approaches and formats.
   function main() {
     var implementations,
         testRunners = {
@@ -58,13 +63,15 @@ var BatchTestRunnerCursorMaintenance = (function () {
           ])
         };
 
-    load('../cursor_maintainer.js');
-    load('../cursor_maintainer_experiments.js');
+    load(targetDirectory + '/cursor_maintainer.js');
+    load(targetDirectory + '/cursor_maintainer_experiments.js');
     implementations = CursorMaintainerExperiments;
 
+    // Each approach in the following array is tested with each format in
+    //  the nested array. To omit an approach or a format, comment it out.
     [ //'format',  // format contains plain formatters (no cursor maintenance).
       'adHoc',
-      'mockCursor',
+      //'mockCursor',
       'meta',
       //'splitLevenshtein',
       'frequencyRatios',
@@ -81,6 +88,11 @@ var BatchTestRunnerCursorMaintenance = (function () {
     });
   }
 
+  // TestRunner instantiates an object with a set of test cases that are
+  //  passed in as an array of four-element arrays, each of which contains
+  //  a single test case. The four elements are the raw text, raw cursor,
+  //  expected text, and expected cursor. The test case gets wrapped in
+  //  a nested object for convenient access during testing.
   function TestRunner(tuples) {
     this.testCases = tuples.map(function (tuple) {
       return {
@@ -90,8 +102,10 @@ var BatchTestRunnerCursorMaintenance = (function () {
     });
   }
 
-  /* showText prints out a single test string and optionally displays
-     the cursor position below it. */
+  // TestRunner.showText prints a given label followed by a given text value.
+  //  The third argument, a cursor position, is optional; if specified,
+  //  the cursor position is indicated by a special character printed on
+  //  a new line below the text.
   TestRunner.prototype.showText = function (label, text, cursor) {
     var parts, i,
         prefix = '  ' + label + ': "';
@@ -106,6 +120,10 @@ var BatchTestRunnerCursorMaintenance = (function () {
     }
   };
 
+  // TestRunner.display iterates over the test cases, printing the raw text
+  //  and expected text of each one. By default the cursor positions are also
+  //  printed. If the optional argument showCursor is false, the cursor
+  //  positions are not printed.
   TestRunner.prototype.display = function (showCursor) {
     var showText = this.showText;
     if (showCursor === undefined) {
@@ -126,7 +144,11 @@ var BatchTestRunnerCursorMaintenance = (function () {
     });
   };
 
-  /* run tests a specified format or all of them. */
+  // TestRunner.run executes the specified cursor-maintaining formatter on
+  //  all test cases. In each case, if the new text fails to match the
+  //  expected text or the new cursor position fails to match the expected
+  //  cursor position, the failure is displayed. If the optional argument
+  //  withCursor is false, the cursor positions are not tested.
   TestRunner.prototype.run = function (format, withCursor) {
     var passing = true,
         showText = this.showText;

@@ -18,7 +18,7 @@ var CursorMaintainer = (function () {
     return this.text.length;
   };
    
-  // read gets one character by default, several if specified.
+  // TextCursor.read gets one character by default, several if specified.
   TextWithCursor.prototype.read = function (begin, length) {
     if (length === undefined) {
       length = 1;
@@ -29,9 +29,9 @@ var CursorMaintainer = (function () {
     return this.text.substring(begin, begin + length);
   };
 
-  // insert adds text at the specified insertion point and shifts the cursor
-  //  if needed. The cursor is unchanged if it is at or to the left of the
-  //  insertion point.
+  // TextWithCursor.insert adds text at the specified insertion point and
+  //  shifts the cursor if needed. The cursor is unchanged if it is at or to
+  //  the left of the insertion point.
   TextWithCursor.prototype.insert = function (begin, subtext) {
     this.text = this.text.substring(0, begin) + subtext +
         this.text.substring(begin);
@@ -40,9 +40,9 @@ var CursorMaintainer = (function () {
     }
   };
 
-  // delete removes one character by default, several if specified, then
-  //  shifts the cursor if needed. The cursor is unchanged if it is at or
-  //  to the left of the deleted characters.
+  // TextWithCursor.delete removes one character by default, several if
+  //  specified, then shifts the cursor if needed. The cursor is unchanged
+  //  if it is at or to the left of the deleted characters.
   TextWithCursor.prototype.delete = function (begin, length) {
     if (length === undefined) {
       length = 1;
