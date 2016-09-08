@@ -67,9 +67,20 @@ var BatchTestCursorMaintenance = (function () {
     load(targetDirectory + '/cursor_maintainer_experiments.js');
     implementations = CursorMaintainerExperiments;
 
-    // Each approach in the following array is tested with each format in
-    //  the nested array. To omit an approach or a format, comment it out.
-    [ //'format',  // format contains plain formatters (no cursor maintenance).
+    // Each approach named in the following array is tested with each format
+    //  named in the nested array. To omit an approach or a format, comment
+    //  out its name. The approach name is used to look up an implementation
+    //  of a cursor-maintenance approach, and the format name is used to
+    //  look up a cursor-maintaining formatter in the implementation object.
+    //  There is one test runner for each format.
+    //  The 'format' implementation contains plain formatters that are
+    //  wrapped to look like cursor-maintaining formatters, but they return
+    //  the raw cursor position as is. The purpose of 'format' is to let us
+    //  verify the text returned by cursor-maintenance approaches that
+    //  reimplement a format. If we only want to test the formatting and
+    //  ignore the cursor maintenance, we pass a true (or truthy) value
+    //  as the optional second argument to TestRunner.run.
+    [ //'format',
       'adHoc',
       //'mockCursor',
       'meta',
@@ -83,7 +94,7 @@ var BatchTestCursorMaintenance = (function () {
         'trimify'
       ].forEach(function (formatName) {
         print('testing', formatName);
-        testRunners[formatName].run(implementation[formatName]);
+        testRunners[formatName].run(implementation[formatName], false);
       });
     });
   }
@@ -122,19 +133,16 @@ var BatchTestCursorMaintenance = (function () {
 
   // TestRunner.display iterates over the test cases, printing the raw text
   //  and expected text of each one. By default the cursor positions are also
-  //  printed. If the optional argument showCursor is false, the cursor
+  //  printed. If the optional argument ignoreCursor is truthy, the cursor
   //  positions are not printed.
-  TestRunner.prototype.display = function (showCursor) {
+  TestRunner.prototype.display = function (ignoreCursor) {
     var showText = this.showText;
-    if (showCursor === undefined) {
-      showCursor = true;
-    }
     print('TestRunner cases for ' + name + '\n');
     this.testCases.forEach(function (testCase) {
       var testCase = this.testCases[i],
           rawCursor,
           expectedCursor;
-      if (showCursor) {
+      if (!ignoreCursor) {
         rawCursor = testCase.raw.cursor;
         expectedCursor = testCase.expected.cursor;
       }
@@ -148,18 +156,15 @@ var BatchTestCursorMaintenance = (function () {
   //  all test cases. In each case, if the new text fails to match the
   //  expected text or the new cursor position fails to match the expected
   //  cursor position, the failure is displayed. If the optional argument
-  //  withCursor is false, the cursor positions are not tested.
-  TestRunner.prototype.run = function (format, withCursor) {
+  //  ignoreCursor is truthy, the cursor positions are not tested.
+  TestRunner.prototype.run = function (format, ignoreCursor) {
     var passing = true,
         showText = this.showText;
-    if (withCursor === undefined) {
-      withCursor = true;
-    }
     this.testCases.forEach(function (testCase) {
       var raw = testCase.raw,
           expected = testCase.expected,
           received = format(raw.text, raw.cursor);
-      if (received.text != expected.text || (withCursor &&
+      if (received.text != expected.text || (!ignoreCursor &&
           received.cursor != expected.cursor)) {
         //print('failed (with' + (withCursor ? '' : 'out') + ' cursor)');
         print();
