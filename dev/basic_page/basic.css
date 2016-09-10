@@ -1,0 +1,27 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Roboto, sans-serif;
+  color: #222;
+}
+
+#wrapper {
+  margin: 15px 25px;
+}
+
+input {
+  font-family: 'Droid Sans Mono', monospace;
+  font-size: 17px;
+  outline: none;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 2px solid #7d95a8;
+  color: #333;
+}
+input:focus {
+  color: #000;
+  border-color: #385671;
+}
+
