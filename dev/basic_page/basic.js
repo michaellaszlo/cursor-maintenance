@@ -20,3 +20,42 @@ data.forEach(function (tuple) {
   });
 });
 */
+var BasicExample = (function () {
+  'use strict';
+
+  var ccInput,
+      ccMaintainer;
+
+  function ccFormat(s) {
+    var groups = [],
+        i;
+    s = s.replace(/\D/g, '');
+    s = s.substring(0, 16);
+    for (i = 0; i < s.length; i += 4) {
+      groups.push(s.substring(i, i + 4));
+    }
+    return groups.join(' ');
+  }
+
+  function ccHandleInput() {
+    var text = ccInput.value,
+        cursor = ccInput.selectionStart,
+        formatted = ccMaintainer(text, cursor);
+    ccInput.value = formatted.text;
+    ccInput.setSelectionRange(formatted.cursor, formatted.cursor);
+  }
+
+  function load() {
+    ccInput = document.getElementById('ccInput');
+    ccMaintainer = CursorMaintainer.layer.augmentFormat(ccFormat, [ /\d/ ]);
+    [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
+      ccInput.addEventListener(eventName, ccHandleInput);
+    });
+  }
+
+  return {
+    load: load
+  };
+})();
+
+onload = BasicExample.load;
