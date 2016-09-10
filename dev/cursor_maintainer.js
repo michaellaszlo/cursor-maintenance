@@ -163,8 +163,14 @@ var CursorMaintainer = (function () {
   layer.augmentFormat = function (format, testers, preferRight) {
     var maintainer = layer.makeMaintainer(testers, preferRight);
     return function (raw, cursor) {
-      var formatted = format(raw),
-          result = maintainer(raw, cursor, formatted);
+      var result,
+          formatted = format(raw);
+      // Check for equality to avoid erroneous cursor positions in the trivial
+      //  case where formatted == raw.
+      if (formatted == raw) {
+        return { text: raw, cursor: cursor };
+      }
+      result = maintainer(raw, cursor, formatted);
       result.text = formatted;
       return result;
     };
@@ -366,8 +372,16 @@ var CursorMaintainer = (function () {
     }
     maintainer = retrospective.makeMaintainer(costFunction);
     return function (raw, cursor) {
-      var formatted = format(raw),
-          result = maintainer(raw, cursor, formatted);
+      var result,
+          formatted = format(raw);
+      // Check for equality to avoid erroneous cursor positions in the trivial
+      //  case where formatted == raw. We add a zero-length score array to the
+      //  result because functions returned by retrospective.makeMaintainer
+      //  include scores in the return value.
+      if (formatted == raw) {
+        return { text: raw, cursor: cursor, scores: [] };
+      }
+      result = maintainer(raw, cursor, formatted);
       result.text = formatted;
       return result;
     };
