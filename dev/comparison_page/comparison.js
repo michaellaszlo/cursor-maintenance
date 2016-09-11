@@ -4,7 +4,7 @@ var CursorMaintenanceComparison = (function () {
   // requires: cursor_maintainer_experiments.js
   //           note_expander.js
 
-  // CursorMaintenanceComparison runs a web page that displays a table
+  // CursorMaintenanceComparison powers a web page that displays a table
   //  of results from several cursor-maintenance implementations applied
   //  in parallel to a formatting instance. There is one formatting
   //  instance for each of two formats, commatize and trimify. A table
@@ -246,6 +246,7 @@ var CursorMaintenanceComparison = (function () {
     inputs.trimify.click();
     outputs.commatize.frequencyRatios.button.click();
     outputs.trimify.frequencyRatios.button.click();
+
     // Add expander to notes (collapsed by default).
     NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }

@@ -1,11 +1,20 @@
 var CursorMaintenanceDemo = (function () {
   'use strict';
 
-  // requires: cursor_maintainer_experiments.js
+  // requires: cursor_maintainer.js
+  //           cursor_maintainer_experiments.js
   //           note_expander.js
+
+  // CursorMaintenanceDemo powers a web page that provides feature-rich
+  //  demonstrations of selected cursor-maintenance approaches. Formatting
+  //  can be toggled off and on for each input area. The demonstration of
+  //  the retrospective approach allows the user to specify her own cost
+  //  function. The layer approach also allows the user to define the
+  //  character sets and the tie-breaker of the layer configuration.
 
   var CM = CursorMaintainer,
       CME = CursorMaintainerExperiments,
+      layerConfiguration,
       messages = {
         formatting: {
           off: '<span class="icon">&#x25a1;</span>formatting off',
@@ -173,7 +182,9 @@ var CursorMaintenanceDemo = (function () {
     return testers;
   }
 
-  function addTester(value) {
+  layerConfiguration = {};
+
+  layerConfiguration.addTester = function (value) {
     var container = document.getElementById('testerBox'),
         deleteButton = document.getElementById('deleteButton'),
         tester = document.createElement('textarea');
@@ -183,9 +194,9 @@ var CursorMaintenanceDemo = (function () {
       tester.value = value;
     }
     container.insertBefore(tester, deleteButton);
-  }
+  };
 
-  function addTesterButtons() {
+  layerConfiguration.addTesterButtons = function () {
     var container = document.getElementById('testerBox'),
         deleteButton = document.createElement('div'),
         newButton = document.createElement('div');
@@ -206,36 +217,46 @@ var CursorMaintenanceDemo = (function () {
       }
     };
     newButton.onclick = function () {
-      addTester();
+      layerConfiguration.addTester();
       deleteButton.className =
           deleteButton.className.replace(/\s+disabled/, '');
     };
     container.appendChild(deleteButton);
     container.appendChild(newButton);
-  }
+  };
 
-  function getPreference() {
+  layerConfiguration.getPreference = function () {
     var container = document.getElementById('preferRightBox'),
         buttons = container.getElementsByTagName('input');
     return buttons[0].checked ? 'left' : 'right';
-  }
+  };
 
-  function setPreference(direction) {
+  layerConfiguration.setPreference = function (direction) {
     var container = document.getElementById('preferRightBox'),
         buttons = container.getElementsByTagName('input');
     buttons[direction == 'left' ? 0 : 1].checked = true;
-  }
+  };
 
+  // load sets up the cursor-maintaining formatter for each demo by
+  //  calling setMaintainer, then fills the input area with sample content.
   function load() {
     var divs, i, notes, columns, content, snippet;
 
     // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
         CME.meta.commatize, { validate: commatizeValidator });
+    document.getElementById('commatizeInput').value = '3171814';
+    document.getElementById('commatizeInput').click();
 
     // Meta version of trimify. No input validation.
     setMaintainer(document.getElementById('trimifyInput'),
         CME.meta.trimify);
+    document.getElementById('trimifyInput').value =
+        "\"Other maps are such shapes, with their islands and capes! / " +
+        "   But we've got our brave Captain to thank\" / " +
+        "(So the crew would protest) \"that he's bought us the best— / " +
+        "   A perfect and absolute blank!\"";
+    document.getElementById('trimifyInput').click();
 
     // Retrospective approach with frequency ratios applied to a
     //  user-defined formatting function. No input validation.
@@ -243,26 +264,7 @@ var CursorMaintenanceDemo = (function () {
         CM.retrospective.augmentFormat(
             makeFormatFromInput(document.getElementById('retrospectiveCode')),
             CM.retrospective.costFunctions.frequencyRatios));
-
-    // Layer approach applied to a user-defined formatting function.
-    //  No input validation.
-    setMaintainer(document.getElementById('layerInput'),
-        function () {
-            return CM.layer.augmentFormat(
-                makeFormatFromInput(document.getElementById('layerCode')),
-                getTesters(),
-                getPreference() == 'right');
-        }, { makeFormat: true });
-
-    // Fill input and code box with sample content.
-    document.getElementById('commatizeInput').value = '3171814';
-    document.getElementById('commatizeInput').click();
-    document.getElementById('trimifyInput').value =
-        "\"Other maps are such shapes, with their islands and capes! / " +
-        "   But we've got our brave Captain to thank\" / " +
-        "(So the crew would protest) \"that he's bought us the best— / " +
-        "   A perfect and absolute blank!\"";
-    document.getElementById('trimifyInput').click();
+    document.getElementById('retrospectiveInput').value = '29031.925';
     document.getElementById('retrospectiveCode').value = "function (s) {\n" +
         "  // Comma-separated dollar amount with unlimited cent precision.\n" +
         "  var decimalPos, whole, fraction, start, groups, i;\n" +
@@ -284,8 +286,18 @@ var CursorMaintenanceDemo = (function () {
         "      '' : '.' + s.substring(decimalPos));\n" +
         "  return '$' + s;\n" +
         "}";
-    document.getElementById('retrospectiveInput').value = '29031.925';
     document.getElementById('retrospectiveInput').click();
+
+    // Layer approach applied to a user-defined formatting function.
+    //  No input validation.
+    setMaintainer(document.getElementById('layerInput'),
+        function () {
+            return CM.layer.augmentFormat(
+                makeFormatFromInput(document.getElementById('layerCode')),
+                getTesters(),
+                layerConfiguration.getPreference() == 'right');
+        }, { makeFormat: true });
+    document.getElementById('layerInput').value = "716";
     document.getElementById('layerCode').value = "function (s) {\n" +
         "  // Ten-digit phone number with hyphens.\n" +
         "  var t;\n" +
@@ -299,11 +311,11 @@ var CursorMaintenanceDemo = (function () {
         "  }\n" +
         "  return t;\n" +
         "}";
-    setPreference('left');
-    addTesterButtons();
-    addTester('/\\d/');
-    document.getElementById('layerInput').value = "716";
+    layerConfiguration.setPreference('left');
+    layerConfiguration.addTesterButtons();
+    layerConfiguration.addTester('/\\d/');
     document.getElementById('layerInput').click();
+    // Remove focus from the last input area that we clicked.
     document.getElementById('layerInput').blur();
 
     // The page position may have been changed by focus events as the input
