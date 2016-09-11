@@ -33,7 +33,18 @@ var BasicExample = (function () {
     return groups.join(' ');             // Put spaces between the groups.
   }
 
-  // ccUpdate
+  // ccUpdate responds to changes in the state of the input element. This
+  //  is a very simple implementation that calls the cursor-maintaining
+  //  formatter and uses the return value to update the input value and
+  //  cursor position. This particular cursor-maintaining formatter takes
+  //  care to check whether the formatted text is equal to the raw text,
+  //  and if so, retains the raw cursor position instead of trying to
+  //  calculate a new cursor position. If you use a cursor-maintaining
+  //  formatter that does not perform this check, do it yourself.
+  // Note that you can make ccUpdate more efficient by storing the input
+  //  text outside the function and checking at the start of each call
+  //  to see if the text has changed since the last call. If it hasn't,
+  //  you can immediately return and save the expense of formatting.
   function ccUpdate() {
     var text = ccInput.value,
         cursor = ccInput.selectionStart,
@@ -44,8 +55,15 @@ var BasicExample = (function () {
 
   // load instantiates the cursor-maintaining formatter, attaches event
   //  listeners to the input element, and fills the input element with
-  //  some initial content.
-  // Note that the input element can
+  //  initial content.
+  // Note that the maxlength attribute of the input element can influence
+  //  the effect of user input. In the case of a limited-length input value
+  //  like a credit card number, there is a question of what happens when the
+  //  input is already at full length and the user inserts a new character.
+  //  If maxlength is not set, the text to the left of the new character
+  //  is shifted and the final character gets chopped off by the formatter.
+  //  If maxlength is set to the maximum length, the input element ignores
+  //  the user's attempt to insert one more character.
   function load() {
     ccInput = document.getElementById('ccInput');
     ccMaintainer = CursorMaintainer.layer.augmentFormat(ccFormat, [ /\d/ ]);
