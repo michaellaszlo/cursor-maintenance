@@ -1,7 +1,8 @@
 var CursorMaintenanceDemo = (function () {
   'use strict';
 
-  // requires: CursorMaintainer, CursorMaintainerExperiments, NoteExpander
+  // requires: cursor_maintainer_experiments.js
+  //           note_expander.js
 
   var CM = CursorMaintainer,
       CME = CursorMaintainerExperiments,

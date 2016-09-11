@@ -6,7 +6,7 @@ var CursorMaintainer = (function () {
       costFunctions;  // Cost functions for the retrospective approach.
 
 
-  //--- Meta approach: entails reimplementing the format with
+  //--- Meta approach: Wherein we reimplement the format with
   //  elementary operations on a text-with-cursor object.
 
   function TextWithCursor(text, cursor) {
@@ -58,7 +58,7 @@ var CursorMaintainer = (function () {
   };
 
 
-  //--- Layer approach: a statistical approach that looks at layers of text
+  //--- Layer approach: A statistical approach that looks at layers of text
   //  induced by character sets specified for a format. Within each layer of
   //  the formatted text, we seek the cursor position where the proportion
   //  of ratio characters to the left is closest to the equivalent proportion
@@ -159,14 +159,14 @@ var CursorMaintainer = (function () {
   //  given format. A cursor-maintaining formatter takes raw text and a raw
   //  cursor position; it returns formatted text and a new cursor position.
   // format: A function that takes raw text and returns formatted text.
-  //  testers, preferRight: arguments to layer.makeMaintainer.
+  // testers, preferRight: Arguments to layer.makeMaintainer.
   layer.augmentFormat = function (format, testers, preferRight) {
     var maintainer = layer.makeMaintainer(testers, preferRight);
     return function (raw, cursor) {
       var result,
           formatted = format(raw);
-      // Check for equality to avoid erroneous cursor positions in the trivial
-      //  case where formatted == raw.
+      // Check for equality to avoid calculating a new, possibly erroneous
+      //  cursor position in the trivial case where formatted == raw.
       if (formatted == raw) {
         return { text: raw, cursor: cursor };
       }
@@ -374,10 +374,11 @@ var CursorMaintainer = (function () {
     return function (raw, cursor) {
       var result,
           formatted = format(raw);
-      // Check for equality to avoid erroneous cursor positions in the trivial
-      //  case where formatted == raw. We add a zero-length score array to the
-      //  result because functions returned by retrospective.makeMaintainer
-      //  include scores in the return value.
+      // Check for equality to avoid calculating a new, possibly erroneous
+      //  cursor position in the trivial case where formatted == raw.
+      // We add a zero-length score array to the result because functions
+      //  returned by retrospective.makeMaintainer include scores in their
+      //  return value.
       if (formatted == raw) {
         return { text: raw, cursor: cursor, scores: [] };
       }

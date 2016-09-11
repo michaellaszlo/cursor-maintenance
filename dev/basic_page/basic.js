@@ -4,7 +4,7 @@ var BasicExample = (function () {
   // requires: cursor_maintainer.js
 
   // The BasicExample module illustrates how you can use the CursorMaintainer
-  //  module to add cursor maintenance to an existing format. We have a
+  //  module to add cursor maintenance to an existing formatter. We have a
   //  credit card number format implemented in the ccFormat function below.
   //  We use the layer approach to generate a cursor-maintaining formatter.
   //  This is accomplished in the second line of the load function below,
@@ -57,13 +57,13 @@ var BasicExample = (function () {
   //  listeners to the input element, and fills the input element with
   //  initial content.
   // Note that the maxlength attribute of the input element can influence
-  //  the effect of user input. In the case of a limited-length input value
+  //  the effect of user input. In the case of a fixed-length input value
   //  like a credit card number, there is a question of what happens when the
   //  input is already at full length and the user inserts a new character.
   //  If maxlength is not set, the text to the left of the new character
   //  is shifted and the final character gets chopped off by the formatter.
-  //  If maxlength is set to the maximum length, the input element ignores
-  //  the user's attempt to insert one more character.
+  //  If maxlength is set to the full length, the input element ignores the
+  //  user's attempt to insert one more character.
   function load() {
     ccInput = document.getElementById('ccInput');
     ccMaintainer = CursorMaintainer.layer.augmentFormat(ccFormat, [ /\d/ ]);

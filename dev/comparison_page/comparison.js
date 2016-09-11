@@ -1,6 +1,18 @@
 var CursorMaintenanceComparison = (function () {
   'use strict';
 
+  // requires: cursor_maintainer_experiments.js
+  //           note_expander.js
+
+  // CursorMaintenanceComparison runs a web page that displays a table
+  //  of results from several cursor-maintenance implementations applied
+  //  in parallel to a formatting instance. There is one formatting
+  //  instance for each of two formats, commatize and trimify. A table
+  //  column is dedicated to each format. The various cursor-maintenance
+  //  approaches correspond to rows. Each formatting instance can be
+  //  edited by the user, and the results are immediately updated when
+  //  the text or the cursor position changes.
+
   var CME = CursorMaintainerExperiments,
       inputMaxLengths = {
         commatize: 15,
@@ -62,20 +74,26 @@ var CursorMaintenanceComparison = (function () {
     });
   }
 
-  // List all cursor positions and scores for a retrospective approach.
-  function enableScoreButton(button, formatName, approach) {
+  // enableScoreButton builds a click handler for a score button that
+  //  was built for a particular format and cursor-maintenance approach,
+  //  as named by arguments. The format and approach names are used to
+  //  look up the appropriate cursor-maintenance method and DOM elements.
+  //  The response to a click is to generate a list of scores calculated
+  //  for every cursor position by a retrospective cost function, and to
+  //  display these in the score area at the bottom of the column.
+  function enableScoreButton(button, formatName, approachName) {
+    var maintainer = CME[approachName][formatName],
+        scoreArea = scores[formatName],
+        input = inputs[formatName];
     button.onclick = function () {
-      var input = inputs[formatName],
-          text = input.value,
+      var text = input.value,
           cursor = input.selectionStart,
-          result = CME[approach][formatName](text, cursor),
-          container = scores[formatName],
+          result = maintainer(text, cursor),
           activeButton = activeButtons[formatName],
-          parts = [],
           i, item, output, score;
-      container.innerHTML = '';
+      scoreArea.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
-        item = make('div', { parent: container, className: 'scoreItem' });
+        item = make('div', { parent: scoreArea, className: 'scoreItem' });
         if (i == result.cursor) {
           item.className += ' best';
         }
@@ -99,6 +117,12 @@ var CursorMaintenanceComparison = (function () {
     };
   }
 
+  // make is a factory for DOM elements.
+  // tag: The name of an HTML tag.
+  // options: An object containing name-value pairs for HTML tag attributes.
+  //  Attribute values are assigned directly to the newly created element.
+  //  options can also include the special key 'parent', pointing to a live
+  //  DOM node to which we append the new element.
   function make(tag, options) {
     var element = document.createElement(tag);
     if ('parent' in options) {
@@ -111,6 +135,11 @@ var CursorMaintenanceComparison = (function () {
     return element;
   }
 
+  // makeApproachName takes label text extracted from the HTML table and
+  //  and transforms it into the name of a member of the cursor-maintenance
+  //  module. Examples:
+  // "ad hoc" -> "adHoc" (a cursor-maintenance implementation)
+  // "frequency ratios" -> "frequencyRatios"  (a retrospective cost function)
   function makeApproachName(s) {
     var parts = s.replace(/^\s+|\s+$/g, '').split(/\s+/),
         i, name;
@@ -121,6 +150,14 @@ var CursorMaintenanceComparison = (function () {
     return name;
   }
 
+  // load fills out a table that is initially defined in the static HTML
+  //  in skeletal form, with single-cell rows that each contain the name
+  //  of a cursor-maintenance approach. The names are extracted from the
+  //  HTML and used to build result fields. Score buttons are built for
+  //  rows that have the word "retrospective" in their class name. Input
+  //  areas are built at the top of each column, and score displays are
+  //  built at the bottom. The format names and approach names in the HTML
+  //  are used to look up functions in the cursor-maintenance module.
   function load() {
     var table = document.getElementById('comparisons'),
         rows = table.getElementsByTagName('tr'),
@@ -131,17 +168,27 @@ var CursorMaintenanceComparison = (function () {
         approach;
     formatNames.forEach(function (formatName) {
       outputs[formatName] = {};
+      // Build the score displays in advance so that we'll be able to connect
+      //  score buttons to displays as we traverse the table.
       scores[formatName] = make('div', { className: 'scoreList', parent:
           make('td', { parent: scoreRow }) });
     });
-    // Traverse rows, adding cells. Insert inputs at top, outputs everywhere.
+    // Traverse all rows in one shot, filling out cells as we go. Use
+    //  class names to decide what to build for each row.
     for (i = 0; i < rows.length; ++i) {
       row = rows[i];
+      // Don't do anything for table headers and score displays.
       if (row.className.indexOf('outputs') == -1) {
         continue;
       }
+      // Extract the approach name from the first cell in the row.
       cells = row.getElementsByTagName('td');
       approach = makeApproachName(cells[0].innerHTML);
+      // Build cells for each format. Most cells only get an output field.
+      //  The top row, labeled "before", also gets an input field that
+      //  hides behind the output field (which will contain a fancy graphical
+      //  cursor). Retrospective result rows get a score button next to
+      //  the output field.
       formatNames.forEach(function (formatName) {
         var button,
             cell = make('td', { parent: row }),
@@ -165,7 +212,7 @@ var CursorMaintenanceComparison = (function () {
     formatNames.forEach(function (formatName) {
       enableInput(inputs[formatName], formatName);
     });
-    // Insert prefabricated data.
+    // Make initial data.
     inputs.commatize.value = '129,00';
     inputs.commatize.setSelectionRange(4, 4);
     inputs.commatize.click();
@@ -174,7 +221,6 @@ var CursorMaintenanceComparison = (function () {
     inputs.trimify.click();
     outputs.commatize.frequencyRatios.button.click();
     outputs.trimify.frequencyRatios.button.click();
-
     // Add expander to notes (collapsed by default).
     NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
