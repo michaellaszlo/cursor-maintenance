@@ -6,7 +6,7 @@
 
 body {
   font-family: Roboto, sans-serif;
-  color: #222;
+  color: #333;
 }
 
 #wrapper {
@@ -22,13 +22,14 @@ input {
   font-family: 'Droid Sans Mono', monospace;
   font-size: 17px;
   outline: none;
-  padding: 3px 6px;
+  padding: 6px 0 6px 9px;
   margin-left: 5px;
   border-radius: 4px;
-  border: 2px solid #7d95a8;
-  color: #333;
+  border: 1px solid #7d95a8;
+  color: #222;
 }
 input:focus {
   color: #000;
-  border-color: #385671;
+  border-color: transparent;
+  background: #e2ecec;
 }
