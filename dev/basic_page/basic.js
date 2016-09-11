@@ -1,43 +1,40 @@
-/*
-load('../cursor_maintainer.js');
-var maintainRetro = CursorMaintainer.retrospective.makeMaintainer(),
-    maintainLayer = CursorMaintainer.layer.makeMaintainer([ /\d+/ ]),
-    data = [ [ '2500', 1, '2,500', 1 ],
-             [ '12500', 3, '12,500', 4 ],
-             [ '5,4990000', 9, '54,990,000', 10 ] ];
-             [ '  hello  ', 8, 'hello ', 6 ],
-             [ '  hello  ', 1, 'hello ', 0 ],
-             [ 'Hello,  friends.', 7, 'Hello, friends.', 7 ]
-data.forEach(function (tuple) {
-  print('test case: ' + tuple.join(' '));
-  [ maintainRetro, maintainLayer ].forEach(function (maintain) {
-    var cursor = maintain(tuple[0], tuple[1], tuple[2]).cursor;
-    if (cursor == tuple[3]) {
-      print('  correct');
-    } else {
-      print('  ' + cursor + ' != ' + tuple[3]);
-    }
-  });
-});
-*/
 var BasicExample = (function () {
   'use strict';
+
+  // requires: cursor_maintainer.js
+
+  // The BasicExample module illustrates how you can use the CursorMaintainer
+  //  module to add cursor maintenance to an existing format. We have a
+  //  credit card number format implemented in the ccFormat function below.
+  //  We use the layer approach to generate a cursor-maintaining formatter.
+  //  This is accomplished in the second line of the load function below,
+  //  where we call CursorMaintainer.layer.augmentFormat with ccFormat and
+  //  an array of regular expressions representing character sets. The
+  //  result of this call is a function that takes raw text and a cursor
+  //  position; it returns an object containing formatted text and a new
+  //  cursor position.
 
   var ccInput,
       ccMaintainer;
 
+  // ccFormat enforces a display format for credit card numbers. The result
+  //  is a sequence of four-digit groups separated by spaces, containing a
+  //  maximum of sixteen digits. Examples:
+  //  " 123-456-" -> "1234 56"
+  //  "12345678901234567890" -> "1234 5678 9012 3456"
   function ccFormat(s) {
     var groups = [],
         i;
-    s = s.replace(/\D/g, '');
-    s = s.substring(0, 16);
-    for (i = 0; i < s.length; i += 4) {
+    s = s.replace(/\D/g, '');            // Remove all non-digit characters.
+    s = s.substring(0, 16);              // Keep no more than 16 digits.
+    for (i = 0; i < s.length; i += 4) {  // Make four-digit groups.
       groups.push(s.substring(i, i + 4));
     }
-    return groups.join(' ');
+    return groups.join(' ');             // Put spaces between the groups.
   }
 
-  function ccHandleInput() {
+  // ccUpdate
+  function ccUpdate() {
     var text = ccInput.value,
         cursor = ccInput.selectionStart,
         formatted = ccMaintainer(text, cursor);
@@ -45,12 +42,19 @@ var BasicExample = (function () {
     ccInput.setSelectionRange(formatted.cursor, formatted.cursor);
   }
 
+  // load instantiates the cursor-maintaining formatter, attaches event
+  //  listeners to the input element, and fills the input element with
+  //  some initial content.
+  // Note that the input element can
   function load() {
     ccInput = document.getElementById('ccInput');
     ccMaintainer = CursorMaintainer.layer.augmentFormat(ccFormat, [ /\d/ ]);
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
-      ccInput.addEventListener(eventName, ccHandleInput);
+      ccInput.addEventListener(eventName, ccUpdate);
     });
+    ccInput.value = '1234567';
+    ccInput.click();
+    ccInput.focus();
   }
 
   return {

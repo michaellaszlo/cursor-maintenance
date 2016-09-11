@@ -2,7 +2,6 @@ var CursorMaintainerExperiments = (function () {
   'use strict';
 
   // requires: cursor_maintainer.js
-  var CM = CursorMaintainer;
 
   // The CursorMaintainerExperiments module defines two plain formatters and
   //  uses them as the basis for a collection of cursor-maintaining formatters
@@ -11,7 +10,8 @@ var CursorMaintainerExperiments = (function () {
   //  formatted text. A cursor-maintaining formatter takes raw text and a raw
   //  cursor position; it returns formatted text and a new cursor position.
 
-  var format,         // Plain formatters for demonstration and testing.
+  var CM = CursorMaintainer,
+      format,         // Plain formatters for demonstration and testing.
       adHoc,          // Reimplementation of formats with cursor maintenance.
       mockCursor,     // Ad hoc approach with the help of a mock cursor.
       meta,           // Reimplementation on a text-with-cursor object.
