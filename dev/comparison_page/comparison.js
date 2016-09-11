@@ -10,13 +10,13 @@ var CursorMaintenanceComparison = (function () {
   //  instance for each of two formats, commatize and trimify. A table
   //  column is dedicated to each format. The various cursor-maintenance
   //  approaches correspond to rows. Each formatting instance can be
-  //  edited by the user, and the results are immediately updated when
-  //  the text or the cursor position changes.
+  //  edited by the user, and the results are immediately updated to
+  //  reflect changes in the raw text or cursor position.
 
   var CME = CursorMaintainerExperiments,
-      inputMaxLengths = {
-        commatize: 15,
-        trimify: 60
+      inputMaxLengths = {  // Maximum number of input characters for each
+        commatize: 15,     //  format. These values are used to set the
+        trimify: 60        //  maxlength attribute of the input element.
       },
       cellMinWidths = {
         commatize: 200,
@@ -28,59 +28,80 @@ var CursorMaintenanceComparison = (function () {
       activeInputMirror,
       scores = {};
 
+  // setOutput displays a cursor-maintenance result in an output element.
   function setOutput(element, text, cursor) {
-    // Note that the range test is false when cursor is null or undefined.
+    // The range test evaluates to false when cursor is null or undefined.
     if (!(cursor >= 0 && cursor <= text.length)) {
       element.innerHTML = text;
       return;
     }
+    // Indicate the cursor position with a specially styled span. The start
+    //  span makes the cursor span visible at position 0.
     element.innerHTML = '<span class="start"></span>' +
         text.substring(0, cursor) + '<span class="cursor"></span>' +
         text.substring(cursor);
   }
 
+  // enableInput builds a handler for events in the input field for each
+  //  format. The input element is hidden behind an output box that contains
+  //  a graphical cursor. When the input element has focus, the output box
+  //  is active, giving it special styling with a blinking cursor. In addition
+  //  to managing the active output box, we have to format the text with the
+  //  plain formatter and with all the cursor-maintaining formatters, and
+  //  display the results in the table.
   function enableInput(input, formatName) {
-    function react() {
+    var formatter = CME.format[formatName],  // This is the plain formatter.
+        formatOutputs = outputs[formatName];
+    // update responds to any event that has the potential to change the
+    //  input text or cursor position.
+    function update() {
       var rawText = input.value,
           rawCursor = input.selectionStart,
-          formattedText = CME.format[formatName](rawText).text;
-      // Echo input. Show formatted text without cursor.
-      setOutput(outputs[formatName].before, rawText, rawCursor);
-      setOutput(outputs[formatName].after, formattedText);
-      // Show text formatted with cursor maintenance.
-      Object.keys(outputs[formatName]).forEach(function (approach) {
-        var result;
-        if (approach in CME) {
-          result = CME[approach][formatName](rawText, rawCursor);
-          setOutput(outputs[formatName][approach], result.text, result.cursor);
-        }
-      });
-      if (activeButtons[formatName]) {
-        activeButtons[formatName].click();
-      }
+          formattedText = formatter(rawText).text;  // Plain formatting.
+      // Display the formatted text without a cursor.
+      setOutput(formatOutputs.after, formattedText);
+      // Mirror the raw text in the output box directly over the input.
+      setOutput(formatOutputs.before, rawText, rawCursor);
+      // Deactivate the previously active input-mirroring output box.
       if (activeInputMirror) {
         activeInputMirror.className =
             activeInputMirror.className.replace(/\s*active\s*/g, '');
       }
-      activeInputMirror = outputs[formatName].before;
+      // Activate the current input-mirroring output box.
+      activeInputMirror = formatOutputs.before;
       activeInputMirror.className += ' active';
+      // Run every cursor-maintaining formatter and display the results.
+      Object.keys(formatOutputs).forEach(function (approach) {
+        var result;
+        if (approach in CME) {
+          result = CME[approach][formatName](rawText, rawCursor);
+          setOutput(formatOutputs[approach], result.text, result.cursor);
+        }
+      });
+      // Update the score display for the retrospective approach whose
+      //  score button is currently active.
+      if (activeButtons[formatName]) {
+        activeButtons[formatName].click();
+      }
     }
+    // When the input loses focus, deactivate its input-mirroring output box.
     input.onblur = function () {
-      outputs[formatName].before.className =
-          outputs[formatName].before.className.replace(/\s*active\s*/g, '');
+      formatOutputs.before.className =
+          formatOutputs.before.className.replace(/\s*active\s*/g, '');
     };
+    // Attach update for events that can change the text or cursor position.
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
-      input['on' + eventName] = react;
+      input.addEventListener(eventName, update);
     });
   }
 
   // enableScoreButton builds a click handler for a score button that
-  //  was built for a particular format and cursor-maintenance approach,
+  //  was made for a particular format and cursor-maintenance approach,
   //  as named by arguments. The format and approach names are used to
   //  look up the appropriate cursor-maintenance method and DOM elements.
   //  The response to a click is to generate a list of scores calculated
   //  for every cursor position by a retrospective cost function, and to
-  //  display these in the score area at the bottom of the column.
+  //  display these in the score area at the bottom of the table column.
   function enableScoreButton(button, formatName, approachName) {
     var maintainer = CME[approachName][formatName],
         scoreArea = scores[formatName],
@@ -93,21 +114,25 @@ var CursorMaintenanceComparison = (function () {
           i, item, output, score;
       scoreArea.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
+        // Make a separate div for each cursor position.
         item = make('div', { parent: scoreArea, className: 'scoreItem' });
         if (i == result.cursor) {
           item.className += ' best';
         }
-        output = make('span', { className: 'output', parent: item,
-            innerHTML: '<span class="start"></span>' +
-                result.text.substring(0, i) + '<span class="cursor"></span>' +
-                result.text.substring(i) });
+        output = make('span', { className: 'output', parent: item });
+        setOutput(output, result.text, i);
         output.style.width = '250px';
         score = ' ' + result.scores[i];
+        // Whole values don't get a decimal point. Display fractional values
+        //  with up to six decimal digits.
         if (score.indexOf('.') != -1) {
           score = score.substring(0, score.indexOf('.') + 6);
         }
         make('span', { parent: item, className: 'score', innerHTML: score });
       }
+      // The currently active score button gets special styling. When a
+      //  different button is activated, alter the class name of the
+      //  previously active button to remove the styling.
       if (activeButton && activeButton != button) {
         activeButton.className =
             activeButton.className.replace(/\s*active\s*/g, '');
@@ -197,7 +222,7 @@ var CursorMaintenanceComparison = (function () {
         if (approach == 'before') {
           inputs[formatName] = make('input', { parent: cell, type: 'text',
               spellcheck: false,
-              maxLength: inputMaxLengths[formatName] });
+              maxlength: inputMaxLengths[formatName] });
           output.className += ' raw';
           cell.style.minWidth = cellMinWidths[formatName] + 'px';
         }
