@@ -140,11 +140,11 @@ textarea.tester {
 #testerBox .tester {
   margin-top: 5px;
 }
-#preferRightBox {
+#tieBreakerBox {
   width: auto;
   margin-bottom: 10px;
 }
-#preferRightBox input {
+#tieBreakerBox input {
   display: inline;
   width: auto;
   margin-left: 5px;

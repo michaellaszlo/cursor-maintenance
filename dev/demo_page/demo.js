@@ -4,6 +4,7 @@ var CursorMaintenanceDemo = (function () {
   // requires: cursor_maintainer.js
   //           cursor_maintainer_experiments.js
   //           note_expander.js
+  //           utilities.js
 
   // CursorMaintenanceDemo powers a web page that provides user-configurable
   //  demonstrations of selected cursor-maintenance approaches. Formatting
@@ -14,12 +15,21 @@ var CursorMaintenanceDemo = (function () {
 
   var CM = CursorMaintainer,
       CME = CursorMaintainerExperiments,
-      layerConfiguration;
+      layerConfigure;
 
+  // getCursorPosition obtains the cursor position with selectionStart,
+  //  which, according to the Mozilla Developer Network documentation,
+  //  is supported by Chrome, Firefox, Safari, and IE 9+. According to
+  //  whatwg.org, selectionStart is an attribute of input elements of type
+  //  text, search, URL, tel, and password. In my experience, it also works
+  //  for textarea elements.
   function getCursorPosition(input) {
     return input.selectionStart;
   }
 
+  // setCursorPosition uses setSelectionRange, which, in my experience,
+  //  works for input elements of type text as well as textarea elements
+  //  in all recent browsers.
   function setCursorPosition(input, position) {
     input.setSelectionRange(position, position);
   }
@@ -28,6 +38,12 @@ var CursorMaintenanceDemo = (function () {
   //  that the input text gets formatted and the cursor is maintained
   //  whenever the user changes the text. setMaintainer also builds a
   //  toggle element that lets the user disable formatting for this input.
+  // input: An input element of type text or a textarea element.
+  // format: A cursor-maintaining formatter or a function that returns a
+  //  cursor-maintaining formatter. In the latter case, options.makeFormat
+  //  must be true.
+  // options: An optional argument which, if present, is an object containing
+  //  optional values .validate and .makeFormat.
   function setMaintainer(input, format, options) {
     var formatted,
         toggleBox,
@@ -95,10 +111,14 @@ var CursorMaintenanceDemo = (function () {
     // Add a logical toggle state to the input element.
     input.status = { formatting: false };
     // Build the physical toggle switch.
-    toggleBox = document.createElement('div');
-    toggleBox.className = 'toggle';
-    toggleBox.onclick = function () {
+    toggleBox = make('div', { className: 'toggle' });
+    toggleBox.addEventListener('click', function () {
       if (!input.status.formatting) {
+        // Wipe out the saved text in case the user-defined format is changed
+        //  while formatting is off. This ensures that even if the text is
+        //  unchanged, the new format will be applied when formatting is
+        //  turned back on.
+        saved.text = null;
         input.status.formatting = true;
         this.className += ' active';
         toggleBox.innerHTML =
@@ -111,19 +131,20 @@ var CursorMaintenanceDemo = (function () {
             '<span class="icon">&#x25a1;</span>formatting off';
       }
       input.focus();
-    };
-    toggleBox.click();
+    });
     input.parentNode.insertBefore(toggleBox, input);
+    toggleBox.click();
   }
 
-  // makeFormatFromInput gets text from an input area and evaluates it
-  //  as JavaScript. A discussion of security is in order. We know that it
+  // makeFormatFromInput gets the content of a textarea and evaluates it
+  //  as JavaScript to obtain a plain formatter, a function that implements
+  //  a text transformation. A discussion of security is in order. It is
   //  is dangerous for a server to evaluate user-provided code or to share
   //  it among clients. In our case, however, the code is evaluated in the
   //  browser session in which the user entered the code. This incurs the
   //  same level of risk as the user typing arbitrary code into her own
   //  browser's JavaScript console. In both cases, the code is entered
-  //  voluntarily by the user and is only executed in the user's browser.
+  //  voluntarily by the user and is executed only in the user's browser.
   function makeFormatFromInput(codeBox) {
     var code = '',
         formatter = null,
@@ -131,21 +152,24 @@ var CursorMaintenanceDemo = (function () {
     return function (text) {
       var error,
           okay = true;
-      // Check for cached code.
+      // Check whether the code has changed since the last call.
       if (code !== codeBox.value) {
         code = codeBox.value;
         formatter = null;
+        // Try to evaluate the code.
         try {
           formatter = eval('(' + code + ')');
         } catch (error) {
           okay = false;
           console.log('user-defined formatter: syntax error');
         }
+        // Check whether the code evaluated to a function.
         if (typeof formatter !== 'function') {
           okay = false;
           formatter = null;
           console.log('user-defined formatter: not a function');
         }
+        // If code evaluation failed, style the textarea to alert the user.
         if (okay) {
           codeBox.className = codeBox.className.replace(/\s+error\s*/, ' ');
         } else {
@@ -153,9 +177,13 @@ var CursorMaintenanceDemo = (function () {
         }
       }
       if (formatter === null) {
+        // The default text transformation returns the input text as is.
         result = text;
       } else {
+        // If the evaluation of the user code yielded a function, we assume
+        //  that it will perform a text transformation.
         result = formatter(text);
+        // Check whether the user-defined function returned a string.
         if (typeof result !== 'string') {
           console.log('user-defined formatter: did not return a string' +
               result);
@@ -166,11 +194,13 @@ var CursorMaintenanceDemo = (function () {
     };
   }
 
-  layerConfiguration = {};
+  // layerConfigure groups together functions and DOM elements that make it
+  //  possible for the user to configure the layer-approach demo.
+  layerConfigure = {};
 
-  layerConfiguration.getTesters = function () {
-    var container = document.getElementById('testerBox'),
-        inputs = container.getElementsByTagName('textarea'),
+  // layerConfigure.getTesters
+  layerConfigure.getTesters = function () {
+    var inputs = layerConfigure.testerBox.getElementsByTagName('textarea'),
         testers = [],
         i, tester, error;
     for (i = 0; i < inputs.length; ++i) {
@@ -193,55 +223,51 @@ var CursorMaintenanceDemo = (function () {
     return testers;
   }
 
-  layerConfiguration.addTester = function (value) {
-    var container = document.getElementById('testerBox'),
-        deleteButton = document.getElementById('deleteButton'),
-        tester = document.createElement('textarea');
-    tester.spellcheck = false;
-    tester.className = 'tester';
+  // layerConfigure.addTester
+  layerConfigure.addTester = function (value) {
+    var deleteButton = document.getElementById('deleteButton'),
+        tester = make('textarea', { className: 'tester', spellcheck: false });
     if (value) {
       tester.value = value;
     }
-    container.insertBefore(tester, deleteButton);
+    layerConfigure.testerBox.insertBefore(tester, deleteButton);
   };
 
-  layerConfiguration.addTesterButtons = function () {
-    var container = document.getElementById('testerBox'),
-        deleteButton = document.createElement('div'),
-        newButton = document.createElement('div');
-    deleteButton.id = 'deleteButton';
-    newButton.id = 'newButton';
-    deleteButton.className = newButton.className = 'button';
-    deleteButton.innerHTML = '&uarr; delete';
-    newButton.innerHTML = 'new &darr;';
-    deleteButton.onclick = function () {
+  // layerConfigure.addTesterButtons
+  layerConfigure.addTesterButtons = function () {
+    var deleteButton, newButton, container;
+    container = layerConfigure.testerBox = document.getElementById('testerBox');
+    deleteButton = make('div', { id: 'deleteButton', className: 'button',
+        innerHTML: '&uarr; delete', parent: container });
+    deleteButton.addEventListener('click', function () {
       var tester = deleteButton.previousSibling;
       if (tester === null) {
         return;
       }
       container.removeChild(tester);
-      tester = deleteButton.previousSibling;
-      if (tester === null) {
+      if (deleteButton.previousSibling === null) {
         deleteButton.className += ' disabled';
       }
-    };
-    newButton.onclick = function () {
-      layerConfiguration.addTester();
+    });
+    newButton = make('div', { id: 'newButton', className: 'button',
+        innerHTML: 'new &darr;', parent: container });
+    newButton.addEventListener('click', function () {
+      layerConfigure.addTester();
       deleteButton.className =
           deleteButton.className.replace(/\s+disabled/, '');
-    };
-    container.appendChild(deleteButton);
-    container.appendChild(newButton);
+    });
   };
 
-  layerConfiguration.getPreference = function () {
-    var container = document.getElementById('preferRightBox'),
+  // layerConfigure.getPreference
+  layerConfigure.getPreference = function () {
+    var container = document.getElementById('tieBreakerBox'),
         buttons = container.getElementsByTagName('input');
     return buttons[0].checked ? 'left' : 'right';
   };
 
-  layerConfiguration.setPreference = function (direction) {
-    var container = document.getElementById('preferRightBox'),
+  // layerConfigure.setPreference
+  layerConfigure.setPreference = function (direction) {
+    var container = document.getElementById('tieBreakerBox'),
         buttons = container.getElementsByTagName('input');
     buttons[direction == 'left' ? 0 : 1].checked = true;
   };
@@ -251,7 +277,8 @@ var CursorMaintenanceDemo = (function () {
   function load() {
     var divs, i, notes, columns, content, snippet;
 
-    // Meta version of commatize accompanied by an input validator.
+    // Meta version of commatize, with an input validator that only accepts
+    //  text consisting of digits and commas.
     setMaintainer(document.getElementById('commatizeInput'),
         CME.meta.commatize, {
           validate: function (text) {
@@ -261,7 +288,7 @@ var CursorMaintenanceDemo = (function () {
     document.getElementById('commatizeInput').value = '3171814';
     document.getElementById('commatizeInput').click();
 
-    // Meta version of trimify. No input validation.
+    // Meta version of trimify.
     setMaintainer(document.getElementById('trimifyInput'),
         CME.meta.trimify);
     document.getElementById('trimifyInput').value =
@@ -272,7 +299,7 @@ var CursorMaintenanceDemo = (function () {
     document.getElementById('trimifyInput').click();
 
     // Retrospective approach with frequency ratios applied to a
-    //  user-defined formatting function. No input validation.
+    //  user-defined formatting function.
     setMaintainer(document.getElementById('retrospectiveInput'),
         CM.retrospective.augmentFormat(
             makeFormatFromInput(document.getElementById('retrospectiveCode')),
@@ -302,13 +329,13 @@ var CursorMaintenanceDemo = (function () {
     document.getElementById('retrospectiveInput').click();
 
     // Layer approach applied to a user-defined formatting function.
-    //  No input validation.
+    layerConfigure.addTesterButtons();
     setMaintainer(document.getElementById('layerInput'),
         function () {
             return CM.layer.augmentFormat(
                 makeFormatFromInput(document.getElementById('layerCode')),
-                layerConfiguration.getTesters(),
-                layerConfiguration.getPreference() == 'right');
+                layerConfigure.getTesters(),
+                layerConfigure.getPreference() == 'right');
         }, { makeFormat: true });
     document.getElementById('layerInput').value = "716";
     document.getElementById('layerCode').value = "function (s) {\n" +
@@ -324,9 +351,8 @@ var CursorMaintenanceDemo = (function () {
         "  }\n" +
         "  return t;\n" +
         "}";
-    layerConfiguration.setPreference('left');
-    layerConfiguration.addTesterButtons();
-    layerConfiguration.addTester('/\\d/');
+    layerConfigure.setPreference('left');
+    layerConfigure.addTester('/\\d/');
     document.getElementById('layerInput').click();
     // Remove focus from the last input area that we clicked.
     document.getElementById('layerInput').blur();
