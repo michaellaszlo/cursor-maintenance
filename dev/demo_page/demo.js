@@ -138,13 +138,14 @@ var CursorMaintenanceDemo = (function () {
 
   // makeFormatFromInput gets the content of a textarea and evaluates it
   //  as JavaScript to obtain a plain formatter, a function that implements
-  //  a text transformation. A discussion of security is in order. It is
-  //  is dangerous for a server to evaluate user-provided code or to share
-  //  it among clients. In our case, however, the code is evaluated in the
+  //  a text transformation.
+  // A discussion of security is in order because we are using eval. It is
+  //  dangerous for a server to evaluate user-provided code or to share it
+  //  among clients. In our case, however, the code is evaluated in the
   //  browser session in which the user entered the code. This incurs the
-  //  same level of risk as the user typing arbitrary code into her own
+  //  same level of risk as the user typing arbitrary code into her
   //  browser's JavaScript console. In both cases, the code is entered
-  //  voluntarily by the user and is executed only in the user's browser.
+  //  voluntarily by the user and is executed in the user's own browser.
   function makeFormatFromInput(codeBox) {
     var code = '',
         formatter = null,
@@ -156,14 +157,14 @@ var CursorMaintenanceDemo = (function () {
       if (code !== codeBox.value) {
         code = codeBox.value;
         formatter = null;
-        // Try to evaluate the code.
+        // Evaluate source code which is expected to define a function.
         try {
           formatter = eval('(' + code + ')');
         } catch (error) {
           okay = false;
           console.log('user-defined formatter: syntax error');
         }
-        // Check whether the code evaluated to a function.
+        // Did the evaluation yield a function?
         if (typeof formatter !== 'function') {
           okay = false;
           formatter = null;
@@ -198,22 +199,31 @@ var CursorMaintenanceDemo = (function () {
   //  possible for the user to configure the layer-approach demo.
   layerConfigure = {};
 
-  // layerConfigure.getTesters
+  // layerConfigure.getTesters makes a character-set tester from the content
+  //  of each input field in the layer-configuration area. A tester is an
+  //  object that includes a test function that returns true or false for
+  //  a given character. In particular, a regex is a tester.
+  // See the introductory comments to makeFormatFromInput for a discussion
+  //  of security considerations. The same conclusion applies here because
+  //  this function evaluates user-supplied code in the same way.
   layerConfigure.getTesters = function () {
     var inputs = layerConfigure.testerBox.getElementsByTagName('textarea'),
         testers = [],
         i, tester, error;
     for (i = 0; i < inputs.length; ++i) {
+      // Evaluate source code which is expected to define a tester.
       try {
         tester = eval('(' + inputs[i].value + ')');
       } catch (error) {
         console.log('user-defined tester: syntax error');
         continue;
       }
+      // Did the evaluation yield an object?
       if (typeof tester !== 'object') {
         console.log('user-defined tester: not an object');
         continue;
       }
+      // Does the object include a test function?
       if (typeof tester.test !== 'function') {
         console.log('user-defined tester: no .test method');
         continue;
@@ -223,8 +233,9 @@ var CursorMaintenanceDemo = (function () {
     return testers;
   }
 
-  // layerConfigure.addTester
-  layerConfigure.addTester = function (value) {
+  // layerConfigure.addTesterInput builds a new input element in which
+  //  the user can define a character-set tester for the layer configuration.
+  layerConfigure.addTesterInput = function (value) {
     var deleteButton = document.getElementById('deleteButton'),
         tester = make('textarea', { className: 'tester', spellcheck: false });
     if (value) {
@@ -233,18 +244,22 @@ var CursorMaintenanceDemo = (function () {
     layerConfigure.testerBox.insertBefore(tester, deleteButton);
   };
 
-  // layerConfigure.addTesterButtons
+  // layerConfigure.addTesterButtons builds a pair of buttons that allow the
+  //  user to delete and add tester inputs. This function is called once,
+  //  prior to the setMaintainer call for the layer demo.
   layerConfigure.addTesterButtons = function () {
     var deleteButton, newButton, container;
     container = layerConfigure.testerBox = document.getElementById('testerBox');
     deleteButton = make('div', { id: 'deleteButton', className: 'button',
         innerHTML: '&uarr; delete', parent: container });
     deleteButton.addEventListener('click', function () {
+      // Is there a tester input for us to delete?
       var tester = deleteButton.previousSibling;
       if (tester === null) {
         return;
       }
       container.removeChild(tester);
+      // If no tester inputs remain, gray out this button.
       if (deleteButton.previousSibling === null) {
         deleteButton.className += ' disabled';
       }
@@ -252,21 +267,23 @@ var CursorMaintenanceDemo = (function () {
     newButton = make('div', { id: 'newButton', className: 'button',
         innerHTML: 'new &darr;', parent: container });
     newButton.addEventListener('click', function () {
-      layerConfigure.addTester();
+      layerConfigure.addTesterInput();
       deleteButton.className =
           deleteButton.className.replace(/\s+disabled/, '');
     });
   };
 
-  // layerConfigure.getPreference
-  layerConfigure.getPreference = function () {
+  // layerConfigure.getTieBreakDirection gets the tie-breaking preference
+  //  from the radio buttons at the bottom of the configuration area.
+  layerConfigure.getTieBreakDirection = function () {
     var container = document.getElementById('tieBreakerBox'),
         buttons = container.getElementsByTagName('input');
     return buttons[0].checked ? 'left' : 'right';
   };
 
-  // layerConfigure.setPreference
-  layerConfigure.setPreference = function (direction) {
+  // layerConfigure.setTieBreakDirection takes a tie-breaking preference and
+  //  manipulates the radio buttons at the bottom of the configuration area.
+  layerConfigure.setTieBreakDirection = function (direction) {
     var container = document.getElementById('tieBreakerBox'),
         buttons = container.getElementsByTagName('input');
     buttons[direction == 'left' ? 0 : 1].checked = true;
@@ -335,7 +352,7 @@ var CursorMaintenanceDemo = (function () {
             return CM.layer.augmentFormat(
                 makeFormatFromInput(document.getElementById('layerCode')),
                 layerConfigure.getTesters(),
-                layerConfigure.getPreference() == 'right');
+                layerConfigure.getTieBreakDirection() == 'right');
         }, { makeFormat: true });
     document.getElementById('layerInput').value = "716";
     document.getElementById('layerCode').value = "function (s) {\n" +
@@ -351,8 +368,8 @@ var CursorMaintenanceDemo = (function () {
         "  }\n" +
         "  return t;\n" +
         "}";
-    layerConfigure.setPreference('left');
-    layerConfigure.addTester('/\\d/');
+    layerConfigure.setTieBreakDirection('left');
+    layerConfigure.addTesterInput('/\\d/');
     document.getElementById('layerInput').click();
     // Remove focus from the last input area that we clicked.
     document.getElementById('layerInput').blur();
