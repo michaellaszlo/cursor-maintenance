@@ -5,22 +5,16 @@ var CursorMaintenanceDemo = (function () {
   //           cursor_maintainer_experiments.js
   //           note_expander.js
 
-  // CursorMaintenanceDemo powers a web page that provides feature-rich
+  // CursorMaintenanceDemo powers a web page that provides user-configurable
   //  demonstrations of selected cursor-maintenance approaches. Formatting
   //  can be toggled off and on for each input area. The demonstration of
   //  the retrospective approach allows the user to specify her own cost
-  //  function. The layer approach also allows the user to define the
-  //  character sets and the tie-breaker of the layer configuration.
+  //  function. The layer-approach demo also allows the user to define the
+  //  character sets and the tie-breaker for the layer configuration.
 
   var CM = CursorMaintainer,
       CME = CursorMaintainerExperiments,
-      layerConfiguration,
-      messages = {
-        formatting: {
-          off: '<span class="icon">&#x25a1;</span>formatting off',
-          on: '<span class="icon">&#x25a0;</span>formatting on'
-        }
-      };
+      layerConfiguration;
 
   function getCursorPosition(input) {
     return input.selectionStart;
@@ -30,28 +24,38 @@ var CursorMaintenanceDemo = (function () {
     input.setSelectionRange(position, position);
   }
 
+  // setMaintainer attaches an event handler to the given input element so
+  //  that the input text gets formatted and the cursor is maintained
+  //  whenever the user changes the text. setMaintainer also builds a
+  //  toggle element that lets the user disable formatting for this input.
   function setMaintainer(input, format, options) {
     var formatted,
         toggleBox,
-        validate = null,
-        makeFormat = false,
-        saved = { text: null, cursor: 0 };
-    if (options && typeof options == 'object') {
-      if ('validate' in options) {
-        validate = options.validate;
-      }
-      if ('makeFormat' in options) {
-        makeFormat = options.makeFormat;
-      }
+        validate,
+        makeFormat,
+        saved;
+    if (typeof options == 'object') {
+      // validate is an optional function that accepts or rejects input text.
+      validate = options.validate;
+      // makeFormat, if true, signifies that format() returns a formatter.
+      makeFormat = options.makeFormat;
     }
-    function processInput() {
+    // saved will store the input state after each update, so that on the
+    //  next call to the update function we can compare the current input
+    //  state and return early if the state is unchanged.
+    saved = { text: null, cursor: 0 };
+    // update responds to events that have the potential to change the text
+    //  in the input element. It performs input validation if specified,
+    //  formats the text unless formatting has been toggled off, and
+    //  changes the cursor position as needed.
+    function update() {
       var text,
           cursor,
           formatted;
       text = input.value;
       cursor = getCursorPosition(input);
-      // If the input is invalid, restore the saved state and bail out.
-      if (validate !== null && validate(text) !== true) {
+      // If the input text is invalid, restore the saved state and bail out.
+      if (validate && validate(text) !== true) {
         input.value = saved.text;
         setCursorPosition(input, saved.cursor);
         return;
@@ -65,6 +69,10 @@ var CursorMaintenanceDemo = (function () {
         saved.cursor = cursor;
         return;
       }
+      // If the makeFormat option is true, the format argument passed to
+      //  setMaintainer isn't a formatter but a function that returns a
+      //  formatter. By evaluating this function, we obtain the formatter
+      //  that the user currently specifies on the demo page.
       if (makeFormat) {
         formatted = format()(text, cursor);
       } else {
@@ -75,28 +83,32 @@ var CursorMaintenanceDemo = (function () {
         saved.cursor = cursor;
         return;
       }
+      // Update the input element and save its state.
       input.value = saved.text = formatted.text;
       setCursorPosition(input, saved.cursor = formatted.cursor);
     }
     // Listen for events that can change the input value.
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
-      input.addEventListener(eventName, processInput);
+      input.addEventListener(eventName, update);
     });
-    // Add an element that allows the user to toggle formatting on and off.
+    // Build an element that allows the user to toggle formatting on and off.
+    // Add a logical toggle state to the input element.
     input.status = { formatting: false };
+    // Build the physical toggle switch.
     toggleBox = document.createElement('div');
     toggleBox.className = 'toggle';
     toggleBox.onclick = function () {
       if (!input.status.formatting) {
-        saved.text = null;
         input.status.formatting = true;
         this.className += ' active';
-        toggleBox.innerHTML = messages.formatting.on;
-        processInput();
+        toggleBox.innerHTML =
+            '<span class="icon">&#x25a0;</span>formatting on';
+        update();
       } else {
         input.status.formatting = false;
         this.className = this.className.replace(/\s*active\s*/, ' ');
-        toggleBox.innerHTML = messages.formatting.off;
+        toggleBox.innerHTML =
+            '<span class="icon">&#x25a1;</span>formatting off';
       }
       input.focus();
     };
@@ -104,17 +116,14 @@ var CursorMaintenanceDemo = (function () {
     input.parentNode.insertBefore(toggleBox, input);
   }
 
-  function commatizeValidator(text) {
-    return /^[0-9,]*$/.test(text);
-  }
-
-  // makeFormatFromInput reads user input from codeBox and evaluates it
-  //  as JavaScript. It is generally thought to be unwise to evaluate
-  //  user-provided code. In our case, the code is evaluated in the
+  // makeFormatFromInput gets text from an input area and evaluates it
+  //  as JavaScript. A discussion of security is in order. We know that it
+  //  is dangerous for a server to evaluate user-provided code or to share
+  //  it among clients. In our case, however, the code is evaluated in the
   //  browser session in which the user entered the code. This incurs the
-  //  same level of risk as the user executing arbitrary code in the
+  //  same level of risk as the user typing arbitrary code into her own
   //  browser's JavaScript console. In both cases, the code is entered
-  //  voluntarily by the user and is executed only in the user's browser.
+  //  voluntarily by the user and is only executed in the user's browser.
   function makeFormatFromInput(codeBox) {
     var code = '',
         formatter = null,
@@ -157,7 +166,9 @@ var CursorMaintenanceDemo = (function () {
     };
   }
 
-  function getTesters() {
+  layerConfiguration = {};
+
+  layerConfiguration.getTesters = function () {
     var container = document.getElementById('testerBox'),
         inputs = container.getElementsByTagName('textarea'),
         testers = [],
@@ -181,8 +192,6 @@ var CursorMaintenanceDemo = (function () {
     }
     return testers;
   }
-
-  layerConfiguration = {};
 
   layerConfiguration.addTester = function (value) {
     var container = document.getElementById('testerBox'),
@@ -244,7 +253,11 @@ var CursorMaintenanceDemo = (function () {
 
     // Meta version of commatize accompanied by an input validator.
     setMaintainer(document.getElementById('commatizeInput'),
-        CME.meta.commatize, { validate: commatizeValidator });
+        CME.meta.commatize, {
+          validate: function (text) {
+                      return /^[0-9,]*$/.test(text);
+                    }
+        });
     document.getElementById('commatizeInput').value = '3171814';
     document.getElementById('commatizeInput').click();
 
@@ -294,7 +307,7 @@ var CursorMaintenanceDemo = (function () {
         function () {
             return CM.layer.augmentFormat(
                 makeFormatFromInput(document.getElementById('layerCode')),
-                getTesters(),
+                layerConfiguration.getTesters(),
                 layerConfiguration.getPreference() == 'right');
         }, { makeFormat: true });
     document.getElementById('layerInput').value = "716";

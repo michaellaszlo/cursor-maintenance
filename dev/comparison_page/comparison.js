@@ -53,7 +53,7 @@ var CursorMaintenanceComparison = (function () {
     var formatter = CME.format[formatName],  // This is the plain formatter.
         formatOutputs = outputs[formatName];
     // update responds to any event that has the potential to change the
-    //  input text or cursor position.
+    //  input text.
     function update() {
       var rawText = input.value,
           rawCursor = input.selectionStart,
@@ -89,7 +89,7 @@ var CursorMaintenanceComparison = (function () {
       formatOutputs.before.className =
           formatOutputs.before.className.replace(/\s*active\s*/g, '');
     };
-    // Attach update for events that can change the text or cursor position.
+    // Attach update for events that can change the raw text.
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input.addEventListener(eventName, update);
     });
