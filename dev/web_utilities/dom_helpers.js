@@ -1,17 +1,21 @@
 var DOMHelpers = (function () {
   'use strict';
 
-  // The DOMHelpers module is a small collection of functions that help
-  //  you build and manipulate web pages more concisely.
+  // The DOMHelpers module is a small collection of functions that help to
+  //   build and manipulate DOM elements.
 
   // make is a DOM element factory.
-  // tag: The name of an HTML tag.
-  // options: An object containing name-value pairs for HTML tag attributes.
-  //  Attribute values are assigned directly to the newly created element.
-  //  options can also include the special key 'parent', pointing to a live
-  //  DOM node to which we append the new element.
+  // tag: The name of a DOM element.
+  // options: An object containing DOM attribute-value pairs. These values
+  //  are assigned directly to the new object. For example, if you set
+  //  options.className to 'button active', the className of the new object
+  //  is set to 'button active'. There is one special key, 'parent': if you
+  //  use it, the new object is appended to options.parent as a child element.
   function make(tag, options) {
     var element = document.createElement(tag);
+    if (typeof options !== 'object') {
+      return;
+    }
     if ('parent' in options) {
       options.parent.appendChild(element);
       delete options.parent;
@@ -23,7 +27,7 @@ var DOMHelpers = (function () {
   }
 
   // classRemove modifies the given element's className so that it no longer
-  //  includes classes that are equal to the given name.
+  //  includes the class named by the second argument.
   function classRemove(element, name) {
     var names = element.className.replace(/^\s+|\s+$/g, '').split(/\s+/),
         newNames = [],
