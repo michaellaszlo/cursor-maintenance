@@ -1,19 +1,31 @@
 var CursorMaintainer = (function () {
   'use strict';
 
+  // The CursorMaintainer module supports three cursor-maintenance approaches:
+  //  meta, layer, and retrospective.
+
   var layer,          // A statistical approach configured per format.
       retrospective,  // Format-independent statistical cursor maintenance.
       costFunctions;  // Cost functions for the retrospective approach.
 
 
-  //--- Meta approach: Wherein we reimplement the format with
-  //  elementary operations on a text-with-cursor object.
+  //--- Meta approach: Wherein we reimplement the format with elementary
+  //  operations on a text-with-cursor object. The elementary operations
+  //  are read, insert, and delete. When an insert or delete operation is
+  //  applied once, it moves the cursor in a straightforward manner. However,
+  //  it is possible to apply a sequence of elementary operations that
+  //  obfuscate the overall cursor movement. You want to avoid that. Be wary
+  //  of deleting large spans of text around the cursor, because that's how
+  //  you lose contextual information. Seek to delete the fewest possible
+  //  characters to achieve the text transformation required by the format.
 
+  // TextWithCursor constructs a text-with-cursor object.
   function TextWithCursor(text, cursor) {
     this.text = text || '';
     this.cursor = cursor || 0;
   }
 
+  // TextWithCursor.length is a shortcut for accessing the text length.
   TextWithCursor.prototype.length = function () {
     return this.text.length;
   };
