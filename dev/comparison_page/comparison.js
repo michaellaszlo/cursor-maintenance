@@ -2,7 +2,7 @@ var CursorMaintenanceComparison = (function () {
   'use strict';
 
   // requires: cursor_maintainer_experiments.js
-  //           note_expander.js
+  //           web_utilities.js
 
   // CursorMaintenanceComparison powers a web page that displays a table
   //  of results from several cursor-maintenance implementations applied
@@ -14,6 +14,7 @@ var CursorMaintenanceComparison = (function () {
   //  reflect changes in the raw text or cursor position.
 
   var CME = CursorMaintainerExperiments,
+      W = WebUtilities,
       inputMaxLengths = {  // Maximum number of input characters for each
         commatize: 15,     //  format. These values are used to set the
         trimify: 60        //  maxlength attribute of the input element.
@@ -115,11 +116,11 @@ var CursorMaintenanceComparison = (function () {
       scoreArea.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
         // Make a separate div for each cursor position.
-        item = make('div', { parent: scoreArea, className: 'scoreItem' });
+        item = W.make('div', { parent: scoreArea, className: 'scoreItem' });
         if (i == result.cursor) {
           item.className += ' best';
         }
-        output = make('span', { className: 'output', parent: item });
+        output = W.make('span', { className: 'output', parent: item });
         setOutput(output, result.text, i);
         output.style.width = '250px';
         score = ' ' + result.scores[i];
@@ -128,7 +129,7 @@ var CursorMaintenanceComparison = (function () {
         if (score.indexOf('.') != -1) {
           score = score.substring(0, score.indexOf('.') + 6);
         }
-        make('span', { parent: item, className: 'score', innerHTML: score });
+        W.make('span', { parent: item, className: 'score', innerHTML: score });
       }
       // The currently active score button gets special styling. When a
       //  different button is activated, alter the class name of the
@@ -140,24 +141,6 @@ var CursorMaintenanceComparison = (function () {
       activeButtons[formatName] = button;
       button.className += ' active';
     };
-  }
-
-  // make is a factory for DOM elements.
-  // tag: The name of an HTML tag.
-  // options: An object containing name-value pairs for HTML tag attributes.
-  //  Attribute values are assigned directly to the newly created element.
-  //  options can also include the special key 'parent', pointing to a live
-  //  DOM node to which we append the new element.
-  function make(tag, options) {
-    var element = document.createElement(tag);
-    if ('parent' in options) {
-      options.parent.appendChild(element);
-      delete options.parent;
-    }
-    Object.keys(options).forEach(function (key) {
-      element[key] = options[key];
-    });
-    return element;
   }
 
   // makeApproachName takes label text extracted from the HTML table and
@@ -195,8 +178,8 @@ var CursorMaintenanceComparison = (function () {
       outputs[formatName] = {};
       // Build the score displays in advance so that we'll be able to connect
       //  score buttons to displays as we traverse the table.
-      scores[formatName] = make('div', { className: 'scoreList', parent:
-          make('td', { parent: scoreRow }) });
+      scores[formatName] = W.make('div', { className: 'scoreList', parent:
+          W.make('td', { parent: scoreRow }) });
     });
     // Traverse all rows in one shot, filling out cells as we go. Use
     //  class names to decide what to build for each row.
@@ -216,18 +199,18 @@ var CursorMaintenanceComparison = (function () {
       //  the output field.
       formatNames.forEach(function (formatName) {
         var button,
-            cell = make('td', { parent: row }),
-            output = outputs[formatName][approach] = make('span',
+            cell = W.make('td', { parent: row }),
+            output = outputs[formatName][approach] = W.make('span',
                 { parent: cell, className: 'output' });
         if (approach == 'before') {
-          inputs[formatName] = make('input', { parent: cell, type: 'text',
+          inputs[formatName] = W.make('input', { parent: cell, type: 'text',
               spellcheck: false,
               maxlength: inputMaxLengths[formatName] });
           output.className += ' raw';
           cell.style.minWidth = cellMinWidths[formatName] + 'px';
         }
         if (row.className.indexOf('retrospective') != -1) {
-          button = make('button', { innerHTML: 'scores', parent: cell });
+          button = W.make('button', { innerHTML: 'scores', parent: cell });
           enableScoreButton(button, formatName, approach);
           output.button = button;
         }
@@ -248,7 +231,7 @@ var CursorMaintenanceComparison = (function () {
     outputs.trimify.frequencyRatios.button.click();
 
     // Add expander to notes (collapsed by default).
-    NoteExpander.enableByTagAndClass(document, 'div', 'notes');
+    W.NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
 
   return {
