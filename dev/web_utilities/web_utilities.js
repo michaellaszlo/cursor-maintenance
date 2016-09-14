@@ -21,6 +21,18 @@ var WebUtilities = (function () {
     return element;
   }
 
+  function classRemove(element, name) {
+    var names = element.className.replace(/^\s+|\s+$/g, '').split(/\s+/),
+        newNames = [],
+        i;
+    for (i = 0; i < names.length; ++i) {
+      if (names[i] != name) {
+        newNames.push(names[i]);
+      }
+    }
+    element.className = newNames.join(' ');
+  }
+
   // NoteExpander
   NoteExpander = {};
 
@@ -72,6 +84,7 @@ var WebUtilities = (function () {
 
   return {
     make: make,
+    classRemove: classRemove,
     NoteExpander: NoteExpander
   };
 })();

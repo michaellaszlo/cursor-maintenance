@@ -65,8 +65,7 @@ var CursorMaintenanceComparison = (function () {
       setOutput(formatOutputs.before, rawText, rawCursor);
       // Deactivate the previously active input-mirroring output box.
       if (activeInputMirror) {
-        activeInputMirror.className =
-            activeInputMirror.className.replace(/\s*active\s*/g, '');
+        W.classRemove(activeInputMirror, 'active');
       }
       // Activate the current input-mirroring output box.
       activeInputMirror = formatOutputs.before;
@@ -87,8 +86,7 @@ var CursorMaintenanceComparison = (function () {
     }
     // When the input loses focus, deactivate its input-mirroring output box.
     input.onblur = function () {
-      formatOutputs.before.className =
-          formatOutputs.before.className.replace(/\s*active\s*/g, '');
+      W.classRemove(formatOutputs.before, 'active');
     };
     // Attach update for events that can change the raw text.
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
@@ -135,8 +133,7 @@ var CursorMaintenanceComparison = (function () {
       //  different button is activated, alter the class name of the
       //  previously active button to remove the styling.
       if (activeButton && activeButton != button) {
-        activeButton.className =
-            activeButton.className.replace(/\s*active\s*/g, '');
+        W.classRemove(activeButton, 'active');
       }
       activeButtons[formatName] = button;
       button.className += ' active';

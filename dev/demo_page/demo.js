@@ -126,7 +126,7 @@ var CursorMaintenanceDemo = (function () {
         update();
       } else {
         input.status.formatting = false;
-        this.className = this.className.replace(/\s*active\s*/, ' ');
+        W.classRemove(this, 'active');
         toggleBox.innerHTML =
             '<span class="icon">&#x25a1;</span>formatting off';
       }
@@ -172,7 +172,7 @@ var CursorMaintenanceDemo = (function () {
         }
         // If code evaluation failed, style the textarea to alert the user.
         if (okay) {
-          codeBox.className = codeBox.className.replace(/\s+error\s*/, ' ');
+          W.classRemove(codeBox, 'error');
         } else {
           codeBox.className += ' error';
         }
@@ -268,8 +268,7 @@ var CursorMaintenanceDemo = (function () {
         innerHTML: 'new &darr;', parent: container });
     newButton.addEventListener('click', function () {
       layerConfigure.addTesterInput();
-      deleteButton.className =
-          deleteButton.className.replace(/\s+disabled/, '');
+      W.classRemove(deleteButton, 'disabled');
     });
   };
 
