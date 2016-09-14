@@ -2,7 +2,8 @@ var CursorMaintenanceComparison = (function () {
   'use strict';
 
   // requires: cursor_maintainer_experiments.js
-  //           web_utilities.js
+  //           dom_helpers.js
+  //           note_expander.js
 
   // CursorMaintenanceComparison powers a web page that displays a table
   //  of results from several cursor-maintenance implementations applied
@@ -14,7 +15,8 @@ var CursorMaintenanceComparison = (function () {
   //  reflect changes in the raw text or cursor position.
 
   var CME = CursorMaintainerExperiments,
-      W = WebUtilities,
+      make = DOMHelpers.make,
+      classRemove = DOMHelpers.classRemove,
       inputMaxLengths = {  // Maximum number of input characters for each
         commatize: 15,     //  format. These values are used to set the
         trimify: 60        //  maxlength attribute of the input element.
@@ -65,7 +67,7 @@ var CursorMaintenanceComparison = (function () {
       setOutput(formatOutputs.before, rawText, rawCursor);
       // Deactivate the previously active input-mirroring output box.
       if (activeInputMirror) {
-        W.classRemove(activeInputMirror, 'active');
+        classRemove(activeInputMirror, 'active');
       }
       // Activate the current input-mirroring output box.
       activeInputMirror = formatOutputs.before;
@@ -86,7 +88,7 @@ var CursorMaintenanceComparison = (function () {
     }
     // When the input loses focus, deactivate its input-mirroring output box.
     input.onblur = function () {
-      W.classRemove(formatOutputs.before, 'active');
+      classRemove(formatOutputs.before, 'active');
     };
     // Attach update for events that can change the raw text.
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
@@ -114,11 +116,11 @@ var CursorMaintenanceComparison = (function () {
       scoreArea.innerHTML = '';
       for (i = 0; i < result.scores.length; ++i) {
         // Make a separate div for each cursor position.
-        item = W.make('div', { parent: scoreArea, className: 'scoreItem' });
+        item = make('div', { parent: scoreArea, className: 'scoreItem' });
         if (i == result.cursor) {
           item.className += ' best';
         }
-        output = W.make('span', { className: 'output', parent: item });
+        output = make('span', { className: 'output', parent: item });
         setOutput(output, result.text, i);
         output.style.width = '250px';
         score = ' ' + result.scores[i];
@@ -127,13 +129,13 @@ var CursorMaintenanceComparison = (function () {
         if (score.indexOf('.') != -1) {
           score = score.substring(0, score.indexOf('.') + 6);
         }
-        W.make('span', { parent: item, className: 'score', innerHTML: score });
+        make('span', { parent: item, className: 'score', innerHTML: score });
       }
       // The currently active score button gets special styling. When a
       //  different button is activated, alter the class name of the
       //  previously active button to remove the styling.
       if (activeButton && activeButton != button) {
-        W.classRemove(activeButton, 'active');
+        classRemove(activeButton, 'active');
       }
       activeButtons[formatName] = button;
       button.className += ' active';
@@ -175,8 +177,8 @@ var CursorMaintenanceComparison = (function () {
       outputs[formatName] = {};
       // Build the score displays in advance so that we'll be able to connect
       //  score buttons to displays as we traverse the table.
-      scores[formatName] = W.make('div', { className: 'scoreList', parent:
-          W.make('td', { parent: scoreRow }) });
+      scores[formatName] = make('div', { className: 'scoreList', parent:
+          make('td', { parent: scoreRow }) });
     });
     // Traverse all rows in one shot, filling out cells as we go. Use
     //  class names to decide what to build for each row.
@@ -196,18 +198,18 @@ var CursorMaintenanceComparison = (function () {
       //  the output field.
       formatNames.forEach(function (formatName) {
         var button,
-            cell = W.make('td', { parent: row }),
-            output = outputs[formatName][approach] = W.make('span',
+            cell = make('td', { parent: row }),
+            output = outputs[formatName][approach] = make('span',
                 { parent: cell, className: 'output' });
         if (approach == 'before') {
-          inputs[formatName] = W.make('input', { parent: cell, type: 'text',
+          inputs[formatName] = make('input', { parent: cell, type: 'text',
               spellcheck: false,
               maxlength: inputMaxLengths[formatName] });
           output.className += ' raw';
           cell.style.minWidth = cellMinWidths[formatName] + 'px';
         }
         if (row.className.indexOf('retrospective') != -1) {
-          button = W.make('button', { innerHTML: 'scores', parent: cell });
+          button = make('button', { innerHTML: 'scores', parent: cell });
           enableScoreButton(button, formatName, approach);
           output.button = button;
         }
@@ -228,7 +230,7 @@ var CursorMaintenanceComparison = (function () {
     outputs.trimify.frequencyRatios.button.click();
 
     // Add expander to notes (collapsed by default).
-    W.NoteExpander.enableByTagAndClass(document, 'div', 'notes');
+    NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
 
   return {

@@ -14,7 +14,8 @@ var CursorMaintenanceDemo = (function () {
 
   var CM = CursorMaintainer,
       CME = CursorMaintainerExperiments,
-      W = WebUtilities,
+      make = DOMHelpers.make,
+      classRemove = DOMHelpers.classRemove,
       layerConfigure;
 
   // getCursorPosition obtains the cursor position with selectionStart,
@@ -111,7 +112,7 @@ var CursorMaintenanceDemo = (function () {
     // Add a logical toggle state to the input element.
     input.status = { formatting: false };
     // Build the physical toggle switch.
-    toggleBox = W.make('div', { className: 'toggle' });
+    toggleBox = make('div', { className: 'toggle' });
     toggleBox.addEventListener('click', function () {
       if (!input.status.formatting) {
         // Wipe out the saved text in case the user-defined format is changed
@@ -126,7 +127,7 @@ var CursorMaintenanceDemo = (function () {
         update();
       } else {
         input.status.formatting = false;
-        W.classRemove(this, 'active');
+        classRemove(this, 'active');
         toggleBox.innerHTML =
             '<span class="icon">&#x25a1;</span>formatting off';
       }
@@ -172,7 +173,7 @@ var CursorMaintenanceDemo = (function () {
         }
         // If code evaluation failed, style the textarea to alert the user.
         if (okay) {
-          W.classRemove(codeBox, 'error');
+          classRemove(codeBox, 'error');
         } else {
           codeBox.className += ' error';
         }
@@ -237,7 +238,7 @@ var CursorMaintenanceDemo = (function () {
   //  the user can define a character-set tester for the layer configuration.
   layerConfigure.addTesterInput = function (value) {
     var deleteButton = document.getElementById('deleteButton'),
-        tester = W.make('textarea', { className: 'tester', spellcheck: false });
+        tester = make('textarea', { className: 'tester', spellcheck: false });
     if (value) {
       tester.value = value;
     }
@@ -250,7 +251,7 @@ var CursorMaintenanceDemo = (function () {
   layerConfigure.addTesterButtons = function () {
     var deleteButton, newButton, container;
     container = layerConfigure.testerBox = document.getElementById('testerBox');
-    deleteButton = W.make('div', { id: 'deleteButton', className: 'button',
+    deleteButton = make('div', { id: 'deleteButton', className: 'button',
         innerHTML: '&uarr; delete', parent: container });
     deleteButton.addEventListener('click', function () {
       // Is there a tester input for us to delete?
@@ -264,11 +265,11 @@ var CursorMaintenanceDemo = (function () {
         deleteButton.className += ' disabled';
       }
     });
-    newButton = W.make('div', { id: 'newButton', className: 'button',
+    newButton = make('div', { id: 'newButton', className: 'button',
         innerHTML: 'new &darr;', parent: container });
     newButton.addEventListener('click', function () {
       layerConfigure.addTesterInput();
-      W.classRemove(deleteButton, 'disabled');
+      classRemove(deleteButton, 'disabled');
     });
   };
 
@@ -378,7 +379,7 @@ var CursorMaintenanceDemo = (function () {
     scrollTo(0, 0);
 
     // Add expander widgets to note sections. Notes are collapsed by default.
-    W.NoteExpander.enableByTagAndClass(document, 'div', 'notes');
+    NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
 
   return {
