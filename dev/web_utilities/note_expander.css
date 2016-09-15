@@ -25,7 +25,7 @@
 
 .expander-icon {
   display: inline-block;
-  transform: rotate(-90deg);
+  transform: rotate(+90deg);
   transition: transform 0.25s ease-in-out;
 }
 .expander-collapsed .expander-icon {
