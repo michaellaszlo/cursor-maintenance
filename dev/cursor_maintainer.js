@@ -2,82 +2,22 @@ var CursorMaintainer = (function () {
   'use strict';
 
   // The CursorMaintainer module supports three cursor-maintenance approaches:
-  //  meta, layer, and retrospective.
+  //  layer, retrospective, and meta.
 
-  var layer,          // A statistical approach configured per format.
-      retrospective,  // Format-independent statistical cursor maintenance.
-      costFunctions;  // Cost functions for the retrospective approach.
-
-
-  //--- Meta approach: Wherein we reimplement the format with elementary
-  //  operations on a text-with-cursor object. The elementary operations
-  //  are read, insert, and delete. When an insert or delete operation is
-  //  applied once, it moves the cursor in a straightforward manner. However,
-  //  it is possible to apply a sequence of elementary operations that
-  //  obfuscate the overall cursor movement. You want to avoid that. Be wary
-  //  of deleting large spans of text around the cursor, because that's how
-  //  you lose contextual information. Seek to delete the fewest possible
-  //  characters to achieve the text transformation required by the format.
-
-  // TextWithCursor constructs a text-with-cursor object.
-  function TextWithCursor(text, cursor) {
-    this.text = text || '';
-    this.cursor = cursor || 0;
-  }
-
-  // TextWithCursor.length is a shortcut for accessing the text length.
-  TextWithCursor.prototype.length = function () {
-    return this.text.length;
-  };
-   
-  // TextCursor.read gets one character by default, several if specified.
-  TextWithCursor.prototype.read = function (begin, length) {
-    if (length === undefined) {
-      length = 1;
-    }
-    if (length <= 0) {
-      return;
-    }
-    return this.text.substring(begin, begin + length);
-  };
-
-  // TextWithCursor.insert adds text at the specified insertion point and
-  //  shifts the cursor if needed. The cursor is unchanged if it is at or to
-  //  the left of the insertion point.
-  TextWithCursor.prototype.insert = function (begin, subtext) {
-    this.text = this.text.substring(0, begin) + subtext +
-        this.text.substring(begin);
-    if (this.cursor > begin) {
-      this.cursor += subtext.length;
-    }
-  };
-
-  // TextWithCursor.delete removes one character by default, several if
-  //  specified, then shifts the cursor if needed. The cursor is unchanged
-  //  if it is at or to the left of the deleted characters.
-  TextWithCursor.prototype.delete = function (begin, length) {
-    if (length === undefined) {
-      length = 1;
-    }
-    if (length <= 0) {
-      return;
-    }
-    this.text = this.text.substring(0, begin) +
-        this.text.substring(begin + length);
-    if (this.cursor > begin) {
-      this.cursor -= Math.min(this.cursor - begin, length);
-    }
-  };
+  var layer,           // A statistical approach configured per format.
+      retrospective,   // Format-independent statistical cursor maintenance.
+      costFunctions,   // Cost functions for the retrospective approach.
+      TextWithCursor;  // Support for the meta approach.
 
 
   //--- Layer approach: A statistical approach that looks at layers of text
   //  induced by character sets specified for a format. Within each layer of
   //  the formatted text, we seek the cursor position where the proportion
   //  of ratio characters to the left is closest to the equivalent proportion
-  //  at the raw cursor position in the raw text. If several cursor positions
-  //  are equally close, we move to the next layer. If a tie-breaker is
-  //  needed, we take either the left or right end of the final range,
-  //  as configured for the format. 
+  //  at the cursor position in the raw text. If several cursor positions are
+  //  equally close, we move to the next layer. If a tie-breaker is needed,
+  //  we take either the left or right end of the final range, as configured
+  //  for the format. 
 
   layer = {};
 
@@ -401,9 +341,70 @@ var CursorMaintainer = (function () {
   };
 
 
+  //--- Meta approach: Wherein we reimplement the format with elementary
+  //  operations on a text-with-cursor object. The elementary operations
+  //  are read, insert, and delete. When an insert or delete operation is
+  //  applied once, it moves the cursor in a straightforward manner. However,
+  //  it is possible to apply a sequence of elementary operations that
+  //  obfuscate the overall cursor movement, defeating cursor maintenance.
+  //  Be wary of deleting large substrings that span the cursor, because
+  //  that's how you lose cursor context. Try to delete the fewest possible
+  //  characters to achieve the text transformation required by the format.
+
+  // TextWithCursor constructs a text-with-cursor object.
+  TextWithCursor = function (text, cursor) {
+    this.text = text || '';
+    this.cursor = cursor || 0;
+  }
+
+  // TextWithCursor.length is a shortcut for accessing the text length.
+  TextWithCursor.prototype.length = function () {
+    return this.text.length;
+  };
+   
+  // TextCursor.read gets one character by default, several if specified.
+  TextWithCursor.prototype.read = function (begin, length) {
+    if (length === undefined) {
+      length = 1;
+    }
+    if (length <= 0) {
+      return;
+    }
+    return this.text.substring(begin, begin + length);
+  };
+
+  // TextWithCursor.insert adds text at the specified insertion point and
+  //  shifts the cursor if needed. The cursor is unchanged if it is at or to
+  //  the left of the insertion point.
+  TextWithCursor.prototype.insert = function (begin, subtext) {
+    this.text = this.text.substring(0, begin) + subtext +
+        this.text.substring(begin);
+    if (this.cursor > begin) {
+      this.cursor += subtext.length;
+    }
+  };
+
+  // TextWithCursor.delete removes one character by default, several if
+  //  specified, then shifts the cursor if needed. The cursor is unchanged
+  //  if it is at or to the left of the deleted characters.
+  TextWithCursor.prototype.delete = function (begin, length) {
+    if (length === undefined) {
+      length = 1;
+    }
+    if (length <= 0) {
+      return;
+    }
+    this.text = this.text.substring(0, begin) +
+        this.text.substring(begin + length);
+    if (this.cursor > begin) {
+      this.cursor -= Math.min(this.cursor - begin, length);
+    }
+  };
+
+
   return {
-    retrospective: retrospective,
     layer: layer,
+    retrospective: retrospective,
     TextWithCursor: TextWithCursor
   };
 })();
