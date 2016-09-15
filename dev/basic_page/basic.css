@@ -18,6 +18,12 @@ h1 {
   margin-bottom: 20px;
 }
 
+input[type='text'] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 input {
   font-family: 'Droid Sans Mono', monospace;
   font-size: 17px;
