@@ -24,7 +24,7 @@ a:hover {
 
 h1 {
   color: #777;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .notes {
@@ -37,7 +37,7 @@ p {
 }
 
 table {
-  margin-top: 5px;
+  margin-top: 20px;
   border-collapse: collapse;
   table-layout: fixed;
   background: #fff;

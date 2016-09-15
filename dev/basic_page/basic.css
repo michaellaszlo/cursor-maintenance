@@ -15,7 +15,11 @@ body {
 
 h1 {
   color: #777;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+}
+
+#introduction {
+  margin-bottom: 15px;
 }
 
 input[type='text'] {
