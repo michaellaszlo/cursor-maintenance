@@ -90,10 +90,14 @@ var CursorMaintenanceComparison = (function () {
     input.onblur = function () {
       classRemove(formatOutputs.before, 'active');
     };
-    // Attach update for events that can change the raw text.
+    // Attach update for events that can change the raw text or cursor.
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input.addEventListener(eventName, update);
     });
+    // To detect input cursor movement in WebKit browsers on iOS, we listen
+    //  to selectionchange events on the document.
+    //  Hat tip: http://stackoverflow.com/questions/23544937/
+    document.addEventListener('selectionchange', update);
   }
 
   // enableScoreButton builds a click handler for a score button that
