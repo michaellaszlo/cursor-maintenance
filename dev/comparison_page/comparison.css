@@ -83,6 +83,7 @@ input {
   top: 9px;
   background: transparent;
   color: transparent;
+  transfor: scale(0);
 }
 
 .output {
