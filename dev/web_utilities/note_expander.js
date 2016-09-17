@@ -22,33 +22,33 @@ var NoteExpander = (function () {
   //   NoteExpander.enableByTagAndClass(document, 'div', 'notes', true);
 
   // makeExpanderAction
-  function makeExpanderAction(wrapper, button, content) {
+  function makeExpanderAction(wrapper, button, contentBox) {
     var fog = document.createElement('div');
     fog.className = 'expander-fog';
     wrapper.appendChild(fog);
     return function () {
       if (wrapper.className.indexOf('expander-collapsed') == -1) {
         wrapper.className += ' expander-collapsed';
-        content.style.height = fog.style.height = button.offsetHeight + 'px';
+        contentBox.style.height = fog.style.height = button.offsetHeight + 'px';
       } else {
         wrapper.className = wrapper.className.replace(
             /\s+expander-collapsed/, '');
-        content.style.height = '';
+        contentBox.style.height = '';
       }
     }
   }
 
   // enable
-  function enable(content, startExpanded) {
+  function enable(contentBox, startExpanded) {
     var wrapper = document.createElement('div'),
         button = document.createElement('div');
     button.className = 'expander-button';
     button.innerHTML = '<span class="expander-icon">&#x22ef;</span>';
-    content.className = 'expander-content';
-    content.parentNode.insertBefore(wrapper, content);
-    wrapper.appendChild(content);
+    contentBox.className = 'expander-content';
+    contentBox.parentNode.insertBefore(wrapper, contentBox);
+    wrapper.appendChild(contentBox);
     wrapper.appendChild(button);
-    button.onclick = makeExpanderAction(wrapper, button, content);
+    button.onclick = makeExpanderAction(wrapper, button, contentBox);
     button.click();
     if (startExpanded) {
       button.click();
