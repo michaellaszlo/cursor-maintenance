@@ -11,10 +11,10 @@ var CursorMaintainer = (function () {
 
 
   //--- Layer approach: A statistical approach that looks at layers of text
-  //  induced by character sets specified for a format. Within each layer of
-  //  the formatted text, we seek the cursor position where the proportion
-  //  of ratio characters to the left is closest to the equivalent proportion
-  //  at the cursor position in the raw text. If several cursor positions are
+  //  induced by the character sets specified for a format. Within each layer
+  //  of formatted text, we seek the position where the ratio of characters
+  //  to the left of the cursor is closest to the equivalent proportion at
+  //  the cursor position in the raw text. If several cursor positions are
   //  equally close, we move to the next layer. If a tie-breaker is needed,
   //  we take either the left or right end of the final range, as configured
   //  for the format. 

@@ -53,14 +53,14 @@ var BasicExample = (function () {
   // load instantiates the cursor-maintaining formatter, attaches event
   //  listeners to the input element, and fills the input element with
   //  initial content.
-  // Note: The maxlength attribute of the input element can influence
-  //  the effect of user input. In the case of a fixed-length input value
+  // Note: The maxlength attribute of the input element may determine the
+  //  outcome of a user action. In the case of a fixed-length input value
   //  like a credit card number, there is a question of what happens when the
   //  input is already at full length and the user inserts a new character.
   //  If maxlength is not set, the text to the left of the new character
   //  is shifted and the final character gets chopped off by the formatter.
-  //  If maxlength is set to the full length, the input element ignores the
-  //  user's attempt to insert one more character.
+  //  If maxlength is set to the required input length, the input element
+  //  ignores the user's attempt to insert one more character.
   function load() {
     ccInput = document.getElementById('ccInput');
     ccMaintainer = CursorMaintainer.layer.augmentFormat(ccFormat, [ /\d/ ]);

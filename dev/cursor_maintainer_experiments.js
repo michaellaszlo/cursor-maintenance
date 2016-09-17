@@ -5,10 +5,10 @@ var CursorMaintainerExperiments = (function () {
 
   // The CursorMaintainerExperiments module defines two plain formatters and
   //  uses them as the basis for a collection of cursor-maintaining formatters
-  //  using various approaches.
-  //  A plain formatter is a function that takes raw text and returns
-  //  formatted text. A cursor-maintaining formatter takes raw text and a raw
-  //  cursor position; it returns formatted text and a new cursor position.
+  //  using various approaches. A plain formatter is a function that takes raw
+  //  text and returns formatted text. A cursor-maintaining formatter takes
+  //  raw text and a cursor position in the raw text; it returns formatted
+  //  text and a new cursor position.
 
   var CM = CursorMaintainer,
       format,         // Plain formatters for demonstration and testing.

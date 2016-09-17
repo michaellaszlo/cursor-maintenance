@@ -1,4 +1,17 @@
 var NoteExpander = (function () {
+  'use strict';
+
+  // The NoteExpander module implements expandable notes. Notes of this kind
+  //  initially appear in a compact state that shows no more than the first
+  //  line of note content. The user must click on a button to expand the
+  //  note, revealing its full content. The next click on the button
+  //  collapses it into its compact state.
+  // This module depends on the style rules in note_expander.css, which must
+  //  be loaded to achieve the collapsed state and the expanding effect.
+  //  It introduces class names that begin with ".expander-". If you foresee
+  //  conflicts with your existing CSS classes, you should choose a unique
+  //  prefix and use it to replace all occurrences of ".expander-" in
+  //  note_expander.js and note_expander.css.
 
   function makeExpanderAction(wrapper, button, content) {
     var fog = document.createElement('div');
