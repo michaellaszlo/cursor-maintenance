@@ -12,7 +12,16 @@ var NoteExpander = (function () {
   //  conflicts with your existing CSS classes, you should choose a unique
   //  prefix and use it to replace all occurrences of ".expander-" in
   //  note_expander.js and note_expander.css.
+  // The easiest way to use NoteExpander is to call enableByTagAndClass.
+  //  For example, to make expandable notes out of all div elements that have
+  //  the class "notes":
+  //   NoteExpander.enableByTagAndClass(document, 'div', 'notes');
+  //  To do this only for the subtree rooted at the element named article:
+  //   NoteExpander.enableByTagAndClass(article, 'div', 'notes');
+  //  To make notes that are initially expanded:
+  //   NoteExpander.enableByTagAndClass(document, 'div', 'notes', true);
 
+  // makeExpanderAction
   function makeExpanderAction(wrapper, button, content) {
     var fog = document.createElement('div');
     fog.className = 'expander-fog';
@@ -29,7 +38,8 @@ var NoteExpander = (function () {
     }
   }
 
-  function enable(content, notCollapsed) {
+  // enable
+  function enable(content, startExpanded) {
     var wrapper = document.createElement('div'),
         button = document.createElement('div');
     button.className = 'expander-button';
@@ -40,19 +50,20 @@ var NoteExpander = (function () {
     wrapper.appendChild(button);
     button.onclick = makeExpanderAction(wrapper, button, content);
     button.click();
-    if (notCollapsed) {
+    if (startExpanded) {
       button.click();
     }
   }
 
-  function enableByTagAndClass(root, tag, name, notCollapsed) {
+  // enableByTagAndClass kkkkkkkkkkkkkkkkk
+  function enableByTagAndClass(root, tag, name, startExpanded) {
     var elements, names, i, j;
     elements = root.getElementsByTagName(tag);
     for (i = 0; i < elements.length; ++i) {
       names = elements[i].className.split(/\s+/);
       for (j = 0; j < names.length; ++j) {
         if (names[j] == name) {
-          enable(elements[i], notCollapsed);
+          enable(elements[i], startExpanded);
         }
       }
     }
