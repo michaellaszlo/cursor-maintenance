@@ -21,7 +21,9 @@ var NoteExpander = (function () {
   //  To make notes that are initially expanded:
   //   NoteExpander.enableByTagAndClass(document, 'div', 'notes', true);
 
-  // makeExpanderAction
+  // makeExpanderAction returns a function that implements the expanding and
+  //  collapsing effects on the contentBox. The button and contentBox are
+  //  expected to be chldren of the wrapper.
   function makeExpanderAction(wrapper, button, contentBox) {
     var fog = document.createElement('div');
     fog.className = 'expander-fog';
@@ -32,13 +34,16 @@ var NoteExpander = (function () {
         contentBox.style.height = fog.style.height = button.offsetHeight + 'px';
       } else {
         wrapper.className = wrapper.className.replace(
-            /\s+expander-collapsed/, '');
+            /\s+expander-collapsed/g, '');
         contentBox.style.height = '';
       }
     }
   }
 
-  // enable
+  // enable builds an expand-collapse button and puts it inside a new wrapper
+  //  div together with the contentBox. The wrapper takes the place of the
+  //  contentBox in the DOM tree. This is done by inserting the wrapper
+  //  before the contentBox, then appending the contentBox to the wrapper.
   function enable(contentBox, startExpanded) {
     var wrapper = document.createElement('div'),
         button = document.createElement('div');
@@ -55,7 +60,8 @@ var NoteExpander = (function () {
     }
   }
 
-  // enableByTagAndClass kkkkkkkkkkkkkkkkk
+  // enableByTagAndClass calls enable for each element of type tag that
+  //  a descendant of root. The startExpanded argument is passed to enable.
   function enableByTagAndClass(root, tag, name, startExpanded) {
     var elements, names, i, j;
     elements = root.getElementsByTagName(tag);
