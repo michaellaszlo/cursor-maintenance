@@ -207,10 +207,16 @@ Now the input field must choose a cursor position. We are facing the
 problem of cursor maintenance.
 
 A problem instance consists of three input values: the raw text, the
-cursor position in the raw text, and the formatted text.
+cursor position in the raw text, and a format.
 
-To solve the problem, we must determine one output value: the cursor
-position in the formatted text.
+The formatter determines the formatted text. Although some
+cursor-maintenance approaches only look at the formatted text
+corresponding to the raw text given in the problem instance, other
+approaches require full access to the formatter. We will see examples
+of both types of approaches.
+
+To solve the problem instance, we must determine one output value:
+the cursor position in the formatted text.
 
 We'll say *raw cursor position* to mean the position where the user
 has left the cursor in the raw text. The position where the input field
