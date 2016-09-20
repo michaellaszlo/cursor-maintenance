@@ -209,6 +209,12 @@ problem of cursor maintenance.
 A problem instance consists of three input values: the raw text, the
 cursor position in the raw text, and a format.
 
+We mentioned earlier that a format is a function on strings. In principle
+we could use any mathematical notation to describe such a function. In
+practice we work with a formatter, which is a computation that implements
+the format. It is equivalent to a format because it defines a function
+on strings by means of a Turning machine.
+
 The formatter determines the formatted text. Although some
 cursor-maintenance approaches only look at the formatted text
 corresponding to the raw text given in the problem instance, other
