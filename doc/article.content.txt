@@ -673,13 +673,20 @@ caused by each insertion and deletion.
 
 ## Retrospective approach with edit distance
 
-So far we have attempted to do cursor maintenance by peering into the
-inner workings of formats. Let's see what we can accomplish by restricting
-our attention to the three input values of the cursor-maintenance problem:
+So far we have attempted to do cursor maintenance by analyzing and
+reimplementing the formatter. Let's see what we can accomplish by
+narrowing our attention to the single instance of formatted text that
+results from formatting the raw text. We disregard the general workings
+of the formatter and only consider these three values:
 
 - raw text
 - raw cursor position
 - formatted text
+
+This constitutes a formatting instance. We can describe a formatting
+instance with a compact notation like this:
+
+  12,5^900  ->  125,900
 
 To compute a new cursor position, let's try to answer this question:
 
