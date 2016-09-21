@@ -212,22 +212,21 @@ position in the raw text, and a formatter.
 To solve the problem instance, we must determine one output value:
 a cursor position in the formatted text.
 
-Note that the third input value is a formatter&mdash;a practical
-implementation of a function on strings. The formatter takes raw text
-and returns formatted text. Although some cursor-maintenance approaches
-only take into consideration the formatted text corresponding to the
-raw text given in the problem instance, other approaches make use of
-the entire formatter. We will see examples of both types of approaches.
+Note that the third input value is a formatter&mdash;a computational
+process that transforms raw text into formatted text. Although some
+cursor-maintenance approaches only take into consideration the formatted
+text corresponding to the raw text given in the problem instance, other
+approaches make use of the entire formatter. We will see examples of
+both types of approaches.
 
 We'll say *raw cursor position* to mean the position where the user
-has left the cursor in the raw text. The position where the input field
-places the cursor in the formatted text is the *new cursor position*.
-
-Note that the raw text and raw cursor position are the result of user
-actions. The formatted text is the result of applying a format that was
-specified for the input field. The new cursor position is not an automatic
-by-product of the format, but the outcome of some computational process
-that we devise to handle cursor maintenance for the format.
+has left the cursor in the raw text. This is one of the input values
+in a problem instance. Our answer to a problem instance is the *new
+cursor position*&mdash;this is where we place the cursor in the formatted
+text. We are calling it the new cursor position, not the formatted cursor
+position, because we don't want to imply that it is a by-product of text
+formatting. The formatter knows nothing about the cursor position. Indeed,
+this is the crux of the problem.
 
 In the preceding example, the problem instance is the following:
 
@@ -235,13 +234,13 @@ In the preceding example, the problem instance is the following:
 
 - raw cursor position: 4
 
-- formatted text: `125,900`
+- formatter: a function that transforms the raw text into `125,900`
 
-If the formatted text is identical to the raw text, the new cursor
-position must be the same as the raw cursor position. In the remaining
-cases, there is no definitive way to decide whether the problem has
-been solved correctly. This is a fuzzy problem. Our goal is to minimize
-user surprise.
+In general, if the formatted text is identical to the raw text, the new
+cursor position should be the same as the raw cursor position. In all
+remaining cases, such as the one shown here, there is no definitive way
+to decide whether the problem has been solved correctly. This is a fuzzy
+problem. Our goal is to minimize user surprise.
 
 Equivalently, we aim to maximize the odds of meeting the user's
 expectations. Where would the user expect to see the cursor after the
