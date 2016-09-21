@@ -206,23 +206,18 @@ text in the input field.
 Now the input field must choose a cursor position. We are facing the
 problem of cursor maintenance.
 
-A problem instance consists of three input values: the raw text, the
-cursor position in the raw text, and a format.
-
-We mentioned earlier that a format is a function on strings. In principle
-we could use any mathematical notation to describe such a function. In
-practice we work with a formatter, which is a computation that implements
-the format. It is equivalent to a format because it defines a function
-on strings by means of a Turning machine.
-
-The formatter determines the formatted text. Although some
-cursor-maintenance approaches only look at the formatted text
-corresponding to the raw text given in the problem instance, other
-approaches require full access to the formatter. We will see examples
-of both types of approaches.
+A problem instance consists of three input values: raw text, a cursor
+position in the raw text, and a formatter.
 
 To solve the problem instance, we must determine one output value:
-the cursor position in the formatted text.
+a cursor position in the formatted text.
+
+Note that the third input value is a formatter&mdash;a practical
+implementation of a function on strings. The formatter takes raw text
+and returns formatted text. Although some cursor-maintenance approaches
+only take into consideration the formatted text corresponding to the
+raw text given in the problem instance, other approaches make use of
+the entire formatter. We will see examples of both types of approaches.
 
 We'll say *raw cursor position* to mean the position where the user
 has left the cursor in the raw text. The position where the input field
