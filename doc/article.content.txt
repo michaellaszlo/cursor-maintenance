@@ -265,7 +265,7 @@ we want to make a similar decision each time.
 
 ## Real-time versus on-demand formatting
 
-Althought formatting the content of the input field in real time after
+Although formatting the content of the input field in real time after
 every keystroke may seem aesthetically pleasing, it can have unintended
 effects. With some formats, real-time formatting makes the input field
 unusable.
@@ -345,26 +345,28 @@ function trimify(s) {          // s is an arbitrary string.
 
 ## Testing methodology
 
-Some cursor-maintenance involve rewriting your formats. To verify that
-the rewritten version of a format performs the same text transformation
-as the original version, I ran automated tests on the command line. The
+Some cursor-maintenance involve reimplementing the formatter. To verify
+that the reimplemented formatter performs the same text transformation as
+the original formatter, I ran automated tests from a command line. The
 [batch tester]() is available in a [source repository]() together with
 my [implementations of cursor maintenance]() and other code that I will
 mention in this article.
 
 In addition to verifying the text transformation, the automated
 tests helped me to assess the cursor positions computed by various
-strategies. Each case in the test suite contains four values,
-corresponding to the three inputs and one output of the cursor-maintenance
-problem.
+strategies. Each case in the test suite contains four values:
+
+- raw text
+- raw cursor position
+- formatted text
+- a new cursor position
 
 Here is a case in the `trimify` test suite:
 
   ('  whirled    peas  now  ', 11, 'whirled peas now ', 8)
 
-The first three values of the tuple constitute a problem instance. The
-fourth value is a model answer. In this instance, the cursor is initially
-at position 11:
+This describes a situation in which the cursor is initially at position
+11:
 
   `  whirled  ^  peas  now  `
 
@@ -372,14 +374,13 @@ After `trimify`, the cursor moves to position 8:
 
   `whirled ^peas now `
 
-That is the correct answer according to this test suite.
+That is the answer expected by this test case. Is it the optimal answer?
 
-Is it the optimal answer? Due to the fuzzy nature of the problem,
-it's hard to say. What we can say confidently is that if the cursor
+It's hard to say. What we can say confidently is that if the cursor
 is surrounded by spaces before `trimify`, the cursor should end up
 to the immediate left or right of the single space that remains after
-`trimify`. In my test suite, it's on the right. Here it's on the left,
-in position 7:
+`trimify`. In the test case above, it's on the right. This is what it
+would look like on the left, in position 7:
 
   `whirled^ peas now `
 
