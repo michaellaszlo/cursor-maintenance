@@ -1,15 +1,12 @@
 # Maintaining cursor position in same-field formatting
 
-This package supports several approaches to cursor maintenance, which
-arises in the following scenario:
+Cursor maintenance is a problem that occurs when you build an input
+field that allows the user to edit text with the help of a cursor, and
+also formats the text after user editing.
 
-- the user controls a cursor in an input field
-- the user edits the text
-- the text gets formatted by an automatic process
-- the input field is overwritten with the formatted text
-
-Where do you put the cursor in the formatted text? That is the problem
-of cursor maintenance.
+After the text has been formatted, where do you put the cursor? That
+is the problem of cursor maintenance. This package implements several
+solutions that vary in accuracy and ease of use.
 
 
 # Format-independent cursor maintenance
