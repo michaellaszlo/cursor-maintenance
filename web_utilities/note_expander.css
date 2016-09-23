@@ -1,0 +1,63 @@
+.expander-collapsed {
+  position: relative;
+}
+
+.expander-button, .expander-content {
+  display: inline-block;
+  height: 100%;
+}
+
+.expander-button {
+  float: left;
+  cursor: pointer;
+  width: 10%;
+  max-width: 30px;
+  padding: 3px 0;
+  text-align: center;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  background: #e4e4e4;
+  transition: background 0.25s ease-in-out;
+}
+.expander-collapsed .expander-button {
+  background: #eee;
+}
+
+.expander-icon {
+  display: inline-block;
+  transform: rotate(+90deg);
+  transition: transform 0.25s ease-in-out;
+}
+.expander-collapsed .expander-icon {
+  transform: rotate(0);
+}
+
+.expander-content {
+  width: 90%;
+  border-radius: 5px;
+  border-top-left-radius: 0;
+  background: #f4f4f4;
+  transition-property: background, color;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
+  color: #444;
+  overflow: hidden;
+}
+.expander-collapsed .expander-content {
+  background: transparent;
+  color: #999;
+}
+
+.expander-fog {
+  pointer-events: none;
+  display: none;
+  position: absolute;
+  left: 30px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), white 50%);
+}
+.expander-collapsed .expander-fog {
+  display: block;
+}

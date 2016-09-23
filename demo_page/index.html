@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet"
+ href="https://fonts.googleapis.com/css?family=Roboto:400,700|Droid+Sans+Mono">
+<link rel="stylesheet" href="../web_utilities/note_expander.css">
+<link rel="stylesheet" href="demo.css">
+
+<script src="../cursor_maintainer.js"></script>
+<script src="../cursor_maintainer_experiments.js"></script>
+<script src="../web_utilities/dom_helpers.js"></script>
+<script src="../web_utilities/note_expander.js"></script>
+<script src="demo.js"></script>
+
+<title> Cursor maintenance demos </title>
+
+</head>
+<body>
+
+<div id="wrapper">
+
+
+<h1> Cursor-maintenance demos </h1>
+
+<div class="notes">
+
+<p> This page demonstrates three approaches to maintaining cursor position
+in a text input field that formats its contents in real time. Whenever
+the text is formatted, the cursor position must be reconsidered. The
+goal of cursor maintenance is to place the cursor in a position that
+minimizes user surprise.
+
+<p> The problem of cursor maintenance is discussed in an
+<a href="">article</a>. Source code is available in a <a
+href="">repository</a>.
+
+</div>
+
+
+
+<h2> Meta approach </h2>
+
+<div class="notes">
+
+<p> In the meta approach, we reimplement a format by applying elementary
+operations to a text-with-cursor object. The object moves the cursor in
+a predictable manner for each elementary operation.
+
+<p> Below we demonstrate the meta approach with two formats,
+<em>commatize</em> and <em>trimify</em>.
+
+<p> Commatize is defined for text consisting of digits and commas. Input
+strings containing other characters are rejected by a validation function
+that runs before the formatter. Commatize displays a non-negative integer
+with commas separating groups of three digits.
+
+<p> Trimify is applicable to any text. The input is not validated before
+formatting. Trimify removes whitespace from the beginning of the text,
+then condenses all other whitespace sequences to one space each.
+
+</div>
+
+
+<h3> commatize </h3>
+
+<input type="text" id="commatizeInput" spellcheck="false">
+
+
+<h3> trimify </h3>
+
+<textarea id="trimifyInput" spellcheck="false" class="text"></textarea>
+
+
+
+<h2> Retrospective approach </h2>
+
+<div class="notes">
+
+<p> In retrospective cursor maintenance, we calculate a new cursor
+position by comparing the formatted text to the raw text and cursor
+position. We do not reimplement the format or examine what it does in
+general. We only consider the current formatting instance.
+
+<p> You can define a format to be used in the following input field by
+inserting a JavaScript function into the code area below. The function
+must take a string argument and return a string.
+
+<p> The retrospective scoring formula used here is called <em>frequency
+ratios</em>. It computes the ratios of individual character frequencies
+to the left and right of the cursor in the original text, then tries to
+achieve similar ratios in the formatted text using a least-squares fit.
+
+</div>
+
+
+<h3> user-defined </h3>
+
+<textarea id="retrospectiveInput" spellcheck="false" class="text"></textarea>
+
+<textarea id="retrospectiveCode" spellcheck="false" class="code"></textarea>
+
+
+
+<h2> Layer approach </h2>
+
+<div class="notes">
+
+<p> In the layer approach, we define a ranked sequence of character sets
+for a format. We extract a text layer by scanning the text for members of
+a character set. At each text position, we calculate the ratio of layer
+characters to the left of the position divided by the total number of
+layer characters.
+
+<p> Initially we consider the first layer and try to find a position
+in the formatted text where the ratio is as close as possible to that
+of the cursor in the raw text. If several positions have equally close
+ratios, we shrink the range of candidate positions and move on to the
+next layer. If all layers are exhausted, we choose either the leftmost
+or rightmost position in the final candidate range. The choice of left
+or right is a fixed value in the layer configuration.
+
+<p> As with the retrospective approach, you can define your own format
+in the code area below. You can modify the character sets and the
+tie-breaking direction in the fields between the input area and the code
+area. Each character set is defined by a JavaScript regular expression.
+
+</div>
+
+
+<h3> user-defined </h3>
+
+<textarea id="layerInput" spellcheck="false" class="text"></textarea>
+
+<div class="layerLabel">layer configuration:</div>
+<div id="testerBox"></div>
+
+<div id="tieBreakerBox">
+  tie-breaker:
+  <input type="radio" name="tieBreaker" checked> left
+  <input type="radio" name="tieBreaker"> right
+</div>
+
+<textarea id="layerCode" spellcheck="false" class="code"></textarea>
+
+
+
+</div><!--end wrapper -->
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet"
+ href="https://fonts.googleapis.com/css?family=Roboto:400,700|Droid+Sans+Mono">
+<link rel="stylesheet" href="basic.css?a">
+
+<script src="../cursor_maintainer.js"></script>
+<script src="basic.js"></script>
+
+<title> Basic example of cursor maintenance </title>
+
+</head>
+<body>
+<div id="wrapper">
+
+
+<h1> Basic example of cursor maintenance </h1>
+
+
+<div id="introduction">
+
+<p> The following input element expects the user to enter a credit card
+number. After every keystroke, it calls a formatter that renders the
+input in four-digit groups separated by spaces. Cursor maintenance is done
+with the layer approach. It takes one call to build a cursor-maintaining
+formatter based on the existing formatter. See the source code for
+details. </p>
+
+</div>
+
+
+<p>
+  credit card number:
+  <input type="text" id="ccInput" size="20" maxlength="19">
+</p>
+
+
+</div><!--end wrapper -->
+</body>
+</html>
