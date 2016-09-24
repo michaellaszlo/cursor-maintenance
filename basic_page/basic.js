@@ -57,8 +57,8 @@ var BasicExample = (function () {
   //  outcome of a user action. In the case of a fixed-length input value
   //  like a credit card number, there is a question of what happens when the
   //  input is already at full length and the user inserts a new character.
-  //  If maxlength is not set, the text to the left of the new character
-  //  is shifted and the final character gets chopped off by the formatter.
+  //  If maxlength is not set, the text to the right of the new character
+  //  is shifted right and the final character is truncated by the formatter.
   //  If maxlength is set to the required input length, the input element
   //  ignores the user's attempt to insert one more character.
   function load() {

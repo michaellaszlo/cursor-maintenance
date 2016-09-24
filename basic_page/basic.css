@@ -28,6 +28,20 @@ input[type='text'] {
   appearance: none;
 }
 
+.code {
+  font-family: 'Droid Sans Mono', monospace;
+  font-size: 15px;
+}
+
+a {
+  text-decoration: none;
+  color: #1e74b1;
+}
+a:hover {
+  color: #08a203;
+  border-bottom: 1px solid;
+}
+
 input {
   font-family: 'Droid Sans Mono', monospace;
   font-size: 17px;
