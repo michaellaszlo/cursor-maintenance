@@ -1,21 +1,39 @@
-# Maintaining cursor position in same-field formatting
+# Maintaining cursor position in formatted input fields
 
-Cursor maintenance is a problem that arises when you build a
-self-formatting input field. You let the user move a cursor around the
-input field and edit the text. After some user editing, the text is
-formatted by the input field. Now where should you put the cursor?
+Cursor maintenance is a problem that arises when you build a formatted
+input field that lets the user freely move a cursor and edit the
+text. After some user editing, the text is formatted by the input
+field. Now where should the cursor go?
 
-This project implements several approaches to cursor maintenance. I have
-made a basic page demonstrating one of the simplest approaches. It looks
-like this:
+I have written an article that discusses the problem of cursor maintenance
+in detail. This repository contains implementations of several approaches
+that vary in accuracy and ease of implementation.
+
+
+## Basic demo
+
+The layer approach to cursor maintenance offers a reasonable balance of
+accuracy and ease of implementation. I have made a basic demonstration
+of the layer approach in a page that looks like this:
 
 ![Basic implementation of cursor
-maintenance](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/basic.page.png)
+maintenance](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/basic_demo.png)
 
-I also have a more elaborate demonstration page:
+You may wish to try out the basic demo on my website or see its source
+code in this repository.
+
+
+## Configurable demos
+
+I have also made a more elaborate page with user-configurable
+demonstrations of several cursor-maintenance approaches. It looks
+like this:
 
 ![Interactive implementation of several cursor-maintenance
-approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/demo.page.png)
+approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/configurable_demos.png)
+
+The configurable demo page is hosted live on my website and its source
+code is available in this repository.
 
 
 # Format-independent cursor maintenance
