@@ -5,12 +5,12 @@ var DOMHelpers = (function () {
   //   build and manipulate DOM elements.
 
   // make is a DOM element factory.
-  // tag: The name of a DOM element.
+  // tag: Names a type of DOM element.
   // options: An object containing DOM attribute-value pairs. These values
-  //  are assigned directly to the new object. For example, if you set
-  //  options.className to 'button active', the className of the new object
-  //  is set to 'button active'. There is one special key, 'parent': if you
-  //  use it, the new object is appended to options.parent as a child element.
+  //  are assigned to the newly created object. For example, if the value of
+  //  options.className is 'button active', the className of the new object
+  //  is set to 'button active'. There is one special key, 'parent': If you
+  //  use it, the new object is appended as a child element of options.parent.
   function make(tag, options) {
     var element = document.createElement(tag);
     if (typeof options !== 'object') {

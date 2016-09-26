@@ -139,7 +139,7 @@ var CursorMaintainer = (function () {
   retrospective = { costFunctions: costFunctions };
 
   // levenshtein implements the well-known Levenshtein distance. It is
-  //  called by the costFunctions.splitLevenshtein.
+  //  called by costFunctions.splitLevenshtein.
   function levenshtein(s, t) {
     var n = s.length,
         m = t.length,
