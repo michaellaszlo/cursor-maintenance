@@ -1,12 +1,21 @@
 # Maintaining cursor position in same-field formatting
 
-Cursor maintenance is a problem that occurs when you build an input
-field that allows the user to edit text with the help of a cursor, and
-also formats the text after user editing.
+Cursor maintenance is a problem that arises when you build a
+self-formatting input field. You let the user move a cursor around the
+input field and edit the text. After some user editing, the text is
+formatted by the input field. Now where should you put the cursor?
 
-After the text has been formatted, where do you put the cursor? That
-is the problem of cursor maintenance. This package implements several
-solutions that vary in accuracy and ease of use.
+This project implements several approaches to cursor maintenance. I have
+made a basic page demonstrating one of the simplest approaches. It looks
+like this:
+
+![Basic implementation of cursor
+maintenance](screenshots/screenshot.basic.page.png)
+
+I also have a more elaborate demonstration page:
+
+![Interactive implementation of several cursor-maintenance
+approaches](screenshots/screenshot.demo.page.png)
 
 
 # Format-independent cursor maintenance
