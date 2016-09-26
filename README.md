@@ -10,12 +10,12 @@ made a basic page demonstrating one of the simplest approaches. It looks
 like this:
 
 ![Basic implementation of cursor
-maintenance](screenshots/screenshot.basic.page.png)
+maintenance](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/basic.page.png)
 
 I also have a more elaborate demonstration page:
 
 ![Interactive implementation of several cursor-maintenance
-approaches](screenshots/screenshot.demo.page.png)
+approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/demo.page.png)
 
 
 # Format-independent cursor maintenance
