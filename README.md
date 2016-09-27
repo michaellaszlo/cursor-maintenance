@@ -6,8 +6,8 @@ text. After some user editing, the text is formatted by the input
 field. Now where should the cursor go?
 
 I have written an article that discusses the problem of cursor maintenance
-in detail. This repository contains implementations of several approaches
-that vary in accuracy and ease of implementation.
+in detail. This repository contains code for several approaches that
+vary in accuracy and ease of implementation.
 
 
 ## Basic demo
@@ -36,7 +36,19 @@ The configurable demo page is hosted live on my website and its source
 code is available in this repository.
 
 
-# Format-independent cursor maintenance
+## Choosing an approach
+
+- circumvent?
+- ad hoc?
+- retrospective
+- layer
+- meta
+
+
+## General usage model
+
+
+## Using the retrospective approach
 
 Load `cursor_maintainer.js` and make a cursor maintainer:
 
@@ -59,4 +71,11 @@ For example:
 ```
 var newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
+
+
+## Using the layer approach
+
+
+## Using the meta approach
+
 
