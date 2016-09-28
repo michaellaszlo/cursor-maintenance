@@ -1,4 +1,4 @@
-var BasicExample = (function () {
+var BasicCursorMaintenanceDemo = (function () {
   'use strict';
 
   // requires: cursor_maintainer.js
@@ -76,4 +76,4 @@ var BasicExample = (function () {
   };
 })();
 
-onload = BasicExample.load;
+onload = BasicCursorMaintenanceDemo.load;

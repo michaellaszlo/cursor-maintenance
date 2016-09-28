@@ -1,4 +1,4 @@
-var CursorMaintenanceDemo = (function () {
+var ExtendedCursorMaintenanceDemo = (function () {
   'use strict';
 
   // requires: cursor_maintainer.js
@@ -387,4 +387,4 @@ var CursorMaintenanceDemo = (function () {
   };
 })();
 
-onload = CursorMaintenanceDemo.load;
+onload = ExtendedCursorMaintenanceDemo.load;

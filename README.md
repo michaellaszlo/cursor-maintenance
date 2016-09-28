@@ -1,19 +1,20 @@
-# Maintaining cursor position in formatted input fields
+# Maintaining cursor position in a formatted input field
 
-There's a problem that comes up when you're building a formatted input
-field that lets the user freely move a cursor and edit the text. After
-some user editing, the text is formatted by the input field. Now where
-should the cursor go? That is the problem of cursor maintenance.
+A thorny problem comes up when you're building a formatted input field
+that lets the user freely move a cursor and edit the text. After some
+user editing, the text is formatted by the input field. Now where should
+the cursor go? That is the problem of cursor maintenance.
 
-I have written a detailed article about cursor maintenance. It's a
-complicated problem with fuzzy criteria and many possible approaches,
-none of them perfect. There is always a trade-off between accuracy and
-ease of implementation. In some cases, depending on the format and how
-you want the user to interact with the input field, there is no good
-solution. Sometimes it is possible to achieve perfect cursor maintenance
-if you go about it the right way.
+I have written a detailed article about cursor maintenance. It's
+a complicated problem with fuzzy criteria and many possible
+approaches. There is no silver bullet. Each approach strikes a compromise
+between accuracy and ease of implementation. Sometimes, depending on the
+required text format and how you want the user to interact with the input
+field, there is no good solution. Then again, sometimes it is possible
+to achieve perfect cursor maintenance if you go about it the right way.
 
-This repository contains framework code for three approaches:
+This repository provides framework code and model implementations for
+three approaches:
 
 Name of approach  |  Ease of implementation  |  Accuracy
 ---|---|---
@@ -35,40 +36,22 @@ You may wish to try out the [basic demo](http://michaellaszlo.com/maintaining-cu
 on my website or see its [source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/basic_demo) in this repository.
 
 
-## Configurable demos
+## Extended demos
 
 I have also made a more elaborate page demonstrating the meta,
 retrospective, and layer approaches. The retrospective and layer demos
-can be configured with a formatting function of your choice, and the
-layer demo allows you to specify the layers.
+can be configured with a formatting function of your choice. The layer
+demo allows you to specify the layers.
 
 
 [![Interactive implementation of several cursor-maintenance
-approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/configurable_demos.png)](http://michaellaszlo.com/maintaining-cursor-position/configurable-demos/)
+approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/extended_demos.png)](http://michaellaszlo.com/maintaining-cursor-position/extended-demos/)
 
-The [configurable demo](http://michaellaszlo.com/maintaining-cursor-position/configurable-demos/) page is hosted live on my website and the
-[source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/configurable_demos) is available in this repository.
-
-
-## Choosing an approach
-
-Cursor maintenance is a complicated problem with fuzzy criteria and many
-possible approaches. There is no silver bullet.
-
-I recommend that you weigh the benefits of the following five approaches,
-the last three of which are supported by this code repository:
-
-- *Circumvention*: Avoid cursor maintenance entirely by displaying the
-formatted text separately from the input field.
-
-- circumvent?
-- ad hoc?
-- retrospective
-- layer
-- meta
+The [extended demo](http://michaellaszlo.com/maintaining-cursor-position/extended-demos/) page is hosted live on my website and the
+[source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/extended_demos) is available in this repository.
 
 
-## General usage model
+## General implementation model
 
 
 ## Using the retrospective approach
