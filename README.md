@@ -38,6 +38,15 @@ The [configurable demo](http://michaellaszlo.com/maintaining-cursor-position/con
 
 ## Choosing an approach
 
+Cursor maintenance is a complicated problem with fuzzy criteria and many
+possible approaches. There is no silver bullet.
+
+I recommend that you weigh the benefits of the following five approaches,
+the last three of which are supported by this code repository:
+
+- *Circumvention*: Avoid cursor maintenance entirely by displaying the
+formatted text separately from the input field.
+
 - circumvent?
 - ad hoc?
 - retrospective
