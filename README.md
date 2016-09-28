@@ -16,11 +16,11 @@ The layer approach to cursor maintenance offers a reasonable balance of
 accuracy and ease of implementation. I have made a basic demonstration
 of the layer approach in a page that looks like this:
 
-![Basic implementation of cursor
-maintenance](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/basic_demo.png)
+[![Basic implementation of cursor
+maintenance](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/basic_demo.png)](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/)
 
-You may wish to try out the basic demo on my website or see its source
-code in this repository.
+You may wish to try out the [basic demo](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/)
+on my website or see its [source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/basic_demo) in this repository.
 
 
 ## Configurable demos
@@ -29,11 +29,11 @@ I have also made a more elaborate page with user-configurable
 demonstrations of several cursor-maintenance approaches. It looks
 like this:
 
-![Interactive implementation of several cursor-maintenance
-approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/configurable_demos.png)
+[![Interactive implementation of several cursor-maintenance
+approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/configurable_demos.png)](http://michaellaszlo.com/maintaining-cursor-position/configurable-demos/)
 
-The configurable demo page is hosted live on my website and its source
-code is available in this repository.
+The [configurable demo](http://michaellaszlo.com/maintaining-cursor-position/configurable-demos/) page is hosted live on my website and the
+[source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/configurable_demos) is available in this repository.
 
 
 ## Choosing an approach
