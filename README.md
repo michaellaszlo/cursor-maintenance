@@ -56,13 +56,28 @@ The [extended demo](http://michaellaszlo.com/maintaining-cursor-position/extende
 Cursor maintenance is the third step in this sequence:
 
 1. The user edits the text in the input field with the help of a cursor.
-2. The user's raw text is replaced with formatted text.
-3. The cursor is repositioned in the input field.
+1. The user's raw text is replaced with formatted text.
+1. The cursor is repositioned in the input field.
 
 You provide the formatter, which is a function that takes raw text and
 returns formatted text. You decide when the text should be formatted:
 perhaps after every keystroke, perhaps after a special user action,
-perhaps once a second.
+perhaps at regular intervals.
+
+If the formatted text is identical to the raw text, there is nothing
+further to do. The cursor should stay where it is.
+
+Otherwise, you want to compute a new cursor position. To do so, you pass
+three values to a cursor-maintenance function:
+
+- the user's _raw text_
+- the user's _cursor position_ in the raw text
+- the _formatted text_ obtained from your raw text
+
+You get back one value:
+
+- a _new cursor position_
+
 
 
 
@@ -74,17 +89,7 @@ Load `cursor_maintainer.js` and make a cursor maintainer:
 var maintainer = CursorMaintainer.retrospective.makeMaintainer();
 ```
 
-You pass three input values to the maintainer:
-
-- the user's *raw text*
-- the user's *cursor position* in the raw text
-- the *formatted text* obtained from your raw text
-
-You get back one value:
-
-- a *new cursor position*
-
-For example:
+Compute a new cursor position:
 
 ```
 var newPosition = maintainer('  2400.015 ', 2, '2,400.02');
