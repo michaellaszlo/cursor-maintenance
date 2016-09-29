@@ -53,6 +53,12 @@ The [extended demo](http://michaellaszlo.com/maintaining-cursor-position/extende
 
 ## General implementation model
 
+Cursor maintenance involves the following user flow:
+
+- The user edits the text in the input field with the help of a cursor.
+- The user's raw text is replaced with formatted text.
+- The cursor is repositioned in the input field.
+
 
 
 ## Implementing the retrospective approach
