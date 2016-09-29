@@ -132,7 +132,7 @@ var BatchTestCursorMaintenance = (function () {
   };
 
   // TestRunner.display iterates over the test cases, printing the raw text
-  //  and expected text of each one. By default the cursor positions are also
+  //  and expected text for each one. By default the cursor positions are also
   //  printed. If the optional argument ignoreCursor is truthy, the cursor
   //  positions are not printed.
   TestRunner.prototype.display = function (ignoreCursor) {

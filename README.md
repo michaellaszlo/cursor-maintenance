@@ -2,23 +2,23 @@
 
 A thorny problem comes up when you're building a formatted input field
 that lets the user freely move a cursor and edit the text. After some
-user editing, the text is formatted by the input field. Now where should
-the cursor go? That is the problem of cursor maintenance.
+user editing, the text is reformatted by the input field. Now where
+should the cursor go? That is the problem of cursor maintenance.
 
 I have written a detailed article about cursor maintenance. It's
 a complicated problem with fuzzy criteria and many possible
-approaches. There is no silver bullet. Each approach strikes a compromise
-between accuracy and ease of implementation. Sometimes, depending on the
-required text format and how you want the user to interact with the input
+approaches. There is no silver bullet. Each approach offers a compromise
+between reliability and ease of implementation. Sometimes, depending
+on the text format and how you want the user to interact with the input
 field, there is no good solution. Then again, sometimes it is possible
-to achieve perfect cursor maintenance if you go about it the right way.
+to achieve accurate cursor maintenance with the right approach.
 
-This repository provides framework code and model implementations for
-three approaches:
+This repository provides framework code and implementation examples for
+three approaches. I characterize them as follows:
 
 Name of approach  |  Ease of implementation  |  Accuracy
 ---|---|---
-Retrospective  |  Easy  |  Susceptible to bad cursor positioning
+Retrospective  |  Easy  |  Susceptible to faulty cursor positioning
 Layer  |  Medium  |  Can be made completely accurate for some formats
 Meta  |  Hard  |  Can be made completely accurate for many formats
 
@@ -45,16 +45,17 @@ demo allows you to specify the layers.
 
 
 [![Interactive implementation of several cursor-maintenance
-approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/extended_demos.png)](http://michaellaszlo.com/maintaining-cursor-position/extended-demos/)
+approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/extended_demo.png)](http://michaellaszlo.com/maintaining-cursor-position/extended-demo/)
 
-The [extended demo](http://michaellaszlo.com/maintaining-cursor-position/extended-demos/) page is hosted live on my website and the
-[source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/extended_demos) is available in this repository.
+The [extended demo](http://michaellaszlo.com/maintaining-cursor-position/extended-demo/) page is hosted live on my website and the
+[source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/extended_demo) is available in this repository.
 
 
 ## General implementation model
 
 
-## Using the retrospective approach
+
+## Implementing the retrospective approach
 
 Load `cursor_maintainer.js` and make a cursor maintainer:
 
@@ -79,9 +80,9 @@ var newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
 
 
-## Using the layer approach
+## Implementing the layer approach
 
 
-## Using the meta approach
+## Implementing the meta approach
 
 
