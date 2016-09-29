@@ -53,11 +53,16 @@ The [extended demo](http://michaellaszlo.com/maintaining-cursor-position/extende
 
 ## General implementation model
 
-Cursor maintenance involves the following user flow:
+Cursor maintenance is the third step in this sequence:
 
-- The user edits the text in the input field with the help of a cursor.
-- The user's raw text is replaced with formatted text.
-- The cursor is repositioned in the input field.
+1. The user edits the text in the input field with the help of a cursor.
+2. The user's raw text is replaced with formatted text.
+3. The cursor is repositioned in the input field.
+
+You provide the formatter, which is a function that takes raw text and
+returns formatted text. You decide when the text should be formatted:
+perhaps after every keystroke, perhaps after a special user action,
+perhaps once a second.
 
 
 
