@@ -72,24 +72,36 @@ perhaps at regular intervals.
 If the formatted text is identical to the raw text, there is nothing
 further to do. The cursor should stay where it is.
 
-Otherwise, you want to compute a new cursor position. You can do this
-with one of the following:
+Otherwise, you want to compute a new cursor position. You can do so
+with a cursor maintainer or with a cursor-maintaining formatter.
 
-- a format-oblivious cursor-maintenance function
-- a cursor-maintaining formatter
 
-If you have a format-oblivious cursor-maintenance function, you give it
-the following three values:
+### Using a cursor maintainer
+
+A cursor maintainer doesn't know about your format in general. You call
+it with three values:
 
 - the user's **raw text**
 - the user's **cursor position** in the raw text
-- the **formatted text** obtained from your raw text
+- the **formatted text** that you computed from the raw text
 
 You get back one value:
 
-- a **new cursor position**
+- a **new cursor position** in the formatted text
 
 
+### Using a cursor-maintaining formatter
+
+A cursor-maintaining formatter is built for a specific format. You call
+it with two values:
+
+- the user's **raw text**
+- the user's **cursor position** in the raw text
+
+You get back two values:
+
+- the **formatted text** corresponding to the raw text
+- a **new cursor position** in the formatted text
 
 
 ## Implementing the retrospective approach
