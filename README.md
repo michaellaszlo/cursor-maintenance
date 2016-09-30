@@ -1,23 +1,21 @@
 # Cursor maintenance
 
-## Can you maintain the cursor in a formatted input field?
+## Maintaining cursor position in a formatted input field
 
-A thorny problem comes up when you're building a formatted input field
+A vexing problem comes up when you're building a formatted input field
 that lets the user freely move a cursor and edit the text. After some
 user editing, the text is reformatted by the input field. Now where
 should the cursor go? That is the problem of cursor maintenance.
 
-I have posted a detailed discussion of cursor maintenance on
-my website. It's a complicated problem with fuzzy criteria and many
-possible approaches. There is no silver bullet. Each approach offers a
-compromise between reliability and ease of implementation. The choice
-of approach depends on the text format and how you want the user to
-interact with the input field. Sometimes there is no reliable way to
-maintain the cursor. In such cases, you would do best to circumvent the
+I have posted a detailed discussion of cursor maintenance on my
+website. It's a complicated problem with fuzzy criteria. You can approach
+it in several ways depending on the text format and how you want the
+user to interact with the input field. Sometimes there is no reliable
+way to maintain the cursor. In such cases, it is best to circumvent the
 problem by removing the cursor after reformatting or by displaying the
 formatted text separately from the input text. Then again, sometimes it
-is possible to achieve reliable cursor maintenance. If you can do so,
-the result is a very pleasing user experience.
+is possible to achieve reliable cursor maintenance. If so, the result
+is a very pleasing user experience.
 
 This repository provides framework code and implementation examples for
 three approaches to cursor maintenance. I characterize them as follows:
@@ -25,8 +23,8 @@ three approaches to cursor maintenance. I characterize them as follows:
 Name of approach  |  Ease of implementation  |  Reliability
 ---|---|---
 Retrospective  |  Easy  |  Susceptible to faulty cursor positioning
-Layer  |  Medium  |  Can be made completely accurate for some formats
-Meta  |  Hard  |  Can be made completely accurate for many formats
+Layer  |  Medium  |  Can be made accurate for some formats
+Meta  |  Hard  |  Can be made accurate for many formats
 
 
 ## Basic demo
@@ -64,7 +62,7 @@ Cursor maintenance is the third step in this sequence:
 1. The user's raw text is replaced with formatted text.
 1. The cursor is repositioned in the input field.
 
-You provide the formatter, which is a function that takes raw text and
+You define the formatter, which is a function that takes raw text and
 returns formatted text. You decide when the text should be formatted:
 perhaps after every keystroke, perhaps after a special user action,
 perhaps at regular intervals.
