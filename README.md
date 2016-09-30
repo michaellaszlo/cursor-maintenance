@@ -1,22 +1,28 @@
-# Maintaining cursor position in a formatted input field
+# Cursor maintenance
+
+## Can you maintain the cursor in a formatted input field?
 
 A thorny problem comes up when you're building a formatted input field
 that lets the user freely move a cursor and edit the text. After some
 user editing, the text is reformatted by the input field. Now where
 should the cursor go? That is the problem of cursor maintenance.
 
-I have written a detailed article about cursor maintenance. It's
-a complicated problem with fuzzy criteria and many possible
-approaches. There is no silver bullet. Each approach offers a compromise
-between reliability and ease of implementation. Sometimes, depending
-on the text format and how you want the user to interact with the input
-field, there is no good solution. Then again, sometimes it is possible
-to achieve accurate cursor maintenance with the right approach.
+I have posted a detailed discussion of cursor maintenance on
+my website. It's a complicated problem with fuzzy criteria and many
+possible approaches. There is no silver bullet. Each approach offers a
+compromise between reliability and ease of implementation. The choice
+of approach depends on the text format and how you want the user to
+interact with the input field. Sometimes there is no reliable way to
+maintain the cursor. In such cases, you would do best to circumvent the
+problem by removing the cursor after reformatting or by displaying the
+formatted text separately from the input text. Then again, sometimes it
+is possible to achieve reliable cursor maintenance. If you can do so,
+the result is a very pleasing user experience.
 
 This repository provides framework code and implementation examples for
-three approaches. I characterize them as follows:
+three approaches to cursor maintenance. I characterize them as follows:
 
-Name of approach  |  Ease of implementation  |  Accuracy
+Name of approach  |  Ease of implementation  |  Reliability
 ---|---|---
 Retrospective  |  Easy  |  Susceptible to faulty cursor positioning
 Layer  |  Medium  |  Can be made completely accurate for some formats
@@ -26,7 +32,7 @@ Meta  |  Hard  |  Can be made completely accurate for many formats
 ## Basic demo
 
 The layer approach to cursor maintenance offers a reasonable balance of
-accuracy and ease of implementation. I have made a basic demonstration
+reliability and ease of implementation. I have made a basic demonstration
 of the layer approach that looks like this:
 
 [![Basic implementation of cursor
@@ -42,7 +48,6 @@ I have also made a more elaborate page demonstrating the meta,
 retrospective, and layer approaches. The retrospective and layer demos
 can be configured with a formatting function of your choice. The layer
 demo allows you to specify the layers.
-
 
 [![Interactive implementation of several cursor-maintenance
 approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/extended_demo.png)](http://michaellaszlo.com/maintaining-cursor-position/extended-demo/)
@@ -67,16 +72,22 @@ perhaps at regular intervals.
 If the formatted text is identical to the raw text, there is nothing
 further to do. The cursor should stay where it is.
 
-Otherwise, you want to compute a new cursor position. To do so, you pass
-three values to a cursor-maintenance function:
+Otherwise, you want to compute a new cursor position. You can do this
+with one of the following:
 
-- the user's _raw text_
-- the user's _cursor position_ in the raw text
-- the _formatted text_ obtained from your raw text
+- a format-oblivious cursor-maintenance function
+- a cursor-maintaining formatter
+
+If you have a format-oblivious cursor-maintenance function, you give it
+the following three values:
+
+- the user's **raw text**
+- the user's **cursor position** in the raw text
+- the **formatted text** obtained from your raw text
 
 You get back one value:
 
-- a _new cursor position_
+- a **new cursor position**
 
 
 
