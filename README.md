@@ -3,19 +3,19 @@
 ## Maintaining cursor position in a formatted input field
 
 A vexing problem comes up when you're building a formatted input field
-that lets the user freely move a cursor and edit the text. After some
-user editing, the text is reformatted by the input field. Now where
-should the cursor go? That is the problem of cursor maintenance.
+that lets the user freely move a cursor. After some user editing, the
+text is reformatted by the input field. Now where should the cursor
+appear? That is the problem of cursor maintenance.
 
 I have posted a detailed discussion of cursor maintenance on my
-website. It's a complicated problem with fuzzy criteria. You can approach
-it in several ways depending on the text format and how you want the
-user to interact with the input field. Sometimes there is no reliable
-way to maintain the cursor. In such cases, it is best to circumvent the
-problem by removing the cursor after reformatting or by displaying the
-formatted text separately from the input text. Then again, sometimes it
-is possible to achieve reliable cursor maintenance. If so, the result
-is a very pleasing user experience.
+website. It's a complicated problem with fuzzy criteria. You can
+approach it in several ways depending on the text format and how you
+want the user to interact with the input field. Sometimes there is no
+reliable way to maintain the cursor. If so, it is best to avoid the
+problem by removing the cursor upon reformatting or by displaying the
+formatted text separately from the input text. Then again, sometimes
+it is possible to achieve reliable cursor maintenance, resulting in a
+seamless input interface.
 
 This repository provides framework code and implementation examples for
 three approaches to cursor maintenance. I characterize them as follows:
@@ -42,10 +42,10 @@ on my website or see its [source code](https://github.com/michaellaszlo/maintain
 
 ## Extended demos
 
-I have also made a more elaborate page demonstrating the meta,
-retrospective, and layer approaches. The retrospective and layer demos
-can be configured with a formatting function of your choice. The layer
-demo allows you to specify the layers.
+I have made a more elaborate page demonstrating the meta, retrospective,
+and layer approaches. The retrospective and layer demos allow you to
+specify any formatting function. The layer demo also allows you to define
+the layers.
 
 [![Interactive implementation of several cursor-maintenance
 approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/extended_demo.png)](http://michaellaszlo.com/maintaining-cursor-position/extended-demo/)
@@ -98,13 +98,14 @@ it with two values:
 
 You get back two values:
 
-- the **formatted text** corresponding to the raw text
+- **formatted text** computed from the raw text
 - a **new cursor position** in the formatted text
 
 
 ## Implementing the retrospective approach
 
-Load `cursor_maintainer.js` and make a cursor maintainer:
+After loading `cursor_maintainer.js`, make a retrospective cursor
+maintainer:
 
 ```
 var maintainer = CursorMaintainer.retrospective.makeMaintainer();
@@ -115,6 +116,21 @@ Compute a new cursor position:
 ```
 var newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
+
+If you have a formatting function called `formatter`, you can make a
+cursor-maintaining formatter out of it:
+
+```
+var cmFormatter = CursorMaintainer.augmentFormat(formatter);
+```
+
+Use the cursor-maintaining formatter:
+```
+var result = cmFormatter('  2400.015 ', 2),
+    formattedText = result.text,
+    newCursor = result.cursor;
+```
+
 
 
 ## Implementing the layer approach
