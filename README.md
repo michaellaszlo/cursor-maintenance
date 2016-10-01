@@ -1,5 +1,6 @@
 # Cursor maintenance
 
+
 ## Maintaining cursor position in a formatted input field
 
 A vexing problem comes up when you're building a formatted input field
@@ -108,29 +109,46 @@ After loading `cursor_maintainer.js`, make a retrospective cursor
 maintainer:
 
 ```
-var maintainer = CursorMaintainer.retrospective.makeMaintainer();
+maintainer = CursorMaintainer.retrospective.makeMaintainer();
 ```
 
 Compute a new cursor position:
 
 ```
-var newPosition = maintainer('  2400.015 ', 2, '2,400.02');
+newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
+
+The cursor maintainer is stateless. You can use it repeatedly without
+making a new one each time.
 
 If you have a formatting function called `formatter`, you can make a
 cursor-maintaining formatter out of it:
 
 ```
-var cmFormatter = CursorMaintainer.augmentFormat(formatter);
+cmFormatter = CursorMaintainer.augmentFormat(formatter);
 ```
 
 Use the cursor-maintaining formatter:
 ```
-var result = cmFormatter('  2400.015 ', 2),
-    formattedText = result.text,
-    newCursor = result.cursor;
+result = cmFormatter('  2400.015 ', 2);
+formattedText = result.text;
+newCursor = result.cursor;
 ```
 
+You probably want to react to text editing in your input element with
+a function that looks something like this:
+
+```
+function updateInput() {
+  var rawText = this.value,
+      rawCursor = getCursor(this),
+      formatted = cmFormatter(rawText, rawCursor);
+  if (formatted.text !== rawText) {
+    this.value = formatted.text;
+    setCursor(this, formatted.cursor);
+  }
+}
+```
 
 
 ## Implementing the layer approach
