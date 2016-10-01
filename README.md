@@ -3,13 +3,13 @@
 
 ## Maintaining cursor position in a formatted input field
 
-A vexing problem comes up when you're building a formatted input field
+A vexing question comes up when you're building a formatted input field
 that lets the user freely move a cursor. After some user editing, the
 text is reformatted by the input field. Now where should the cursor
 appear? That is the problem of cursor maintenance.
 
-I have posted a detailed discussion of cursor maintenance on my
-website. It's a complicated problem with fuzzy criteria. You can
+I have posted a [detailed discussion of cursor maintenance]() on
+my website. It's a complicated problem with fuzzy criteria. You can
 approach it in several ways depending on the text format and how you
 want the user to interact with the input field. Sometimes there is no
 reliable way to maintain the cursor. If so, it is best to avoid the
@@ -118,10 +118,11 @@ Compute a new cursor position:
 newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
 
-The cursor maintainer is stateless. You can use it repeatedly without
-making a new one each time.
+The cursor maintainer is stateless, meaning that you can use it repeatedly
+without making a new one each time.
 
-Instantiate a cursor-maintaining formatter based on your plain formatter:
+To instantiate a cursor-maintaining formatter based on your plain
+formatter:
 
 ```
 cmFormatter = CursorMaintainer.retrospective.augmentFormat(formatter);
@@ -138,21 +139,61 @@ You can react to editing actions in your input element with a function
 that looks something like this:
 
 ```
-function updateInput() {
-  var rawText = this.value,
-      rawCursor = getCursor(this),
+function update(input) {
+  var rawText = input.value,
+      rawCursor = getCursor(input),
       formatted = cmFormatter(rawText, rawCursor);
   if (formatted.text !== rawText) {
-    this.value = formatted.text;
-    setCursor(this, formatted.cursor);
+    input.value = formatted.text;
+    setCursor(input, formatted.cursor);
   }
 }
 ```
 
-To get the cursor position and set the cursor, you can use `selectionStart` and `setSelectionRange` as demonstrated in `[my basic demo](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/basic_demo/basic_demo.js#L48-L50)`.
+To get the cursor position and set the cursor, you can use
+`selectionStart` and `setSelectionRange` as demonstrated in [my basic
+demo](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/basic_demo/basic_demo.js#L48-L50).
 
 
 ## Implementing the layer approach
+
+The layer approach requires that you specify a sequence of character
+sets that will be used to extract layers from the raw text and formatted
+text. The details of this approach are described [in an article]().
+
+To define a character set, write a regular expression that tests a single
+character. For example, you can write `/[0-9a-f]/i` to extract a layer
+consisting of hexadecimal digits.
+
+Instantiate a cursor maintainer by passing an array of regular
+expressions:
+
+```
+maintainer = CursorMaintainer.layer.makeMaintainer([ /\d/, /\s/ ]);
+```
+
+The resulting function has the same interface as a retrospective cursor
+maintainer. See the previous section for usage examples.
+
+By default, a layer-approach cursor maintainer breaks ties to the left,
+meaning that it takes the leftmost position in the final candidate
+range. You can make a layer-approach cursor maintainer that breaks ties
+to the right by passing an additional argument:
+
+```
+maintainer = CursorMaintainer.layer.makeMaintainer([ /\d/, /\s/ ], true);
+```
+
+To make a cursor-maintaining formatter, pass a formatter followed by
+the specifications for the layer approach:
+
+```
+cmfLeft = CursorMaintainer.layer.augmentFormat(formatter, [ /\w/ ]);
+cmfRight = CursorMaintainer.layer.augmentFormat(formatter, [ /\w/ ], true);
+```
+
+The resulting function is interchangeable with a retrospective
+cursor-maintaining formatter. See the previous section for usage examples.
 
 
 ## Implementing the meta approach
