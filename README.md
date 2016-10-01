@@ -99,13 +99,13 @@ it with two values:
 
 You get back two values:
 
-- **formatted text** computed from the raw text
+- the **formatted text** computed from the raw text
 - a **new cursor position** in the formatted text
 
 
 ## Implementing the retrospective approach
 
-After loading `cursor_maintainer.js`, make a retrospective cursor
+After loading `cursor_maintainer.js`, instantiate a retrospective cursor
 maintainer:
 
 ```
@@ -121,11 +121,10 @@ newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 The cursor maintainer is stateless. You can use it repeatedly without
 making a new one each time.
 
-If you have a formatting function called `formatter`, you can make a
-cursor-maintaining formatter out of it:
+Instantiate a cursor-maintaining formatter based on your plain formatter:
 
 ```
-cmFormatter = CursorMaintainer.augmentFormat(formatter);
+cmFormatter = CursorMaintainer.retrospective.augmentFormat(formatter);
 ```
 
 Use the cursor-maintaining formatter:
@@ -135,8 +134,8 @@ formattedText = result.text;
 newCursor = result.cursor;
 ```
 
-You probably want to react to text editing in your input element with
-a function that looks something like this:
+You can react to editing actions in your input element with a function
+that looks something like this:
 
 ```
 function updateInput() {
@@ -149,6 +148,8 @@ function updateInput() {
   }
 }
 ```
+
+To get the cursor position and set the cursor, you can use `selectionStart` and `setSelectionRange` as demonstrated in `[my basic demo](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/basic_demo/basic_demo.js#L48-L50)`.
 
 
 ## Implementing the layer approach

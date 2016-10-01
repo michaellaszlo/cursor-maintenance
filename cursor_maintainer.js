@@ -216,6 +216,7 @@ var CursorMaintainer = (function () {
   //  set of characters. It returns an array containing, for each position
   //  in the string, an object that maps each character in the set to the
   //  number of times the character appears to the left of the position.
+  //  It is called by costFunctions.frequencyRatios.
   function getLeftCounts(s, chars) {
     var counts = new Array(s.length + 1),
         pos, i, ch;
