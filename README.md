@@ -197,9 +197,35 @@ cursor-maintaining formatter. See the previous section for usage examples.
 
 ## Using the meta approach
 
-In the meta approach, you reimplement your format as an operation on a
-text-with-cursor object. The `CursorMaintainer.TextWithCursor` constructor
-builds such an object. You perform elementary editing operations and
-the object updates the cursor position.
+In the meta approach, you reimplement your format with a sequence
+of elementary operations on an object that represents text
+with a cursor. Each operation moves the cursor in a predictable
+manner. `CursorMaintainer` contains the constructor `TextWithCursor`
+to make such an object.
+
+`TextWithCursor` offers two operations that manipulate the text and
+cursor:
+
+- `insert(begin, subtext)`: inserts the string `subtext` at position
+`begin`; moves the character rightward by the number of characters that
+are inserted to its left
+
+- `delete(begin, length)`: deletes `length` characters (one character if
+`length` is omitted) starting from `begin`; moves the cursor leftward
+by the number of characters that are deleted to its left
+
+To read the cursor position, access the `TextWithCursor` object's
+`cursor` property.
+
+`TextWithCursor` has two methods that return information:
+
+- `read(begin, length)`: returns a string consisting of the `length`
+characters (one character if `length` is omitted) starting at `begin`
+
+- `length()`: returns the length of the text
+
+`CursorMaintainer.TextWithCursor` constructor builds such an
+object. You perform elementary editing operations and the object updates
+the cursor position.
 
 
