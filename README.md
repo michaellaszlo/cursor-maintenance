@@ -8,7 +8,7 @@ that lets the user freely move a cursor. After some user editing, the
 text is reformatted by the input field. Now where should the cursor
 appear? That is the problem of cursor maintenance.
 
-I have posted a [detailed discussion of cursor maintenance]() on
+I have posted a [detailed introduction]() to cursor maintenance on
 my website. It's a complicated problem with fuzzy criteria. You can
 approach it in several ways depending on the text format and how you
 want the user to interact with the input field. Sometimes there is no
@@ -75,7 +75,7 @@ Otherwise, you want to compute a new cursor position. You can do so
 with a cursor maintainer or with a cursor-maintaining formatter.
 
 
-### Using a cursor maintainer
+### Cursor maintainer
 
 A cursor maintainer doesn't know about your format in general. You call
 it with three values:
@@ -89,7 +89,7 @@ You get back one value:
 - a **new cursor position** in the formatted text
 
 
-### Using a cursor-maintaining formatter
+### Cursor-maintaining formatter
 
 A cursor-maintaining formatter is built for a specific format. You call
 it with two values:
@@ -103,7 +103,7 @@ You get back two values:
 - a **new cursor position** in the formatted text
 
 
-## Implementing the retrospective approach
+## Using the retrospective approach
 
 After loading `cursor_maintainer.js`, instantiate a retrospective cursor
 maintainer:
@@ -118,8 +118,8 @@ Compute a new cursor position:
 newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
 
-The cursor maintainer is stateless, meaning that you can use it repeatedly
-without making a new one each time.
+The cursor maintainer is stateless. You can instantiate just one and
+use it repeatedly.
 
 To instantiate a cursor-maintaining formatter based on your plain
 formatter:
@@ -151,11 +151,11 @@ function update(input) {
 ```
 
 To get the cursor position and set the cursor, you can use
-`selectionStart` and `setSelectionRange` as demonstrated in [my basic
+`selectionStart` and `setSelectionRange` as demonstrated in the [basic
 demo](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/basic_demo/basic_demo.js#L48-L50).
 
 
-## Implementing the layer approach
+## Using the layer approach
 
 The layer approach requires that you specify a sequence of character
 sets that will be used to extract layers from the raw text and formatted
@@ -176,7 +176,7 @@ The resulting function has the same interface as a retrospective cursor
 maintainer. See the previous section for usage examples.
 
 By default, a layer-approach cursor maintainer breaks ties to the left,
-meaning that it takes the leftmost position in the final candidate
+meaning that it chooses the leftmost position in the final candidate
 range. You can make a layer-approach cursor maintainer that breaks ties
 to the right by passing an additional argument:
 
@@ -184,8 +184,7 @@ to the right by passing an additional argument:
 maintainer = CursorMaintainer.layer.makeMaintainer([ /\d/, /\s/ ], true);
 ```
 
-To make a cursor-maintaining formatter, pass a formatter followed by
-the specifications for the layer approach:
+To make a cursor-maintaining formatter with the layer approach:
 
 ```
 cmfLeft = CursorMaintainer.layer.augmentFormat(formatter, [ /\w/ ]);
@@ -196,6 +195,11 @@ The resulting function is interchangeable with a retrospective
 cursor-maintaining formatter. See the previous section for usage examples.
 
 
-## Implementing the meta approach
+## Using the meta approach
+
+In the meta approach, you reimplement your format as an operation on a
+text-with-cursor object. The `CursorMaintainer.TextWithCursor` constructor
+builds such an object. You perform elementary editing operations and
+the object updates the cursor position.
 
 
