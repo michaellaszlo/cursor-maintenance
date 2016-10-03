@@ -118,11 +118,10 @@ Compute a new cursor position:
 newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
 
-The cursor maintainer is stateless. You can instantiate just one and
-use it repeatedly.
+The cursor maintainer is stateless. You can instantiate one and use
+it repeatedly.
 
-To instantiate a cursor-maintaining formatter based on your plain
-formatter:
+To make a cursor-maintaining formatter based on your plain formatter:
 
 ```
 cmFormatter = CursorMaintainer.retrospective.augmentFormat(formatter);
@@ -198,8 +197,8 @@ cursor-maintaining formatter. See the previous section for usage examples.
 ## Using the meta approach
 
 In the meta approach, you reimplement your format with a sequence
-of elementary operations on an object that represents text
-with a cursor. Each operation moves the cursor in a predictable
+of elementary operations on an object that represents text with
+a cursor. Each operation moves the cursor in a straightforward
 manner. `CursorMaintainer` contains the constructor `TextWithCursor`
 to make such an object.
 
@@ -224,8 +223,22 @@ characters (one character if `length` is omitted) starting at `begin`
 
 - `length()`: returns the length of the text
 
-`CursorMaintainer.TextWithCursor` constructor builds such an
-object. You perform elementary editing operations and the object updates
-the cursor position.
+Although each call to `insert` and `delete` has a small and sensible
+effect on cursor position, the overall effect after making a sequence
+of calls is not necessarily sensible. For example, you could implement a
+format by deleting the entire text and rebuilding it from left to right,
+which has the effect of moving the cursor to the leftmost position every
+time. That would defeat the purpose of the meta approach.
 
+The text-with-cursor object doesn't do any magic, unfortunately. It's
+a very light text-manipulation framework that does the menial task of
+updating the cursor position&mdash;it handles the bookkeeping, as it
+were&mdash;and leaves the difficult thinking to you. You must decide
+on a series of operations that implements your format while moving the
+cursor in a way that the user can readily predict.
+
+The key to achieving predictable cursor movement is to localize
+destructive operations around the cursor. In other words, if you delete
+a span of text that includes or borders on the cursor, make the span as
+small as possible.
 
