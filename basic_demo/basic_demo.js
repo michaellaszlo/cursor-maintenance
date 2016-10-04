@@ -69,6 +69,8 @@ var BasicCursorMaintenanceDemo = (function () {
     });
     ccInput.value = '1234567';
     ccInput.click();
+    // Collapse the notes above the input element.
+    NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
 
   return {

@@ -199,14 +199,13 @@ cursor-maintaining formatter. See the previous section for usage examples.
 In the meta approach, you reimplement your format with a sequence
 of elementary operations on an object that represents text with
 a cursor. Each operation moves the cursor in a straightforward
-manner. `CursorMaintainer` contains the constructor `TextWithCursor`
+manner. `CursorMaintainer` offers the constructor `TextWithCursor`
 to make such an object.
 
-`TextWithCursor` offers two operations that manipulate the text and
-cursor:
+`TextWithCursor` has two methods that alter the text:
 
 - `insert(begin, subtext)`: inserts the string `subtext` at position
-`begin`; moves the character rightward by the number of characters that
+`begin`; moves the cursor rightward by the number of characters that
 are inserted to its left
 
 - `delete(begin, length)`: deletes `length` characters (one character if
@@ -223,12 +222,12 @@ characters (one character if `length` is omitted) starting at `begin`
 
 - `length()`: returns the length of the text
 
-Although each call to `insert` and `delete` has a small and sensible
-effect on cursor position, the overall effect after making a sequence
-of calls is not necessarily sensible. For example, you could implement a
-format by deleting the entire text and rebuilding it from left to right,
-which has the effect of moving the cursor to the leftmost position every
-time. That would defeat the purpose of the meta approach.
+Although each call to `insert` and `delete` has a sensible effect on
+cursor position, the overall effect after making a sequence of calls is
+not necessarily sensible. For example, you could implement a format by
+deleting the entire text and rebuilding it from left to right, which has
+the effect of moving the cursor to the leftmost position every time. That
+would defeat the purpose of the meta approach.
 
 The text-with-cursor object doesn't do any magic, unfortunately. It's
 a very light text-manipulation framework that does the menial task of
@@ -238,7 +237,7 @@ on a series of operations that implements your format while moving the
 cursor in a way that the user can readily predict.
 
 The key to achieving predictable cursor movement is to localize
-destructive operations around the cursor. In other words, if you delete
-a span of text that includes or borders on the cursor, make the span as
-small as possible.
+destructive operations around the cursor. If you delete a span of
+text that includes or borders on the cursor, make the span as small
+as possible.
 

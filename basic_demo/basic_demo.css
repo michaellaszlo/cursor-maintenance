@@ -15,7 +15,16 @@ body {
 
 h1 {
   color: #777;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+}
+
+.notes {
+  margin: 10px 0;
+}
+
+p {
+  padding: 5px 10px;
+  line-height: 21px;
 }
 
 #introduction {
