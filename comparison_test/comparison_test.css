@@ -1,0 +1,166 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  color: #222;
+}
+
+#wrapper {
+  padding: 10px 20px;
+}
+
+a {
+  text-decoration: none;
+  color: #1e74b1;
+}
+a:hover {
+  color: #08a203;
+  border-bottom: 1px solid;
+}
+
+h1 {
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.notes {
+  margin: 10px 0;
+}
+
+p {
+  padding: 5px 10px;
+  line-height: 21px;
+}
+
+table {
+  margin-top: 20px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #fff;
+}
+td {
+  overflow: hidden;
+  padding: 10px;
+  text-align: left;
+  position: relative;
+  vertical-align: top;
+}
+.sectionBegin td {
+  border-top: 1px solid #ccc;
+  padding-top: 15px;
+}
+.sectionEnd td {
+  padding-bottom: 15px;
+}
+.label {
+  color: #666;
+  text-align: right;
+  padding-left: 0;
+}
+.header {
+  background: #333;
+  color: #fff;
+  padding: 3px 8px;
+}
+
+input, .output {
+  font-family: 'Droid Sans Mono', monospace;
+  font-size: 15px;
+  letter-spacing: 1px;
+  padding: 2px 4px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  width: 100%;
+}
+input {
+  outline: none;
+  position: absolute;
+  left: 10px;
+  top: 9px;
+  background: transparent;
+  color: transparent;
+  transfor: scale(0);
+}
+
+.output {
+  white-space: pre;
+  background: #f6f5dd;
+  border-color: #f6f5dd;
+}
+.formatted .output {
+  background: #eee;
+  border-color: #eee;
+}
+.output.raw {
+  background: #fff;
+  border: 2px solid #b7c7d8;
+  border-radius: 3px;
+}
+.output.active {
+  color: #000;
+  border-color: #33547d;
+}
+
+.cursor {
+  border: 1px solid #ad4246;
+  margin: 0 -1px;
+}
+.output.active .cursor {
+  animation: blinker 1.0s ease-out infinite;
+}
+@keyframes blinker {  
+  50% { opacity: 0.0; }
+}
+
+td button {
+  position: relative;
+  bottom: 2px;
+  margin-left: 10px;
+  font-family: sans-serif;
+  font-size: 13px;
+  padding: 1px 3px 3px;
+  background: #fff;
+  color: #666;
+  border: 2px solid #ddd;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}
+td button:hover {
+  background: #eee;
+  color: #222;
+  border-color: #ccc;
+}
+td button.active, td button.active:hover {
+  background: #ddd;
+  color: #000;
+  border-color: #ddd;
+  cursor: default;
+}
+
+#scores td {
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+.scoreItem {
+  margin-bottom: 15px;
+}
+.scoreItem .output {
+  background: #eee;
+  border-color: #eee;
+}
+.scoreItem .score {
+  margin-left: 4px;
+  color: #444;
+}
+.scoreItem.best .output {
+  background: #f6f5dd;
+  border-color: #f6f5dd;
+}
+.scoreItem.best .score {
+  color: #000;
+}
