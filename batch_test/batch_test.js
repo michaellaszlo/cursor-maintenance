@@ -60,6 +60,17 @@ var BatchTestCursorMaintenance = (function () {
             [ ' the q   ', 8, 'the q ', 6 ],
             [ ' the q   ', 9, 'the q ', 6 ],
             [ ' the q    ', 8, 'the q ', 6 ]
+          ]),
+          creditCard: new TestRunner([
+            [ '  19243 345  ', 1, '1924 345', 0 ],
+            [ '  19243 345  ', 5, '1924 345', 3 ],
+            [ '  19243 345  ', 6, '1924 345', 4 ],
+            [ '  19243 345  ', 7, '1924 345', 6 ],
+            [ '  19243 345  ', 8, '1924 345', 6 ],
+            [ '  19243 345  ', 10, '1924 345', 7 ],
+            [ '  19243 345  ', 11, '1924 345', 8 ],
+            [ '  19243 345  ', 12, '1924 345', 8 ],
+            [ '  19243 345  ', 13, '1924 345', 8 ]
           ])
         };
 
@@ -91,7 +102,8 @@ var BatchTestCursorMaintenance = (function () {
       var implementation = implementations[approachName];
       print('-----', approachName);
       [ //'commatize',
-        'trimify'
+        'trimify',
+        //'creditCard'
       ].forEach(function (formatName) {
         print('testing', formatName);
         testRunners[formatName].run(implementation[formatName], false);
