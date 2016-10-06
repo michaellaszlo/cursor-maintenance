@@ -47,6 +47,17 @@ var CursorMaintainerExperiments = (function () {
     return s;                    //  to one space each.
   };
 
+  function creditCard(s) {
+    var groups = [],
+        i;
+    s = s.replace(/\D/g, '');            // Remove all non-digit characters.
+    s = s.substring(0, 16);              // Keep no more than 16 digits.
+    for (i = 0; i < s.length; i += 4) {  // Make four-digit groups.
+      groups.push(s.substring(i, i + 4));
+    }
+    return groups.join(' ');             // Put spaces between the groups.
+  }
+
 
   //--- Wrapped versions of the plain formatters. These functions are
   //  interface-compatible with cursor-maintaining formatters, but they don't
@@ -288,7 +299,8 @@ var CursorMaintainerExperiments = (function () {
     var costFunction = CM.retrospective.costFunctions[name];
     retrospective[name] = {
       commatize: CM.retrospective.augmentFormat(commatize, costFunction),
-      trimify: CM.retrospective.augmentFormat(trimify, costFunction)
+      trimify: CM.retrospective.augmentFormat(trimify, costFunction),
+      creditCard: CM.retrospective.augmentFormat(creditCard, costFunction)
     };
   });
 

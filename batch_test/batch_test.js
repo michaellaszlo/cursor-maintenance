@@ -6,8 +6,8 @@ var BatchTestCursorMaintenance = (function () {
   // BatchTestCursorMaintenance is a command-line testing module for the
   //  cursor-maintenance algorithms implemented in cursor_maintainer.js
   //  and cursor_maintainer_experiments.js.
-  //  You can execute this file with d8, the command-line environment
-  //  bundled with the V8 JavaScript engine.
+  //  You can execute this file with js or d8, which are Mozilla's and
+  //  Google's JavaScript command-line environments.
 
   // main instantiates the test runners with a set of test cases for each
   //  format, loads the targeted files, and proceeds to test a selection
@@ -62,15 +62,14 @@ var BatchTestCursorMaintenance = (function () {
             [ ' the q    ', 8, 'the q ', 6 ]
           ]),
           creditCard: new TestRunner([
-            [ '  19243 345  ', 1, '1924 345', 0 ],
-            [ '  19243 345  ', 5, '1924 345', 3 ],
-            [ '  19243 345  ', 6, '1924 345', 4 ],
-            [ '  19243 345  ', 7, '1924 345', 6 ],
-            [ '  19243 345  ', 8, '1924 345', 6 ],
-            [ '  19243 345  ', 10, '1924 345', 7 ],
-            [ '  19243 345  ', 11, '1924 345', 8 ],
-            [ '  19243 345  ', 12, '1924 345', 8 ],
-            [ '  19243 345  ', 13, '1924 345', 8 ]
+            [ '  19203 45  ', 1, '1920 345', 0 ],
+            [ '  19203 45  ', 5, '1920 345', 3 ],
+            [ '  19203 45  ', 6, '1920 345', 4 ],
+            [ '  19203 45  ', 7, '1920 345', 6 ],
+            [ '  19203 45  ', 8, '1920 345', 6 ],
+            [ '  19203 45  ', 10, '1920 345', 7 ],
+            [ '  19203 45  ', 11, '1920 345', 8 ],
+            [ '  19203 45  ', 12, '1920 345', 8 ]
           ])
         };
 
@@ -92,21 +91,22 @@ var BatchTestCursorMaintenance = (function () {
     //  ignore the cursor maintenance, we pass a true (or truthy) value
     //  as the optional second argument to TestRunner.run.
     [ //'format',
-      'adHoc',
+      //'adHoc',
       //'mockCursor',
-      'meta',
+      //'meta',
       //'splitLevenshtein',
       'frequencyRatios',
-      'layer'
+      //'layer'
     ].forEach(function (approachName) {
       var implementation = implementations[approachName];
       print('-----', approachName);
       [ //'commatize',
-        'trimify',
-        //'creditCard'
+        //'trimify',
+        'creditCard'
       ].forEach(function (formatName) {
         print('testing', formatName);
-        testRunners[formatName].run(implementation[formatName], false);
+        testRunners[formatName].display(false);
+        //testRunners[formatName].run(implementation[formatName], false);
       });
     });
   }
@@ -149,10 +149,8 @@ var BatchTestCursorMaintenance = (function () {
   //  positions are not printed.
   TestRunner.prototype.display = function (ignoreCursor) {
     var showText = this.showText;
-    print('TestRunner cases for ' + name + '\n');
     this.testCases.forEach(function (testCase) {
-      var testCase = this.testCases[i],
-          rawCursor,
+      var rawCursor,
           expectedCursor;
       if (!ignoreCursor) {
         rawCursor = testCase.raw.cursor;
