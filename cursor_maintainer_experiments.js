@@ -323,6 +323,8 @@ var CursorMaintainerExperiments = (function () {
 
   layer.trimify = CM.layer.augmentFormat(trimify, [ /\S/ ], true);
 
+  layer.creditCard = CM.layer.augmentFormat(creditCard, [ /\d/ ]);
+
   return {
     format: format,
     adHoc: adHoc,

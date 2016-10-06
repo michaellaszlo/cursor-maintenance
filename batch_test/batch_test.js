@@ -99,14 +99,15 @@ var BatchTestCursorMaintenance = (function () {
     //  verify the text returned by cursor-maintenance approaches that
     //  reimplement a format. If we only want to test the formatting and
     //  ignore the cursor maintenance, we pass a true (or truthy) value
-    //  as the optional second argument to TestRunner.run.
+    //  as the optional second argument to TestRunner.run. To display the
+    //  test cases without testing them, call TestRunner.display.
     [ //'format',
       //'adHoc',
       //'mockCursor',
       //'meta',
-      //'splitLevenshtein',
+      'splitLevenshtein',
       'frequencyRatios',
-      //'layer'
+      'layer'
     ].forEach(function (approachName) {
       var implementation = implementations[approachName];
       print('-----', approachName);
@@ -115,8 +116,8 @@ var BatchTestCursorMaintenance = (function () {
         'creditCard'
       ].forEach(function (formatName) {
         print('testing', formatName);
-        testRunners[formatName].display(false);
-        //testRunners[formatName].run(implementation[formatName], false);
+        //testRunners[formatName].display(false);
+        testRunners[formatName].run(implementation[formatName], false);
       });
     });
   }
