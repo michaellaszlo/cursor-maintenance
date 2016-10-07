@@ -241,3 +241,40 @@ destructive operations around the cursor. If you delete a span of
 text that includes or borders on the cursor, make the span as small
 as possible.
 
+As an example of the meta approach, consider the credit-card formatter used in the [basic demo](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/):
+
+```
+function creditCard(s) {
+  var groups = [],
+      i;
+  s = s.replace(/\D/g, '');            // Remove all non-digit characters.
+  s = s.substring(0, 16);              // Keep no more than 16 digits.
+  for (i = 0; i < s.length; i += 4) {  // Make four-digit groups.
+    groups.push(s.substring(i, i + 4));
+  }
+  return groups.join(' ');             // Put spaces between the groups.
+}
+```
+
+We can reimplement this formatter in a similar way with a `TextWithCursor` object:
+
+```
+meta.creditCard = function (s, cursor) {
+  var t = new CM.TextWithCursor(s, cursor),
+      pos, start;
+  for (pos = t.length() - 1; pos >= 0; --pos) {
+    if (!/\d/.test(t.read(pos))) {  // Remove all non-digit characters.
+      t.delete(pos);
+    }
+  }
+  while (t.length() > 16) {         // Keep no more than 16 digits.
+    t.delete(t.length() - 1);
+  }
+  start = Math.min(12, t.length() - t.length() % 4);
+  for (pos = start; pos > 0; pos -= 4) {
+    t.insert(pos, ' ');             // Put spaces between four-digit groups.
+  }
+  return t;
+};
+```
+
