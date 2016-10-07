@@ -286,6 +286,24 @@ var CursorMaintainerExperiments = (function () {
     return t;
   };
 
+  meta.creditCard = function (s, cursor) {
+    var t = new CM.TextWithCursor(s, cursor),
+        pos, start;
+    for (pos = t.length() - 1; pos >= 0; --pos) {
+      if (!/\d/.test(t.read(pos))) {  // Remove all non-digit characters.
+        t.delete(pos);
+      }
+    }
+    while (t.length() > 16) {         // Keep no more than 16 digits.
+      t.delete(t.length() - 1);
+    }
+    start = Math.min(12, t.length() - t.length() % 4);
+    for (pos = start; pos > 0; pos -= 4) {
+      t.insert(pos, ' ');             // Put spaces between four-digit groups.
+    }
+    return t;
+  };
+
 
   //--- Retrospective approach: An open-ended statistical approach that
   //  relies on a cost function. The CursorMaintainer module defines a
