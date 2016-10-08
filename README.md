@@ -197,10 +197,16 @@ cursor-maintaining formatter. See the previous section for usage examples.
 ## Using the meta approach
 
 In the meta approach, you reimplement your format with a sequence
-of elementary operations on an object that represents text with
-a cursor. Each operation moves the cursor in a straightforward
-manner. `CursorMaintainer` offers the constructor `TextWithCursor`
-to make such an object.
+of elementary operations on an object that represents text with a
+cursor. Each operation moves the cursor in a straightforward manner.
+
+To initialize such an object, call the `CursorMaintainer.TextWithCursor`
+constructor. For example, this is how we construct an object that
+represents the text `'hello'` with the cursor at position 4:
+
+```
+s = new CursorMaintainer.TextWithCursor('hello', 4);
+```
 
 `TextWithCursor` has two methods that alter the text:
 
@@ -222,26 +228,29 @@ characters (one character if `length` is omitted) starting at `begin`
 
 - `length()`: returns the length of the text
 
-Although each call to `insert` and `delete` has a sensible effect on
-cursor position, the overall effect after making a sequence of calls is
-not necessarily sensible. For example, you could implement a format by
-deleting the entire text and rebuilding it from left to right, which has
-the effect of moving the cursor to the leftmost position every time. That
-would defeat the purpose of the meta approach.
+Although each call to `insert` and `delete` has a small and reasonable
+effect on the cursor, the overall effect after making a sequence of calls
+may be neither small nor reasonable. For example, you could implement a
+format by deleting the entire text and rebuilding it from left to right,
+which has the effect of moving the cursor to the leftmost position every
+time. That would defeat the purpose of the meta approach.
 
 The text-with-cursor object doesn't do any magic, unfortunately. It's
 a very light text-manipulation framework that does the menial task of
 updating the cursor position&mdash;it handles the bookkeeping, as it
-were&mdash;and leaves the difficult thinking to you. You must decide
-on a series of operations that implements your format while moving the
-cursor in a way that the user can readily predict.
+were&mdash;and leaves the creative thinking to you. You must decide on a
+series of operations that implements your format while moving the cursor
+in a way that the user can readily predict.
 
 The key to achieving predictable cursor movement is to localize
 destructive operations around the cursor. If you delete a span of
 text that includes or borders on the cursor, make the span as small
 as possible.
 
-As an example of the meta approach, consider the credit-card formatter used in the [basic demo](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/):
+Consider how we might use the meta approach to
+reimplement the credit-card formatter used in the [basic
+demo](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/).
+Here is the plain formatter:
 
 ```
 function creditCard(s) {
@@ -256,7 +265,7 @@ function creditCard(s) {
 }
 ```
 
-We can reimplement this formatter in a similar way with a `TextWithCursor` object:
+And here is the same format implemented with `TextWithCursor` operations:
 
 ```
 meta.creditCard = function (s, cursor) {
@@ -277,4 +286,5 @@ meta.creditCard = function (s, cursor) {
   return t;
 };
 ```
+
 
