@@ -1,27 +1,27 @@
 var BasicCursorMaintenanceDemo = (function () {
   'use strict';
 
-  // requires: cursor_maintainer.js
+  // requires: cursor_maintenance.js, note_expander.js
 
-  // The BasicExample module illustrates how you can use the CursorMaintainer
-  //  module to add cursor maintenance to an existing formatter. We have a
-  //  credit card format implemented below in the ccFormat function.
-  //  We use the layer approach to generate a cursor-maintaining formatter.
-  //  This is accomplished in the second line of the load function, where
-  //  we call CursorMaintainer.layer.augmentFormat with ccFormat and an
-  //  array of regular expressions representing character sets. The result
-  //  is a function that takes raw text and a cursor position; it returns
-  //  an object containing formatted text and a new cursor position.
+  // The BasicCursorMaintenanceDemo module illustrates how you can use the
+  //  CursorMaintenance module to add cursor maintenance to an existing
+  //  formatter. We have a credit card format implemented below in the
+  //  plainFormatter function. We use the layer approach to generate a
+  //  cursor-maintaining formatter. This is accomplished in the load function,
+  //  where we call CursorMaintenance.layer.augmentFormat with plainFormatter
+  //  and an array of regular expressions representing character sets. The
+  //  result is a function that takes raw text and a cursor position; it
+  //  returns an object containing formatted text and a new cursor position.
 
-  var ccInput,
-      ccMaintainer;
+  var inputElement,
+      cursorMaintainingFormatter;
 
-  // ccFormat enforces a display format for credit card numbers. The result
+  // plainFormatter applies a display format to credit card numbers. The result
   //  is a sequence of four-digit groups separated by spaces, containing a
   //  maximum of sixteen digits. Examples:
   //  " 123-456-" -> "1234 56"
   //  "12345678901234567890" -> "1234 5678 9012 3456"
-  function ccFormat(s) {
+  function plainFormatter(s) {
     var groups = [],
         i;
     s = s.replace(/\D/g, '');            // Remove all non-digit characters.
@@ -32,7 +32,7 @@ var BasicCursorMaintenanceDemo = (function () {
     return groups.join(' ');             // Put spaces between the groups.
   }
 
-  // ccUpdate responds to changes in the state of the input element. It
+  // updateInput responds to changes in the state of the input element. It
   //  calls the cursor-maintaining formatter and uses the result to update
   //  the input value and cursor position.
   // Note: We are using a cursor-maintaining formatter that checks whether
@@ -40,14 +40,16 @@ var BasicCursorMaintenanceDemo = (function () {
   //  the current cursor position instead of trying to calculate a new
   //  cursor position. If you use a cursor-maintaining formatter that
   //  does not perform this check, you should do it yourself.
-  // Also note: You can make ccUpdate more efficient by storing the input
+  // Also note: You can make updateInput more efficient by storing the input
   //  value outside the function and checking at the start of each call to
   //  see if the user has changed the text since the last call. If not,
   //  you can immediately return and save the expense of formatting.
-  function ccUpdate() {
-    var formatted = ccMaintainer(ccInput.value, ccInput.selectionStart);
-    ccInput.value = formatted.text;
-    ccInput.setSelectionRange(formatted.cursor, formatted.cursor);
+  function updateInput() {
+    var rawText = inputElement.value,
+        rawCursor = inputElement.selectionStart,
+        formatted = cursorMaintainingFormatter(rawText, rawCursor);
+    inputElement.value = formatted.text;
+    inputElement.setSelectionRange(formatted.cursor, formatted.cursor);
   }
 
   // load instantiates the cursor-maintaining formatter, attaches event
@@ -62,13 +64,14 @@ var BasicCursorMaintenanceDemo = (function () {
   //  If maxlength is set to the required input length, the input element
   //  ignores the user's attempt to insert one more character.
   function load() {
-    ccInput = document.getElementById('ccInput');
-    ccMaintainer = CursorMaintainer.layer.augmentFormat(ccFormat, [ /\d/ ]);
+    cursorMaintainingFormatter =
+        CursorMaintenance.layer.augmentFormat(plainFormatter, [ /\d/ ]);
+    inputElement = document.getElementById('inputElement');
     [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
-      ccInput.addEventListener(eventName, ccUpdate);
+      inputElement.addEventListener(eventName, updateInput);
     });
-    ccInput.value = '1234567';
-    ccInput.click();
+    inputElement.value = '1234567';
+    inputElement.click();
     // Collapse the notes above the input element.
     NoteExpander.enableByTagAndClass(document, 'div', 'notes');
   }
