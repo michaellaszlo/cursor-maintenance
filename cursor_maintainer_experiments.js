@@ -294,10 +294,10 @@ var CursorMaintainerExperiments = (function () {
         t.delete(pos);
       }
     }
-    while (t.length() > 16) {         // Keep no more than 16 digits.
-      t.delete(t.length() - 1);
+    if (t.length() > 16) {            // Keep no more than 16 digits.
+      t.delete(16, t.length() - 16);
     }
-    start = Math.min(12, t.length() - t.length() % 4);
+    start = Math.min(12, t.length() - t.length()%4);
     for (pos = start; pos > 0; pos -= 4) {
       t.insert(pos, ' ');             // Put spaces between four-digit groups.
     }

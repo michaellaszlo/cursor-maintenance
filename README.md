@@ -210,23 +210,23 @@ s = new CursorMaintainer.TextWithCursor('hello', 4);
 
 `TextWithCursor` has two methods that alter the text:
 
-- `insert(begin, subtext)`: inserts the string `subtext` at position
+- `insert(begin, subtext)`: Inserts the string `subtext` at position
 `begin`; moves the cursor rightward by the number of characters that
-are inserted to its left
+are inserted to its left.
 
-- `delete(begin, length)`: deletes `length` characters (one character if
+- `delete(begin, length)`: Deletes `length` characters (one character if
 `length` is omitted) starting from `begin`; moves the cursor leftward
-by the number of characters that are deleted to its left
+by the number of characters that are deleted to its left.
 
 To read the cursor position, access the `TextWithCursor` object's
 `cursor` property.
 
 `TextWithCursor` has two methods that return information:
 
-- `read(begin, length)`: returns a string consisting of the `length`
-characters (one character if `length` is omitted) starting at `begin`
+- `read(begin, length)`: Returns a string consisting of the `length`
+characters (one character if `length` is omitted) starting at `begin`.
 
-- `length()`: returns the length of the text
+- `length()`: Returns the length of the text.
 
 Although each call to `insert` and `delete` has a small and reasonable
 effect on the cursor, the overall effect after making a sequence of calls
