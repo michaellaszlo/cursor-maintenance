@@ -174,10 +174,10 @@ maintainer = CursorMaintainer.layer.makeMaintainer([ /\d/, /\s/ ]);
 The resulting function has the same interface as a retrospective cursor
 maintainer. See the previous section for usage examples.
 
-By default, a layer-approach cursor maintainer breaks ties to the left,
+By default, a layer-based cursor maintainer breaks ties to the left,
 meaning that it chooses the leftmost position in the final candidate
-range. You can make a layer-approach cursor maintainer that breaks ties
-to the right by passing an additional argument:
+range. You can make a layer-based cursor maintainer that breaks ties to
+the right by passing an additional argument:
 
 ```
 maintainer = CursorMaintainer.layer.makeMaintainer([ /\d/, /\s/ ], true);
@@ -286,5 +286,12 @@ meta.creditCard = function (s, cursor) {
   return t;
 };
 ```
+
+Additional examples can be found in
+`[cursor_maintainer_experiments](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintainer_experiments.js)`,
+which contains two more [plain
+formatters](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintainer_experiments.js#L22-L59),
+`commatize` and `trimify`, that are each reimplemented with the [meta
+approach](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintainer_experiments.js#L236-L305)`.
 
 

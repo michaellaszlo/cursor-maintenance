@@ -234,7 +234,7 @@ var CursorMaintainerExperiments = (function () {
 
 
   //--- Meta approach: We reimplement the format with elementary operations
-  //  (read, write, delete, insert) on a text-with-cursor object. The
+  //  (length, read, insert, delete) on a text-with-cursor object. The
   //  CursorMaintainer module defines TextWithCursor for this purpose. Each
   //  elementary operation has a predictable effect on the cursor. We want
   //  to keep these effects in mind as we implement the formatter so that
