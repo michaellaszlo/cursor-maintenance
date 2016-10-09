@@ -28,7 +28,7 @@ var CursorMaintenanceComparison = (function () {
       inputs = {},
       outputs = {},
       activeButtons = {},
-      activeInputMirror,
+      activeInput,
       scores = {};
 
   // setOutput displays a cursor-maintenance result in an output element.
@@ -52,12 +52,12 @@ var CursorMaintenanceComparison = (function () {
   //  to managing the active output box, we have to format the text with the
   //  plain formatter and with all the cursor-maintaining formatters, and
   //  display the results in the table.
-  function enableInput(input, formatName) {
-    var formatter = CME.format[formatName],  // This is the plain formatter.
-        formatOutputs = outputs[formatName];
-    // update responds to any event that has the potential to change the
-    //  input text.
-    function update() {
+  function enableInput(formatName) {
+    var input = inputs[formatName],
+        formatOutputs = outputs[formatName],
+        formatter = CME.format[formatName];  // This is the plain formatter.
+    // update responds to any event that can potentially change the text.
+    function update(event) {
       var rawText = input.value,
           rawCursor = input.selectionStart,
           formattedText = formatter(rawText).text;  // Plain formatting.
@@ -66,12 +66,16 @@ var CursorMaintenanceComparison = (function () {
       // Mirror the raw text in the output box directly over the input.
       setOutput(formatOutputs.before, rawText, rawCursor);
       // Deactivate the previously active input-mirroring output box.
-      if (activeInputMirror) {
-        classRemove(activeInputMirror, 'active');
+      if (activeInput != input) {
+        if (activeInput) {
+          console.log('deactivating', activeInput.mirror);
+          classRemove(activeInput.mirror, 'active');
+        }
+        // Activate the current input-mirroring output box.
+        console.log(event.type, 'activating', formatName, formatOutputs.before);
+        activeInput = input;
+        input.mirror.className += ' active';
       }
-      // Activate the current input-mirroring output box.
-      activeInputMirror = formatOutputs.before;
-      activeInputMirror.className += ' active';
       // Run every cursor-maintaining formatter and display the results.
       Object.keys(formatOutputs).forEach(function (approach) {
         var result;
@@ -88,16 +92,17 @@ var CursorMaintenanceComparison = (function () {
     }
     // When the input loses focus, deactivate its input-mirroring output box.
     input.onblur = function () {
-      classRemove(formatOutputs.before, 'active');
+      console.log('blurring', formatName);
+      classRemove(input.mirror, 'active');
     };
     // Attach update for events that can change the raw text or cursor.
-    [ 'change', 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
+    [ 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
       input.addEventListener(eventName, update);
     });
     // To detect input cursor movement in WebKit browsers on iOS, we listen
     //  to selectionchange events on the document.
     //  Hat tip: http://stackoverflow.com/questions/23544937/
-    document.addEventListener('selectionchange', update);
+    //document.addEventListener('selectionchange', update);
   }
 
   // enableScoreButton builds a click handler for a score button that
@@ -209,6 +214,7 @@ var CursorMaintenanceComparison = (function () {
           inputs[formatName] = make('input', { parent: cell, type: 'text',
               spellcheck: false,
               maxlength: inputMaxLengths[formatName] });
+          inputs[formatName].mirror = output;
           output.className += ' raw';
           cell.style.minWidth = cellMinWidths[formatName] + 'px';
         }
@@ -221,7 +227,7 @@ var CursorMaintenanceComparison = (function () {
     }
     // Attach input handlers.
     formatNames.forEach(function (formatName) {
-      enableInput(inputs[formatName], formatName);
+      enableInput(formatName);
     });
     // Make initial data.
     inputs.commatize.value = '129,00';
