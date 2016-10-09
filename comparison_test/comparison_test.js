@@ -45,14 +45,14 @@ var CursorMaintenanceComparison = (function () {
         text.substring(cursor);
   }
 
-  // enableInput builds a handler for events in the input field for each
-  //  format. The input element is hidden behind an output box that contains
+  // enableInputHandling builds a handler for events in a given format's input
+  //  element. The input element is overlaid with an output box that contains
   //  a graphical cursor. When the input element has focus, the output box
   //  is active, giving it special styling with a blinking cursor. In addition
   //  to managing the active output box, we have to format the text with the
   //  plain formatter and with all the cursor-maintaining formatters, and
   //  display the results in the table.
-  function enableInput(formatName) {
+  function enableInputHandling(formatName) {
     var input = inputs[formatName],
         formatOutputs = outputs[formatName],
         formatter = CME.format[formatName];  // This is the plain formatter.
@@ -65,16 +65,19 @@ var CursorMaintenanceComparison = (function () {
       setOutput(formatOutputs.after, formattedText);
       // Mirror the raw text in the output box directly over the input.
       setOutput(formatOutputs.before, rawText, rawCursor);
-      // Deactivate the previously active input-mirroring output box.
       if (activeInput != input) {
         if (activeInput) {
-          console.log('deactivating', activeInput.mirror);
+          // Deactivate the previously active input.
           classRemove(activeInput.mirror, 'active');
+          document.removeEventListener('selectionchange', update);
         }
-        // Activate the current input-mirroring output box.
-        console.log(event.type, 'activating', formatName, formatOutputs.before);
+        // Activate the current input.
         activeInput = input;
         input.mirror.className += ' active';
+        // To detect input cursor movement in WebKit browsers on iOS, listen
+        //  to selectionchange events on the document.
+        //  Hat tip: http://stackoverflow.com/questions/23544937/
+        document.addEventListener('selectionchange', update);
       }
       // Run every cursor-maintaining formatter and display the results.
       Object.keys(formatOutputs).forEach(function (approach) {
@@ -90,19 +93,24 @@ var CursorMaintenanceComparison = (function () {
         activeButtons[formatName].click();
       }
     }
-    // When the input loses focus, deactivate its input-mirroring output box.
+    // When the input loses focus, deactivate its output mirror and set
+    //  activeInput to null. Can we assume that we aren't corrupting the value
+    //  of activeInput? Yes, because if the other input has been clicked or
+    //  tapped, the browser sends the blur event to this input before sending
+    //  the focus event to the other input. References:
+    //   https://w3c.github.io/uievents/#events-focusevent
+    //   http://stackoverflow.com/questions/20340091/
+    //  In applications that don't have a global activeInput variable, we
+    //  can ignore blur and just listen to focus or click.
     input.onblur = function () {
-      console.log('blurring', formatName);
+      activeInput = null;
       classRemove(input.mirror, 'active');
+      document.removeEventListener('selectionchange', update);
     };
-    // Attach update for events that can change the raw text or cursor.
-    [ 'keydown', 'keyup', 'click' ].forEach(function (eventName) {
+    // Listen for events that can change the text or move the cursor.
+    [ 'change', 'keydown', 'keyup', 'focus' ].forEach(function (eventName) {
       input.addEventListener(eventName, update);
     });
-    // To detect input cursor movement in WebKit browsers on iOS, we listen
-    //  to selectionchange events on the document.
-    //  Hat tip: http://stackoverflow.com/questions/23544937/
-    //document.addEventListener('selectionchange', update);
   }
 
   // enableScoreButton builds a click handler for a score button that
@@ -227,15 +235,15 @@ var CursorMaintenanceComparison = (function () {
     }
     // Attach input handlers.
     formatNames.forEach(function (formatName) {
-      enableInput(formatName);
+      enableInputHandling(formatName);
     });
     // Make initial data.
     inputs.commatize.value = '129,00';
     inputs.commatize.setSelectionRange(4, 4);
-    inputs.commatize.click();
+    inputs.commatize.focus();
     inputs.trimify.value = '    \'Twas   brillig,  and  ';
     inputs.trimify.setSelectionRange(10, 10);
-    inputs.trimify.click();
+    inputs.trimify.focus();
     outputs.commatize.frequencyRatios.button.click();
     outputs.trimify.frequencyRatios.button.click();
 
