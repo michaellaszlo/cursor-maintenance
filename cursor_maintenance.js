@@ -1,7 +1,7 @@
-var CursorMaintainer = (function () {
+var CursorMaintenance = (function () {
   'use strict';
 
-  // The CursorMaintainer module supports three cursor-maintenance approaches:
+  // The CursorMaintenance module supports three cursor-maintenance approaches:
   //  layer, retrospective, and meta.
 
   var layer,           // A statistical approach configured per format.

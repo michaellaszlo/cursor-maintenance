@@ -4,8 +4,8 @@ var BatchTestCursorMaintenance = (function () {
   var targetDirectory = '..';
 
   // BatchTestCursorMaintenance is a command-line testing module for the
-  //  cursor-maintenance algorithms implemented in cursor_maintainer.js
-  //  and cursor_maintainer_experiments.js.
+  //  cursor-maintenance algorithms implemented in cursor_maintenance.js
+  //  and cursor_maintenance.js.
   //  You can execute this file with js or d8, which are Mozilla's and
   //  Google's JavaScript command-line environments.
 
@@ -83,9 +83,9 @@ var BatchTestCursorMaintenance = (function () {
           ])
         };
 
-    load(targetDirectory + '/cursor_maintainer.js');
-    load(targetDirectory + '/cursor_maintainer_experiments.js');
-    implementations = CursorMaintainerExperiments;
+    load(targetDirectory + '/cursor_maintenance.js');
+    load(targetDirectory + '/cursor_maintenance_examples.js');
+    implementations = CursorMaintenanceExamples;
 
     // Each approach named in the following array is tested with each format
     //  named in the nested array. To omit an approach or a format, comment

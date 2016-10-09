@@ -9,8 +9,8 @@
 <link rel="stylesheet" href="../web_utilities/note_expander.css">
 <link rel="stylesheet" href="extended_demo.css">
 
-<script src="../cursor_maintainer.js"></script>
-<script src="../cursor_maintainer_experiments.js"></script>
+<script src="../cursor_maintenance.js"></script>
+<script src="../cursor_maintenance_examples.js"></script>
 <script src="../web_utilities/dom_helpers.js"></script>
 <script src="../web_utilities/note_expander.js"></script>
 <script src="extended_demo.js"></script>
@@ -31,12 +31,12 @@
 in a text input field that formats its contents in real time. Whenever
 the text is formatted, the cursor position must be reconsidered. The
 goal of cursor maintenance is to place the cursor in a position that
-minimizes user surprise.
+minimizes user surprise. </p>
 
 <p> The problem of cursor maintenance is discussed in an <a
-href="http://michaellaszlo.com/maintaining-cursor-position/introduction/">article</a>.
+href="http://michaellaszlo.com/cursor-maintenance/introduction/">article</a>.
 Source code is available in a <a
-href="https://github.com/michaellaszlo/maintaining-cursor-position">repository</a>.
+href="https://github.com/michaellaszlo/cursor-maintenance">repository</a>. </p>
 
 </div>
 
@@ -48,19 +48,19 @@ href="https://github.com/michaellaszlo/maintaining-cursor-position">repository</
 
 <p> In the meta approach, we reimplement a format by applying elementary
 operations to a text-with-cursor object. The object moves the cursor in
-a predictable manner for each elementary operation.
+a predictable manner for each elementary operation. </p>
 
 <p> Below we demonstrate the meta approach with two formats,
-<em>commatize</em> and <em>trimify</em>.
+<em>commatize</em> and <em>trimify</em>. </p>
 
 <p> Commatize is defined for text consisting of digits and commas. Input
 strings containing other characters are rejected by a validation function
 that runs before the formatter. Commatize displays a non-negative integer
-with commas separating groups of three digits.
+with commas separating groups of three digits. </p>
 
 <p> Trimify is applicable to any text. The input is not validated before
 formatting. Trimify removes whitespace from the beginning of the text,
-then condenses all other whitespace sequences to one space each.
+then condenses all other whitespace sequences to one space each. </p>
 
 </div>
 
@@ -83,16 +83,16 @@ then condenses all other whitespace sequences to one space each.
 <p> In retrospective cursor maintenance, we calculate a new cursor
 position by comparing the formatted text to the raw text and cursor
 position. We do not reimplement the format or examine what it does in
-general. We only consider the current formatting instance.
+general. We only consider the current formatting instance. </p>
 
 <p> You can define a format to be used in the following input field by
 inserting a JavaScript function into the code area below. The function
-must take a string argument and return a string.
+must take a string argument and return a string. </p>
 
 <p> The retrospective scoring formula used here is called <em>frequency
 ratios</em>. It computes the ratios of individual character frequencies
 to the left and right of the cursor in the original text, then tries to
-achieve similar ratios in the formatted text using a least-squares fit.
+achieve similar ratios in the formatted text using a least-squares fit. </p>
 
 </div>
 
@@ -113,7 +113,7 @@ achieve similar ratios in the formatted text using a least-squares fit.
 for a format. We extract a text layer by scanning the text for members of
 a character set. At each text position, we calculate the ratio of layer
 characters to the left of the position divided by the total number of
-layer characters.
+layer characters. </p>
 
 <p> Initially we consider the first layer and try to find a position
 in the formatted text where the ratio is as close as possible to that
@@ -121,12 +121,12 @@ of the cursor in the raw text. If several positions have equally close
 ratios, we shrink the range of candidate positions and move on to the
 next layer. If all layers are exhausted, we choose either the leftmost
 or rightmost position in the final candidate range. The choice of left
-or right is a fixed value in the layer configuration.
+or right is a fixed value in the layer configuration. </p>
 
 <p> As with the retrospective approach, you can define your own format
 in the code area below. You can modify the character sets and the
 tie-breaking direction in the fields between the input area and the code
-area. Each character set is defined by a JavaScript regular expression.
+area. Each character set is defined by a JavaScript regular expression. </p>
 
 </div>
 

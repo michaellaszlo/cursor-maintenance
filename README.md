@@ -5,8 +5,8 @@
 
 A vexing question comes up when you're building a formatted input field
 that lets the user freely move a cursor. After some user editing, the
-text is reformatted by the input field. Now where should the cursor
-appear? That is the problem of cursor maintenance.
+text is reformatted by the input field. Where should the cursor appear
+after reformatting? That is the problem of cursor maintenance.
 
 I have posted a [detailed introduction]() to cursor maintenance on
 my website. It's a complicated problem with fuzzy criteria. You can
@@ -105,16 +105,16 @@ You get back two values:
 
 ## Using the retrospective approach
 
-After loading `cursor_maintainer.js`, instantiate a retrospective cursor
+After loading `cursor_maintenance.js`, instantiate a retrospective cursor
 maintainer:
 
-```
-maintainer = CursorMaintainer.retrospective.makeMaintainer();
+```javascript
+maintainer = CursorMaintenance.retrospective.makeMaintainer();
 ```
 
 Compute a new cursor position:
 
-```
+```javascript
 newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
 
@@ -123,12 +123,12 @@ it repeatedly.
 
 To make a cursor-maintaining formatter based on your plain formatter:
 
-```
-cmFormatter = CursorMaintainer.retrospective.augmentFormat(formatter);
+```javascript
+cmFormatter = CursorMaintenance.retrospective.augmentFormat(formatter);
 ```
 
 Use the cursor-maintaining formatter:
-```
+```javascript
 result = cmFormatter('  2400.015 ', 2);
 formattedText = result.text;
 newCursor = result.cursor;
@@ -137,7 +137,7 @@ newCursor = result.cursor;
 You can react to editing actions in your input element with a function
 that looks something like this:
 
-```
+```javascript
 function update(input) {
   var rawText = input.value,
       rawCursor = getCursor(input),
@@ -167,8 +167,8 @@ consisting of hexadecimal digits.
 Instantiate a cursor maintainer by passing an array of regular
 expressions:
 
-```
-maintainer = CursorMaintainer.layer.makeMaintainer([ /\d/, /\s/ ]);
+```javascript
+maintainer = CursorMaintenance.layer.makeMaintainer([ /\d/, /\s/ ]);
 ```
 
 The resulting function has the same interface as a retrospective cursor
@@ -179,15 +179,15 @@ meaning that it chooses the leftmost position in the final candidate
 range. You can make a layer-based cursor maintainer that breaks ties to
 the right by passing an additional argument:
 
-```
-maintainer = CursorMaintainer.layer.makeMaintainer([ /\d/, /\s/ ], true);
+```javascript
+maintainer = CursorMaintenance.layer.makeMaintainer([ /\d/, /\s/ ], true);
 ```
 
 To make a cursor-maintaining formatter with the layer approach:
 
-```
-cmfLeft = CursorMaintainer.layer.augmentFormat(formatter, [ /\w/ ]);
-cmfRight = CursorMaintainer.layer.augmentFormat(formatter, [ /\w/ ], true);
+```javascript
+cmfLeft = CursorMaintenance.layer.augmentFormat(formatter, [ /\w/ ]);
+cmfRight = CursorMaintenance.layer.augmentFormat(formatter, [ /\w/ ], true);
 ```
 
 The resulting function is interchangeable with a retrospective
@@ -200,12 +200,12 @@ In the meta approach, you reimplement your format with a sequence
 of elementary operations on an object that represents text with a
 cursor. Each operation moves the cursor in a straightforward manner.
 
-To initialize such an object, call the `CursorMaintainer.TextWithCursor`
+To initialize such an object, call the `CursorMaintenance.TextWithCursor`
 constructor. For example, this is how we construct an object that
 represents the text `'hello'` with the cursor at position 4:
 
-```
-s = new CursorMaintainer.TextWithCursor('hello', 4);
+```javascript
+s = new CursorMaintenance.TextWithCursor('hello', 4);
 ```
 
 `TextWithCursor` has two methods that alter the text:
@@ -252,7 +252,7 @@ reimplement the credit-card formatter used in the [basic
 demo](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/).
 Here is the plain formatter:
 
-```
+```javascript
 function creditCard(s) {
   var groups = [],
       i;
@@ -267,7 +267,7 @@ function creditCard(s) {
 
 And here is the same format implemented with `TextWithCursor` operations:
 
-```
+```javascript
 meta.creditCard = function (s, cursor) {
   var t = new CM.TextWithCursor(s, cursor),
       pos, start;
@@ -276,10 +276,10 @@ meta.creditCard = function (s, cursor) {
       t.delete(pos);
     }
   }
-  while (t.length() > 16) {         // Keep no more than 16 digits.
-    t.delete(t.length() - 1);
+  if (t.length() > 16) {            // Keep no more than 16 digits.
+    t.delete(16, t.length() - 16);
   }
-  start = Math.min(12, t.length() - t.length() % 4);
+  start = Math.min(12, t.length() - t.length()%4);
   for (pos = start; pos > 0; pos -= 4) {
     t.insert(pos, ' ');             // Put spaces between four-digit groups.
   }
@@ -288,10 +288,10 @@ meta.creditCard = function (s, cursor) {
 ```
 
 Additional examples can be found in
-`[cursor_maintainer_experiments](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintainer_experiments.js)`,
+[`cursor_maintenance_experiments`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintenance_experiments.js),
 which contains two more [plain
-formatters](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintainer_experiments.js#L22-L59),
+formatters](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintenance_experiments.js#L22-L59),
 `commatize` and `trimify`, that are each reimplemented with the [meta
-approach](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintainer_experiments.js#L236-L305)`.
+approach](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintenance_experiments.js#L236-L305).
 
 

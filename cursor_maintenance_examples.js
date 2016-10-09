@@ -1,16 +1,16 @@
-var CursorMaintainerExperiments = (function () {
+var CursorMaintenanceExamples = (function () {
   'use strict';
 
-  // requires: cursor_maintainer.js
+  // requires: cursor_maintenance.js
 
-  // The CursorMaintainerExperiments module defines two plain formatters and
+  // The CursorMaintenanceExamples module defines two plain formatters and
   //  uses them as the basis for a collection of cursor-maintaining formatters
   //  using various approaches. A plain formatter is a function that takes raw
   //  text and returns formatted text. A cursor-maintaining formatter takes
   //  raw text and a cursor position in the raw text; it returns formatted
   //  text and a new cursor position.
 
-  var CM = CursorMaintainer,
+  var CM = CursorMaintenance,
       format,         // Plain formatters for demonstration and testing.
       adHoc,          // Reimplementation of formats with cursor maintenance.
       mockCursor,     // Ad hoc approach with the help of a mock cursor.
@@ -235,7 +235,7 @@ var CursorMaintainerExperiments = (function () {
 
   //--- Meta approach: We reimplement the format with elementary operations
   //  (length, read, insert, delete) on a text-with-cursor object. The
-  //  CursorMaintainer module defines TextWithCursor for this purpose. Each
+  //  CursorMaintenance module defines TextWithCursor for this purpose. Each
   //  elementary operation has a predictable effect on the cursor. We want
   //  to keep these effects in mind as we implement the formatter so that
   //  we control the overall movement of the cursor and make it predictable
@@ -306,7 +306,7 @@ var CursorMaintainerExperiments = (function () {
 
 
   //--- Retrospective approach: An open-ended statistical approach that
-  //  relies on a cost function. The CursorMaintainer module defines a
+  //  relies on a cost function. The CursorMaintenance module defines a
   //  retrospective format augmenter and two cost functions, which we use
   //  here to instantiate cursor-maintaining formatters for commatize and
   //  trimify.
@@ -333,7 +333,7 @@ var CursorMaintainerExperiments = (function () {
   //  a sequence of character sets and optionally specify whether ties should
   //  should be broken by choosing the leftmost or rightmost candidate (the
   //  default is leftmost). Here we build cursor-maintaining formatters for
-  //  commatize and trimify using the layer facilities of CursorMaintainer.
+  //  commatize and trimify using the layer facilities of CursorMaintenance.
 
   layer = {};
 

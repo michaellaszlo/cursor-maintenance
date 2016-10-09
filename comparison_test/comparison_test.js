@@ -1,7 +1,7 @@
 var CursorMaintenanceComparison = (function () {
   'use strict';
 
-  // requires: cursor_maintainer_experiments.js
+  // requires: cursor_maintenance_examples.js
   //           dom_helpers.js
   //           note_expander.js
 
@@ -14,7 +14,7 @@ var CursorMaintenanceComparison = (function () {
   //  edited by the user, and the results are immediately updated to
   //  reflect changes in the raw text or cursor position.
 
-  var CME = CursorMaintainerExperiments,
+  var CME = CursorMaintenanceExamples,
       make = DOMHelpers.make,
       classRemove = DOMHelpers.classRemove,
       inputMaxLengths = {  // Maximum number of input characters for each

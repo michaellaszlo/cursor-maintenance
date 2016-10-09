@@ -1,8 +1,8 @@
 var ExtendedCursorMaintenanceDemo = (function () {
   'use strict';
 
-  // requires: cursor_maintainer.js
-  //           cursor_maintainer_experiments.js
+  // requires: cursor_maintenance.js
+  //           cursor_maintenance_examples.js
   //           web_utilities.js
 
   // CursorMaintenanceDemo powers a web page that provides user-configurable
@@ -12,8 +12,8 @@ var ExtendedCursorMaintenanceDemo = (function () {
   //  function. The layer-approach demo also allows the user to define the
   //  character sets and the tie-breaker for the layer configuration.
 
-  var CM = CursorMaintainer,
-      CME = CursorMaintainerExperiments,
+  var CM = CursorMaintenance,
+      CME = CursorMaintenanceExamples,
       make = DOMHelpers.make,
       classRemove = DOMHelpers.classRemove,
       layerConfigure;
