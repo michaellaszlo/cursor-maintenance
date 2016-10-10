@@ -12,7 +12,7 @@ I have posted a [detailed introduction]() to cursor maintenance on
 my website. It's a complicated problem with fuzzy criteria. You can
 approach it in several ways depending on the text format and how you
 want the user to interact with the input field. Sometimes there is no
-reliable way to maintain the cursor. If so, it is best to avoid the
+reliable way to maintain the cursor. If so, it is best to dodge the
 problem by removing the cursor upon reformatting or by displaying the
 formatted text separately from the input text. Then again, sometimes
 it is possible to achieve reliable cursor maintenance, resulting in a
@@ -35,10 +35,10 @@ reliability and ease of implementation. I have made a basic demonstration
 of the layer approach that looks like this:
 
 [![Basic implementation of cursor
-maintenance](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/basic_demo.png)](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/)
+maintenance](https://github.com/michaellaszlo/cursor-maintenance/blob/master/screenshots/basic_demo.png)](http://michaellaszlo.com/cursor-maintenance/basic-demo/)
 
-You may wish to try out the [basic demo](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/)
-on my website or see its [source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/basic_demo) in this repository.
+You may wish to try out the [basic demo](http://michaellaszlo.com/cursor-maintenance/basic-demo/)
+on my website or see its [source code](https://github.com/michaellaszlo/cursor-maintenance/tree/master/basic_demo) in this repository.
 
 
 ## Extended demos
@@ -49,10 +49,10 @@ specify any formatting function. The layer demo also allows you to define
 the layers.
 
 [![Interactive implementation of several cursor-maintenance
-approaches](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/screenshots/extended_demo.png)](http://michaellaszlo.com/maintaining-cursor-position/extended-demo/)
+approaches](https://github.com/michaellaszlo/cursor-maintenance/blob/master/screenshots/extended_demo.png)](http://michaellaszlo.com/cursor-maintenance/extended-demo/)
 
-The [extended demo](http://michaellaszlo.com/maintaining-cursor-position/extended-demo/) page is hosted live on my website and the
-[source code](https://github.com/michaellaszlo/maintaining-cursor-position/tree/master/extended_demo) is available in this repository.
+The [extended demo](http://michaellaszlo.com/cursor-maintenance/extended-demo/) page is hosted live on my website and the
+[source code](https://github.com/michaellaszlo/cursor-maintenance/tree/master/extended_demo) is available in this repository.
 
 
 ## General implementation model
@@ -63,10 +63,10 @@ Cursor maintenance is the third step in this sequence:
 1. The user's raw text is replaced with formatted text.
 1. The cursor is repositioned in the input field.
 
-You define the formatter, which is a function that takes raw text and
-returns formatted text. You decide when the text should be formatted:
-perhaps after every keystroke, perhaps after a special user action,
-perhaps at regular intervals.
+You, the developer, define the formatter, which is a function that takes
+raw text and returns formatted text. You decide when the text should be
+formatted: perhaps after every keystroke, perhaps after a special user
+action, perhaps at regular intervals.
 
 If the formatted text is identical to the raw text, there is nothing
 further to do. The cursor should stay where it is.
@@ -108,13 +108,13 @@ You get back two values:
 After loading `cursor_maintenance.js`, instantiate a retrospective cursor
 maintainer:
 
-```javascript
+```
 maintainer = CursorMaintenance.retrospective.makeMaintainer();
 ```
 
 Compute a new cursor position:
 
-```javascript
+```
 newPosition = maintainer('  2400.015 ', 2, '2,400.02');
 ```
 
@@ -123,12 +123,12 @@ it repeatedly.
 
 To make a cursor-maintaining formatter based on your plain formatter:
 
-```javascript
+```
 cmFormatter = CursorMaintenance.retrospective.augmentFormat(formatter);
 ```
 
-Use the cursor-maintaining formatter:
-```javascript
+To use the cursor-maintaining formatter:
+```
 result = cmFormatter('  2400.015 ', 2);
 formattedText = result.text;
 newCursor = result.cursor;
@@ -137,7 +137,7 @@ newCursor = result.cursor;
 You can react to editing actions in your input element with a function
 that looks something like this:
 
-```javascript
+```
 function update(input) {
   var rawText = input.value,
       rawCursor = getCursor(input),
@@ -151,7 +151,7 @@ function update(input) {
 
 To get the cursor position and set the cursor, you can use
 `selectionStart` and `setSelectionRange` as demonstrated in the [basic
-demo](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/basic_demo/basic_demo.js#L48-L50).
+demo](https://github.com/michaellaszlo/cursor-maintenance/blob/master/basic_demo/basic_demo.js#L48-L52).
 
 
 ## Using the layer approach
@@ -167,7 +167,7 @@ consisting of hexadecimal digits.
 Instantiate a cursor maintainer by passing an array of regular
 expressions:
 
-```javascript
+```
 maintainer = CursorMaintenance.layer.makeMaintainer([ /\d/, /\s/ ]);
 ```
 
@@ -179,13 +179,13 @@ meaning that it chooses the leftmost position in the final candidate
 range. You can make a layer-based cursor maintainer that breaks ties to
 the right by passing an additional argument:
 
-```javascript
+```
 maintainer = CursorMaintenance.layer.makeMaintainer([ /\d/, /\s/ ], true);
 ```
 
 To make a cursor-maintaining formatter with the layer approach:
 
-```javascript
+```
 cmfLeft = CursorMaintenance.layer.augmentFormat(formatter, [ /\w/ ]);
 cmfRight = CursorMaintenance.layer.augmentFormat(formatter, [ /\w/ ], true);
 ```
@@ -204,7 +204,7 @@ To initialize such an object, call the `CursorMaintenance.TextWithCursor`
 constructor. For example, this is how we construct an object that
 represents the text `'hello'` with the cursor at position 4:
 
-```javascript
+```
 s = new CursorMaintenance.TextWithCursor('hello', 4);
 ```
 
@@ -249,10 +249,10 @@ as possible.
 
 Consider how we might use the meta approach to
 reimplement the credit-card formatter used in the [basic
-demo](http://michaellaszlo.com/maintaining-cursor-position/basic-demo/).
+demo](http://michaellaszlo.com/cursor-maintenance/basic-demo/).
 Here is the plain formatter:
 
-```javascript
+```
 function creditCard(s) {
   var groups = [],
       i;
@@ -267,7 +267,7 @@ function creditCard(s) {
 
 And here is the same format implemented with `TextWithCursor` operations:
 
-```javascript
+```
 meta.creditCard = function (s, cursor) {
   var t = new CM.TextWithCursor(s, cursor),
       pos, start;
@@ -288,10 +288,10 @@ meta.creditCard = function (s, cursor) {
 ```
 
 Additional examples can be found in
-[`cursor_maintenance_experiments`](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintenance_experiments.js),
+[`cursor_maintenance_examples`](https://github.com/michaellaszlo/cursor-maintenance/blob/master/cursor_maintenance_examples.js),
 which contains two more [plain
-formatters](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintenance_experiments.js#L22-L59),
+formatters](https://github.com/michaellaszlo/cursor-maintenance/blob/master/cursor_maintenance_examples.js#L22-L59),
 `commatize` and `trimify`, that are each reimplemented with the [meta
-approach](https://github.com/michaellaszlo/maintaining-cursor-position/blob/master/cursor_maintenance_experiments.js#L236-L305).
+approach](https://github.com/michaellaszlo/cursor-maintenance/blob/master/cursor_maintenance_examples.js#L236-L305).
 
 
