@@ -11,23 +11,23 @@ after reformatting?
 For example, suppose the input field contains formatted text representing
 a number:
 
-    45,900
+![41,900](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_1.png)
 
 The user inserts a cursor to the right of the `9` and hits backspace:
 
-    45,^00
+![41,^00](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_2.png)
 
 The text is reformatted:
 
-    4,500
+![4,100](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_3.png)
 
 The user expects to see the cursor to the right of the `5`, where the
 `9` used to be:
 
-    4,5^00
+![4,1^00](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_4.png)
 
-How can we calculate the new cursor position automatically? That is the
-problem of cursor maintenance.
+How can we compute a new cursor position after reformatting? That is
+the problem of cursor maintenance.
 
 I have posted a [detailed introduction]() to cursor maintenance on
 my website. It's a complicated problem with fuzzy criteria. You can
@@ -56,7 +56,7 @@ reliability and ease of implementation. I have made a basic demonstration
 of the layer approach that looks like this:
 
 [![Basic implementation of cursor
-maintenance](https://github.com/michaellaszlo/cursor-maintenance/blob/master/screenshots/basic_demo.png)](http://michaellaszlo.com/cursor-maintenance/basic-demo/)
+maintenance](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/basic_demo.png)](http://michaellaszlo.com/cursor-maintenance/basic-demo/)
 
 You may wish to try out the [basic demo](http://michaellaszlo.com/cursor-maintenance/basic-demo/)
 on my website or see its [source code](https://github.com/michaellaszlo/cursor-maintenance/tree/master/basic_demo) in this repository.
@@ -70,7 +70,7 @@ specify any formatting function. The layer demo also allows you to define
 the layers.
 
 [![Interactive implementation of several cursor-maintenance
-approaches](https://github.com/michaellaszlo/cursor-maintenance/blob/master/screenshots/extended_demo.png)](http://michaellaszlo.com/cursor-maintenance/extended-demo/)
+approaches](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/extended_demo.png)](http://michaellaszlo.com/cursor-maintenance/extended-demo/)
 
 The [extended demo](http://michaellaszlo.com/cursor-maintenance/extended-demo/) page is hosted live on my website and the
 [source code](https://github.com/michaellaszlo/cursor-maintenance/tree/master/extended_demo) is available in this repository.
