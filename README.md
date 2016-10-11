@@ -6,7 +6,28 @@
 A vexing question comes up when you're building a formatted input field
 that lets the user freely move a cursor. After some user editing, the
 text is reformatted by the input field. Where should the cursor appear
-after reformatting? That is the problem of cursor maintenance.
+after reformatting?
+
+For example, suppose the input field contains formatted text representing
+a number:
+
+  45,900
+
+The user inserts a cursor to the right of the `9` and hits backspace:
+
+  45,^00
+
+The text is reformatted:
+
+  4,500
+
+The user expects to see the cursor to the right of the `5`, where the
+`9` used to be:
+
+  4,5^00
+
+How can we calculate the new cursor position automatically? That is the
+problem of cursor maintenance.
 
 I have posted a [detailed introduction]() to cursor maintenance on
 my website. It's a complicated problem with fuzzy criteria. You can
