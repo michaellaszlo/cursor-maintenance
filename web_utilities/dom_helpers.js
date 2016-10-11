@@ -2,7 +2,7 @@ var DOMHelpers = (function () {
   'use strict';
 
   // The DOMHelpers module is a small collection of functions that help to
-  //   build and manipulate DOM elements.
+  //  build and manipulate DOM elements.
 
   // make is a DOM element factory.
   // tag: Names a type of DOM element.

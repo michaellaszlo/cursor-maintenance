@@ -55,12 +55,12 @@ var CursorMaintenanceComparison = (function () {
   function enableInputHandling(formatName) {
     var input = inputs[formatName],
         formatOutputs = outputs[formatName],
-        formatter = CME.format[formatName];  // This is the plain formatter.
+        plainFormatter = CME.plain[formatName];
     // update responds to any event that can potentially change the text.
     function update(event) {
       var rawText = input.value,
           rawCursor = input.selectionStart,
-          formattedText = formatter(rawText).text;  // Plain formatting.
+          formattedText = plainFormatter(rawText);
       // Display the formatted text without a cursor.
       setOutput(formatOutputs.after, formattedText);
       // Mirror the raw text in the output box directly over the input.

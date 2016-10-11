@@ -93,15 +93,15 @@ var BatchTestCursorMaintenance = (function () {
     //  of a cursor-maintenance approach, and the format name is used to
     //  look up a cursor-maintaining formatter in the implementation object.
     //  There is one test runner for each format.
-    //  The 'format' implementation contains plain formatters that are
+    //  The 'wrapped' implementation contains plain formatters that are
     //  wrapped to look like cursor-maintaining formatters, but they return
-    //  the raw cursor position as is. The purpose of 'format' is to let us
+    //  the raw cursor position as is. The purpose of 'wrapped' is to let us
     //  verify the text returned by cursor-maintenance approaches that
     //  reimplement a format. If we only want to test the formatting and
     //  ignore the cursor maintenance, we pass a true (or truthy) value
     //  as the optional second argument to TestRunner.run. To display the
     //  test cases without testing them, call TestRunner.display.
-    [ //'format',
+    [ //'wrapped',
       //'adHoc',
       //'mockCursor',
       'meta',

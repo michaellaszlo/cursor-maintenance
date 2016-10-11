@@ -11,20 +11,20 @@ after reformatting?
 For example, suppose the input field contains formatted text representing
 a number:
 
-  45,900
+    45,900
 
 The user inserts a cursor to the right of the `9` and hits backspace:
 
-  45,^00
+    45,^00
 
 The text is reformatted:
 
-  4,500
+    4,500
 
 The user expects to see the cursor to the right of the `5`, where the
 `9` used to be:
 
-  4,5^00
+    4,5^00
 
 How can we calculate the new cursor position automatically? That is the
 problem of cursor maintenance.
@@ -136,7 +136,7 @@ maintainer = CursorMaintenance.retrospective.makeMaintainer();
 Compute a new cursor position:
 
 ```
-newPosition = maintainer('  2400.015 ', 2, '2,400.02');
+newPosition = maintainer('  2400.015 ', 3, '2,400.02').cursor;
 ```
 
 The cursor maintainer is stateless. You can instantiate one and use

@@ -11,7 +11,8 @@ var CursorMaintenanceExamples = (function () {
   //  text and a new cursor position.
 
   var CM = CursorMaintenance,
-      format,         // Plain formatters for demonstration and testing.
+      plain,          // Plain formatters: no cursor maintenance.
+      wrapped,        // Plain formatters posing as cursor maintainers.
       adHoc,          // Reimplementation of formats with cursor maintenance.
       mockCursor,     // Ad hoc approach with the help of a mock cursor.
       meta,           // Reimplementation on a text-with-cursor object.
@@ -22,11 +23,13 @@ var CursorMaintenanceExamples = (function () {
   //--- Plain formatters: Text transformations with no cursor. The same
   //  two formats, commatize and trimify, are used throughout this module
   //  as the basis for various approaches to cursor maintenance.
+  
+  plain = {};
 
   // commatize takes a string of digits and commas. It arranges commas so
   //  that they separate the digits into groups of three. For example,
   //  "1,45,,00" gets commatized to "14,500".
-  function commatize(s) {                    // s is a string composed of
+  plain.commatize = function (s) {           // s is a string composed of
     var start, groups, i;                    //  digits and commas.
     s = s.replace(/,/g, '');                 // Remove all commas.
     start = s.length % 3 || 3;               // Begin with 1, 2, or 3 digits.
@@ -41,13 +44,17 @@ var CursorMaintenanceExamples = (function () {
   // trimify removes all whitespace from the beginning of the string and
   //  reduces other whitespace sequences to a single space each. For example,
   //  "  Four score  and  seven  " gets trimified to "Four score and seven ".
-  function trimify(s) {          // s is an arbitrary string.
+  plain.trimify = function (s) { // s is an arbitrary string.
     s = s.replace(/^\s+/, '');   // Remove whitespace from the beginning.
     s = s.replace(/\s+/g, ' ');  // Condense remaining whitespace sequences
     return s;                    //  to one space each.
   };
 
-  function creditCard(s) {
+  // creditCard extracts up to 16 digits from the string and renders them
+  //  in four-digit groups separated by spaces. This format isn't exercised
+  //  to the same extent as commatize and trimify. In particular, the
+  //  ad hoc and mock-cursor versions are missing.
+  plain.creditCard = function (s) {      // s is an arbitrary string.
     var groups = [],
         i;
     s = s.replace(/\D/g, '');            // Remove all non-digit characters.
@@ -56,21 +63,25 @@ var CursorMaintenanceExamples = (function () {
       groups.push(s.substring(i, i + 4));
     }
     return groups.join(' ');             // Put spaces between the groups.
-  }
-
-
-  //--- Wrapped versions of the plain formatters. These functions are
-  //  interface-compatible with cursor-maintaining formatters, but they don't
-  //  do cursor maintenance. They return the raw cursor position as is.
-
-  format = {};
-
-  format.commatize = function (s, cursor) {
-    return { text: commatize(s), cursor: cursor };
   };
 
-  format.trimify = function (s, cursor) {
-    return { text: trimify(s), cursor: cursor };
+
+  //--- Wrapped versions of the plain formatters. These functions have the
+  //  same interface as cursor-maintaining formatters, but they don't
+  //  really maintain the cursor. They return the raw cursor position as is.
+
+  wrapped = {};
+
+  wrapped.commatize = function (s, cursor) {
+    return { text: plain.commatize(s), cursor: cursor };
+  };
+
+  wrapped.trimify = function (s, cursor) {
+    return { text: plain.trimify(s), cursor: cursor };
+  };
+
+  wrapped.creditCard = function (s, cursor) {
+    return { text: plain.creditCard(s), cursor: cursor };
   };
 
 
@@ -96,7 +107,7 @@ var CursorMaintenanceExamples = (function () {
   adHoc.commatize = function (s, cursor) {
     var pos, ch,
         leftDigitCount = cursor - count(s.substring(0, cursor), ',');
-    s = format.commatize(s).text;
+    s = wrapped.commatize(s).text;
     if (leftDigitCount == 0) {
       return { text: s, cursor: 0 };
     }
@@ -117,8 +128,8 @@ var CursorMaintenanceExamples = (function () {
   //  unless the entire trimified text ends up shorter, which will happen
   //  when the cursor is among space characters at the right end of the text.
   adHoc.trimify = function (s, cursor) {
-    var leftTrimmed = format.trimify(s.substring(0, cursor) + '|').text;
-    s = format.trimify(s).text;
+    var leftTrimmed = wrapped.trimify(s.substring(0, cursor) + '|').text;
+    s = wrapped.trimify(s).text;
     cursor = Math.min(s.length, leftTrimmed.length - 1);
     return { text: s, cursor: cursor };
   };
@@ -223,7 +234,7 @@ var CursorMaintenanceExamples = (function () {
   //  to check for: either the mock cursor is the leftmost character and has
   //  a space to its right, or it is between exactly two spaces.
   mockCursor.trimify = mockCursor.augment(function (s, cursorChar) {
-    s = format.trimify(s).text;
+    s = wrapped.trimify(s).text;
     if (s.charAt(0) == cursorChar) {
       s = s.replace(cursorChar + ' ', cursorChar);
     } else {
@@ -314,11 +325,14 @@ var CursorMaintenanceExamples = (function () {
   retrospective = {};
 
   [ 'splitLevenshtein', 'frequencyRatios' ].forEach(function (name) {
-    var costFunction = CM.retrospective.costFunctions[name];
+    var costFunction = CM.retrospective.costFunctions[name],
+        augment = function (plainFormatter) {
+          return CM.retrospective.augmentFormat(plainFormatter, costFunction);
+        };
     retrospective[name] = {
-      commatize: CM.retrospective.augmentFormat(commatize, costFunction),
-      trimify: CM.retrospective.augmentFormat(trimify, costFunction),
-      creditCard: CM.retrospective.augmentFormat(creditCard, costFunction)
+      commatize: augment(plain.commatize),
+      trimify: augment(plain.trimify),
+      creditCard: augment(plain.creditCard)
     };
   });
 
@@ -337,14 +351,15 @@ var CursorMaintenanceExamples = (function () {
 
   layer = {};
 
-  layer.commatize = CM.layer.augmentFormat(commatize, [ /\d/ ]);
+  layer.commatize = CM.layer.augmentFormat(plain.commatize, [ /\d/ ]);
 
-  layer.trimify = CM.layer.augmentFormat(trimify, [ /\S/ ], true);
+  layer.trimify = CM.layer.augmentFormat(plain.trimify, [ /\S/ ], true);
 
-  layer.creditCard = CM.layer.augmentFormat(creditCard, [ /\d/ ]);
+  layer.creditCard = CM.layer.augmentFormat(plain.creditCard, [ /\d/ ]);
 
   return {
-    format: format,
+    plain: plain,
+    wrapped: wrapped,
     adHoc: adHoc,
     mockCursor: mockCursor,
     meta: meta,
