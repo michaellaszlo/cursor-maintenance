@@ -4,16 +4,15 @@
 ## Maintaining cursor position in a formatted input field
 
 A vexing question comes up when you're building a formatted input field
-that lets the user freely move a cursor. After some user editing, the
-text is reformatted by the input field. Where should the cursor appear
-after reformatting?
+with a movable cursor. After the user does some editing, the text is
+reformatted by the input field. Where should the cursor appear after
+reformatting?
 
-For example, suppose the input field contains formatted text representing
-a number:
+For example, suppose an input field contains the numerically formatted text `41,900` and the cursor is positioned to the right of the `9`:
 
 ![41,900](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_1.png)
 
-The user inserts a cursor to the right of the `9` and hits backspace:
+The user hits backspace:
 
 ![41,^00](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_2.png)
 
@@ -21,7 +20,7 @@ The text is reformatted:
 
 ![4,100](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_3.png)
 
-The user expects to see the cursor to the right of the `5`, where the
+The user expects to see the cursor to the right of the `1`, where the
 `9` used to be:
 
 ![4,1^00](https://github.com/michaellaszlo/cursor-maintenance/blob/master/README_images/introductory_example_4.png)
