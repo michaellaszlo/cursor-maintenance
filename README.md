@@ -1,7 +1,7 @@
 # Cursor maintenance
 
 
-## Maintaining cursor position in a formatted input field
+## Tools for maintaining cursor position in a formatted input field
 
 A vexing question comes up when you're building a formatted input field
 with a movable cursor. After the user does some editing, the text is
