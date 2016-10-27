@@ -28,8 +28,9 @@ The user expects to see the cursor to the right of the `1`, where the
 How can we compute a new cursor position after reformatting? That is
 the problem of cursor maintenance.
 
-I have posted a [detailed introduction]() to cursor maintenance on
-my website. It's a complicated problem with fuzzy criteria. You can
+I have posted a [detailed
+introduction](http://michaellaszlo.com/post/cursor/) to cursor maintenance
+on my website. It's a complicated problem with fuzzy criteria. You can
 approach it in several ways depending on the text format and how you
 want the user to interact with the input field. Sometimes there is no
 reliable way to maintain the cursor. If so, it is best to dodge the
