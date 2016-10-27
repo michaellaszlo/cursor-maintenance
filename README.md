@@ -29,7 +29,7 @@ How can we compute a new cursor position after reformatting? That is
 the problem of cursor maintenance.
 
 I have posted a [detailed
-introduction](http://michaellaszlo.com/post/cursor/) to cursor maintenance
+introduction](http://michaellaszlo.com/cursor-maintenance/introduction/) to cursor maintenance
 on my website. It's a complicated problem with fuzzy criteria. You can
 approach it in several ways depending on the text format and how you
 want the user to interact with the input field. Sometimes there is no
@@ -179,7 +179,7 @@ demo](https://github.com/michaellaszlo/cursor-maintenance/blob/master/basic_demo
 
 The layer approach requires that you specify a sequence of character
 sets that will be used to extract layers from the raw text and formatted
-text. The details of this approach are described [in an article]().
+text. The details of this approach are described [in an article](http://michaellaszlo.com/cursor-maintenance/introduction/).
 
 To define a character set, write a regular expression that tests a single
 character. For example, you can write `/[0-9a-f]/i` to extract a layer
